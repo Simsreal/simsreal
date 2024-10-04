@@ -19,4 +19,4 @@ class DecisionMaking(CognitiveProcess):
         job = self.sampler.run([self.circuit], shots=128)
         result = job.result()
         counts = result[0].data.meas.get_counts()
-        print(counts)
+        return counts

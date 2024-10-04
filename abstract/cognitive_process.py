@@ -11,6 +11,7 @@ class CognitiveProcess(ABC):
 
     def create_sampler(self):
         return SamplerV2()
+        # or you can implement your own sampler
 
     @abstractmethod
     def create_circuit(self) -> QuantumCircuit:
