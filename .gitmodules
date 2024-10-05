@@ -1,3 +1,6 @@
 [submodule "world"]
 	path = world
 	url = https://github.com/Simsreal/world
+[submodule "brain"]
+	path = brain
+	url = https://github.com/Simsreal/brain
