@@ -4,3 +4,9 @@
 [submodule "intelligence"]
 	path = intelligence
 	url = https://github.com/Simsreal/intelligence
+[submodule "human"]
+	path = human
+	url = https://github.com/Simsreal/human
+[submodule "utilities"]
+	path = utilities
+	url = https://github.com/Simsreal/utilities
