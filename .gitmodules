@@ -10,3 +10,6 @@
 [submodule "utilities"]
 	path = utilities
 	url = https://github.com/Simsreal/utilities
+[submodule "web"]
+	path = web
+	url = https://github.com/Simsreal/web
