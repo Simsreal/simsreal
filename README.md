@@ -1,10 +1,3 @@
-# simsreal
+# Simsreal
 
-## brain
-creates observation
-
-## world
-(fake) reality
-
-## intelligence
-emergence from a initial wave function
+Creates consciouness.
