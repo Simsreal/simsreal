@@ -3,3 +3,5 @@ black
 isort
 pre-commit
 pytest
+fastapi
+icecream
