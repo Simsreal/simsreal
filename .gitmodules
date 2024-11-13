@@ -1,15 +1,15 @@
 [submodule "world"]
 	path = world
-	url = https://github.com/Simsreal/world
+	url = git@github.com:Simsreal/world.git
 [submodule "intelligence"]
 	path = intelligence
-	url = https://github.com/Simsreal/intelligence
+	url = git@github.com:Simsreal/intelligence.git
 [submodule "human"]
 	path = human
-	url = https://github.com/Simsreal/human
+	url = git@github.com:Simsreal/human.git
 [submodule "utilities"]
 	path = utilities
-	url = https://github.com/Simsreal/utilities
+	url = git@github.com:Simsreal/utilities.git
 [submodule "web"]
 	path = web
-	url = https://github.com/Simsreal/web
+	url = git@github.com:Simsreal/web.git
