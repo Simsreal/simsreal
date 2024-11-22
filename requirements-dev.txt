@@ -6,3 +6,4 @@ pytest
 fastapi
 icecream
 uvicorn
+prometheus-client

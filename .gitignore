@@ -1,10 +1,13 @@
+experiments/
+*.mp4
+*.png
+prometheus*
+*.gz
+*.deb
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-experiments/
-*.mp4
-*.png
 # C extensions
 *.so
 
