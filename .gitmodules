@@ -10,3 +10,6 @@
 [submodule "web"]
 	path = web
 	url = git@github.com:Simsreal/web.git
+[submodule "environment"]
+	path = environment
+	url = git@github.com:Simsreal/environment.git
