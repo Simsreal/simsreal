@@ -1,0 +1,55 @@
+humans:
+    - name: ella
+      perceptors:
+        - name: grid_vision
+          configuration:
+            steer: steer_sincos
+            yx_retrieval: context
+            sight_radius: 5.0
+            fov: 1.04
+      instincts:
+        - name: fear_of_cold
+          configuration:
+            peek_preference: distance_steer_sincos
+            explore_mechanism: void
+      memory:
+        memory_capacity: 100
+        hidden_size: 100
+        num_layers: 1
+        modules:
+          - name: steer_sincos
+            configuration: null
+          - name: accelerator
+            configuration: null
+          - name: perceived_temp
+            configuration: null
+      context:
+        - name: yx
+          configuration:
+            y: 0
+            x: 0
+
+constraints:
+    - name: speed_limit
+      configuration:
+        speed_retrieval: context
+        speed_limit: 1.2
+    - name: physical_boundary
+      configuration:
+        boundary_encounter: context
+        steer: steer_sincos
+
+environment:
+    env: grid2d
+    configuration:
+      name: wintercity
+      height: 5
+      width: 5
+      attr:
+        - temperature
+      landmarks:
+          - name: fire
+            configuration:
+              y: 3
+              x: 2
+              temperature: 100

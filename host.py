@@ -23,7 +23,7 @@ CONFIG_DIR = "simulation_config"
 
 class Host:
     Env = {"grid2d": Grid2D}
-    Humans = {"alice": Alice, "bob": Bob, "charles": Charles, "david": David}
+    Humans = {"alice": Alice, "bob": Bob, "charles": Charles, "david": David, "ella": Ella}
     Perceptors = {"grid_vision": GridVision}
     Instincts = {"fear_of_cold": FearOfCold}
     Constraints = {"speed_limit": SpeedLimit, "physical_boundary": PhysicalBoundary}

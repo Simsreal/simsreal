@@ -4,6 +4,7 @@ humans:
         - name: grid_vision
           configuration:
             steer: context
+            yx_retrieval: guided_yx
             sight_radius: 5.0
             fov: 1.04
       instincts:
