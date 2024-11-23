@@ -18,7 +18,7 @@ from human.schema.environment import EnvironmentConfig, Landmarks
 from intelligence.environment import Environment
 from intelligence.memory import Memory
 
-CONFIG_DIR = "human/simulation_config"
+CONFIG_DIR = "simulation_config"
 
 
 class Host:

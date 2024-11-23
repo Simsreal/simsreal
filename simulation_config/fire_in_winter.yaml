@@ -1,0 +1,35 @@
+humans:
+    - name: alice
+      instincts:
+        - name: fear_of_cold
+          configuration:
+            peek_preference: distance
+      memory:
+        memory_capacity: 100
+        hidden_size: 100
+        num_layers: 1
+        modules:
+          - name: guided_yx
+            configuration: null
+          - name: perceived_temp
+            configuration: null
+
+constraints:
+    - name: speed_limit
+      configuration:
+        speed_retrieval: consciousness
+        speed_limit: 1.2
+
+environment:
+    name: wintercity
+    type: grid
+    height: 5
+    width: 5
+    attr:
+      - temperature
+    landmarks:
+        - name: fire
+          configuration:
+            y: 3
+            x: 2
+            temperature: 100
