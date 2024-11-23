@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from icecream import ic
 from prometheus_client import start_http_server
 
+from environment import *
 from human.constraints import *
 from human.context import *
 from human.humans import *
@@ -15,17 +16,17 @@ from human.instincts import *
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from human.schema.environment import EnvironmentConfig, Landmarks
-from intelligence.environment import Environment
 from intelligence.memory import Memory
 
 CONFIG_DIR = "simulation_config"
 
 
 class Host:
-    H = {"alice": Alice, "bob": Bob, "charles": Charles, "david": David}
-    P = {"grid_vision": GridVision}
-    I = {"fear_of_cold": FearOfCold}
-    C = {"speed_limit": SpeedLimit, "physical_boundary": PhysicalBoundary}
+    Env = {"grid2d": Grid2D}
+    Humans = {"alice": Alice, "bob": Bob, "charles": Charles, "david": David}
+    Perceptors = {"grid_vision": GridVision}
+    Instincts = {"fear_of_cold": FearOfCold}
+    Constraints = {"speed_limit": SpeedLimit, "physical_boundary": PhysicalBoundary}
     Ctx = {"yx": YX}
 
     def __init__(self):
@@ -33,22 +34,24 @@ class Host:
         self.config = yaml.safe_load(open(self.config_file))
 
         self.constraints = [
-            self.C[constraint["name"]](**constraint["configuration"])
+            self.Constraints[constraint["name"]](**constraint["configuration"])
             if constraint["configuration"] is not None
-            else self.C[constraint["name"]]()
+            else self.Constraints[constraint["name"]]()
             for constraint in self.config["constraints"]
         ]
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.env = Environment(self.config["environment"], create=True)
+        self.env = self.Env[self.config["environment"]["env"]](
+            **self.config["environment"]["configuration"], create=True
+        )
         self.humans = []
 
         human_configs = self.config["humans"]
         for human_config in human_configs:
             perceptors = (
                 [
-                    self.P[perceptor["name"]](**perceptor["configuration"])
+                    self.Perceptors[perceptor["name"]](**perceptor["configuration"])
                     if perceptor["configuration"] is not None
-                    else self.P[perceptor["name"]]()
+                    else self.Perceptors[perceptor["name"]]()
                     for perceptor in human_config["perceptors"]
                 ]
                 if "perceptors" in human_config
@@ -57,9 +60,9 @@ class Host:
 
             instincts = (
                 [
-                    self.I[instinct["name"]](**instinct["configuration"])
+                    self.Instincts[instinct["name"]](**instinct["configuration"])
                     if instinct["configuration"] is not None
-                    else self.I[instinct["name"]]()
+                    else self.Instincts[instinct["name"]]()
                     for instinct in human_config["instincts"]
                 ]
                 if "instincts" in human_config
@@ -95,7 +98,7 @@ class Host:
                 nn_module=nn_module,
             )
 
-            human = self.H[human_config["name"]](
+            human = self.Humans[human_config["name"]](
                 perceptors=perceptors,
                 instincts=instincts,
                 constraints=self.constraints,
@@ -103,7 +106,10 @@ class Host:
                 context=context,
                 device=self.device,
             )
-            human.manifest(self.env)
+            human_env = self.Env[self.config["environment"]["env"]](
+                **self.config["environment"]["configuration"], create=False
+            )
+            human.manifest(human_env)
             self.humans.append(human)
 
         set_host(self)
@@ -145,7 +151,8 @@ async def update_env(env_config: EnvironmentConfig):
 @app.post("/update_landmarks")
 async def update_landmarks(landmarks: Landmarks):
     host = get_host()
-    host.env.update_landmarks(landmarks.model_dump())
+    landmarks = landmarks.model_dump()["landmarks"]
+    host.env.update_landmarks(landmarks)
     return "ok"
 
 

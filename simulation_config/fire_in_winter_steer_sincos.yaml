@@ -32,15 +32,16 @@ constraints:
         steer: steer_sincos
 
 environment:
-    name: wintercity
-    type: grid
-    height: 5
-    width: 5
-    attr:
-      - temperature
-    landmarks:
-        - name: fire
-          configuration:
-            y: 3
-            x: 2
-            temperature: 100
+    env: grid2d
+    configuration:
+      name: wintercity
+      height: 5
+      width: 5
+      attr:
+        - temperature
+      landmarks:
+          - name: fire
+            configuration:
+              y: 3
+              x: 2
+              temperature: 100

@@ -1,7 +1,7 @@
 # Simsreal
 Consciousness emerges
 
-# Promethus Grafana
+# Promethus and Grafana
 ## installation
 
 prometheus - [Download page](https://prometheus.io/download/)
