@@ -1,6 +1,3 @@
-[submodule "world"]
-	path = world
-	url = git@github.com:Simsreal/world.git
 [submodule "intelligence"]
 	path = intelligence
 	url = git@github.com:Simsreal/intelligence.git
