@@ -1,25 +1,15 @@
 humans:
     - name: felix
-      perceptors:
-        - name: grid_vision
-          configuration:
-            steer: steer_sincos
-            yx_retrieval: context
-            sight_radius: 5.0
-            fov: 1.04
       instincts:
         - name: fear_of_cold
           configuration:
-            peek_preference: distance_steer_sincos
-            explore_mechanism: void
+            peek_preference: distance
       memory:
         memory_capacity: 100
         hidden_size: 100
         num_layers: 1
         modules:
-          - name: steer_sincos
-            configuration: null
-          - name: accelerator
+          - name: guided_yx
             configuration: null
           - name: perceived_temp
             configuration: null
@@ -32,12 +22,8 @@ humans:
 constraints:
     - name: speed_limit
       configuration:
-        speed_retrieval: context
+        speed_retrieval: consciousness
         speed_limit: 1.2
-    - name: physical_boundary
-      configuration:
-        boundary_encounter: context
-        steer: steer_sincos
 
 environment:
     env: grid2d

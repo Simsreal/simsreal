@@ -181,7 +181,7 @@ if __name__ == "__main__":
     import uvicorn
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="fire_in_winter")
+    parser.add_argument("--config", type=str, default="felix")
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
 

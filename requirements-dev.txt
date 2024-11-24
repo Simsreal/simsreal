@@ -7,3 +7,4 @@ fastapi
 icecream
 uvicorn
 prometheus-client
+pddl
