@@ -37,8 +37,6 @@ class NeuralToPDDL:
             precondition=at(r, from_loc) & connected(from_loc, to_loc),
             effect=~at(r, from_loc) & at(r, to_loc),
         )
-        print(type(Requirements.STRIPS))
-        exit()
 
         # Create domain
         requirements = [Requirements.STRIPS, Requirements.TYPING]
