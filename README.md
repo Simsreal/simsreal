@@ -78,6 +78,18 @@ visit `http://localhost:3000` and all set.
 streamlit run web/streamlit/main.py
 ```
 
+# PDDL & Downward
+```bash
+sudo apt update
+sudo apt install build-essential cmake git
+
+git clone https://github.com/aibasel/downward.git
+cd downward
+
+./build.py
+```
+
+
 ```bash
 export SSHKEY=~/.ssh/id_ed25519_second
 export GIT_SSH_COMMAND="ssh -i $SSHKEY"

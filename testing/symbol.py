@@ -1,3 +1,6 @@
+import os
+import subprocess
+import tempfile
 from typing import Dict, List
 
 import numpy as np
@@ -81,9 +84,7 @@ class NeuralToPDDL:
 
         return predicates
 
-    def create_problem(
-        self, initial_predicates: List, goal_predicates: List
-    ) -> Problem:
+    def create_problem(self, initial_predicates: List, goal_expression) -> Problem:
         """Create PDDL problem"""
         # Define objects
         robot = constants("robot1", type_="robot")[0]
@@ -106,7 +107,7 @@ class NeuralToPDDL:
             requirements=self.domain.requirements,
             objects=[robot] + locations,
             init=initial_predicates + init_connected,
-            goal=goal_predicates,
+            goal=goal_expression,
         )
 
 
@@ -128,16 +129,84 @@ def main():
     robot = constants("robot1", type_="robot")[0]
     loc_c = constants("locC", type_="location")[0]
     goal_at = Predicate("at", robot, loc_c)
-    goal_predicates = [goal_at]
+    goal_expression = goal_at  # Single predicate as goal
 
     # Create problem
-    problem = converter.create_problem(initial_predicates, goal_predicates)
+    problem = converter.create_problem(initial_predicates, goal_expression)
 
-    # Print results
-    print("\nGenerated PDDL Domain:")
-    print(converter.domain)
-    print("\nGenerated PDDL Problem:")
-    print(problem)
+    # Save PDDL files to temporary files
+    with tempfile.NamedTemporaryFile(
+        mode="w", delete=False, suffix=".pddl"
+    ) as domain_file:
+        domain_file.write(str(converter.domain))
+        domain_file_name = domain_file.name
+
+    with tempfile.NamedTemporaryFile(
+        mode="w", delete=False, suffix=".pddl"
+    ) as problem_file:
+        problem_file.write(str(problem))
+        problem_file_name = problem_file.name
+
+    print(f"Domain PDDL saved to {domain_file_name}")
+    print(f"Problem PDDL saved to {problem_file_name}")
+
+    # Set the plan file name (use default 'sas_plan')
+    plan_file_name = "sas_plan"
+
+    # Run Fast Downward planner
+    planner_path = "downward/fast-downward.py"  # Update with your actual path
+    command = [
+        "python3",
+        planner_path,
+        domain_file_name,
+        problem_file_name,
+        "--search",
+        "astar(lmcut())",
+    ]
+
+    try:
+        result = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            check=True,
+        )
+
+        # Print the planner's output
+        print("Planner output:")
+        print(result.stdout)
+
+        # Read and parse the plan from the plan file
+        plan = read_plan(plan_file_name)
+        print("Extracted plan:")
+        for step in plan:
+            print(step)
+
+    except subprocess.CalledProcessError as e:
+        print("An error occurred while running the planner:")
+        print(e.stderr)
+
+    finally:
+        # Clean up temporary files
+        os.remove(domain_file_name)
+        os.remove(problem_file_name)
+        if os.path.exists(plan_file_name):
+            os.remove(plan_file_name)
+
+
+# Function to read the plan from the plan file
+def read_plan(plan_file_name: str) -> List[str]:
+    plan = []
+    try:
+        with open(plan_file_name, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith(";"):
+                    plan.append(line)
+    except FileNotFoundError:
+        print("Plan file not found.")
+    return plan
 
 
 if __name__ == "__main__":

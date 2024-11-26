@@ -4,6 +4,9 @@ experiments/
 prometheus*
 *.gz
 *.deb
+*.pddl
+downward/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

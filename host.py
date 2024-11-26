@@ -184,6 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", type=str, default="felix")
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
+    os.environ["DOWNWARD_PATH"] = "downward"
 
     try:
         start_http_server(8000)
