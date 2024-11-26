@@ -15,8 +15,8 @@ from human.humans import *
 from human.instincts import *
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
-from human.schema.environment import EnvironmentConfig, Landmarks
 from intelligence.memory import Memory
+from schema.environment import EnvironmentConfig, Landmarks
 
 CONFIG_DIR = "simulation_config"
 
