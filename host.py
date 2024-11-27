@@ -13,12 +13,15 @@ from human.constraints import *
 from human.context import *
 from human.humans import *
 from human.instincts import *
+from human.neuro_symbol.receipes import *
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from intelligence.memory import Memory
+from intelligence.neuro_symbol import DownwardPlanner
 from schema.environment import EnvironmentConfig, Landmarks
 
 CONFIG_DIR = "simulation_config"
+DOWNWARD_PATH = "downward"
 
 
 class Host:
@@ -35,6 +38,10 @@ class Host:
     Instincts = {"fear_of_cold": FearOfCold}
     Constraints = {"speed_limit": SpeedLimit, "physical_boundary": PhysicalBoundary}
     Ctx = {"yx": YX}
+    Planners = {"downward": DownwardPlanner}
+    Receipes = {
+        ("yx", "guided_yx"): Grid2DMovementReceipe,
+    }
 
     def __init__(self):
         self.config_file = os.environ["CONFIG_FILE"]
@@ -90,6 +97,18 @@ class Host:
             ctx_size = sum([ctx.size for ctx in context])
             ctx_names = [ctx.name for ctx in context]
 
+            if "planner" not in human_config:
+                planner_name = "downward"  # default planner
+                planner_config = {}
+            else:
+                planner_name = human_config["planner"]["name"]
+                planner_config = human_config["planner"]["configuration"]
+            planner = (
+                self.Planners[planner_name](**planner_config)
+                if planner_config is not None
+                else self.Planners[planner_name]()
+            )
+
             nn_module = LSTM(
                 modules=human_config["memory"]["modules"],
                 hidden_size=human_config["memory"]["hidden_size"],
@@ -105,12 +124,21 @@ class Host:
                 nn_module=nn_module,
             )
 
+            plan_receipes = {}
+            for ctx in context:
+                for guide in ctx.guides:
+                    if guide not in memory.output_modules:
+                        continue
+                    plan_receipes[(ctx.name, guide)] = self.Receipes[(ctx.name, guide)]
+
             human = self.Humans[human_config["name"]](
                 perceptors=perceptors,
                 instincts=instincts,
                 constraints=self.constraints,
                 memory=memory,
                 context=context,
+                plan_receipes=plan_receipes,
+                planner=planner,
                 device=self.device,
             )
             human_env = self.Env[self.config["environment"]["env"]](
@@ -184,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", type=str, default="felix")
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
-    os.environ["DOWNWARD_PATH"] = "downward"
+    os.environ["DOWNWARD_PATH"] = DOWNWARD_PATH
 
     try:
         start_http_server(8000)

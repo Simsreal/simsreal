@@ -1,6 +1,3 @@
-import os
-import subprocess
-import tempfile
 from typing import Dict, List
 
 import numpy as np
@@ -8,6 +5,8 @@ from pddl.action import Action
 from pddl.core import Domain, Problem
 from pddl.logic import Predicate, constants, variables
 from pddl.requirements import Requirements
+
+from intelligence.neuro_symbol import DownwardPlanner
 
 
 class NeuralToPDDL:
@@ -112,7 +111,7 @@ class NeuralToPDDL:
 
 
 def main():
-    # Create converter
+    # Create converter (assuming you have the NeuralToPDDL class)
     converter = NeuralToPDDL()
 
     # Example neural network output
@@ -134,79 +133,24 @@ def main():
     # Create problem
     problem = converter.create_problem(initial_predicates, goal_expression)
 
-    # Save PDDL files to temporary files
-    with tempfile.NamedTemporaryFile(
-        mode="w", delete=False, suffix=".pddl"
-    ) as domain_file:
-        domain_file.write(str(converter.domain))
-        domain_file_name = domain_file.name
+    # Get the domain and problem PDDL strings
+    domain_str = str(converter.domain)
+    problem_str = str(problem)
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", delete=False, suffix=".pddl"
-    ) as problem_file:
-        problem_file.write(str(problem))
-        problem_file_name = problem_file.name
-
-    print(f"Domain PDDL saved to {domain_file_name}")
-    print(f"Problem PDDL saved to {problem_file_name}")
-
-    # Set the plan file name (use default 'sas_plan')
-    plan_file_name = "sas_plan"
-
-    # Run Fast Downward planner
+    # Initialize the planner with the path to fast-downward.py
     planner_path = "downward/fast-downward.py"  # Update with your actual path
-    command = [
-        "python3",
-        planner_path,
-        domain_file_name,
-        problem_file_name,
-        "--search",
-        "astar(lmcut())",
-    ]
+    planner = DownwardPlanner(planner_path)
 
-    try:
-        result = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            check=True,
-        )
+    # Generate the plan
+    plan = planner.plan(domain_str, problem_str)
 
-        # Print the planner's output
-        print("Planner output:")
-        print(result.stdout)
-
-        # Read and parse the plan from the plan file
-        plan = read_plan(plan_file_name)
-        print("Extracted plan:")
+    # Check if a plan was found
+    if plan:
+        print("Plan found:")
         for step in plan:
             print(step)
-
-    except subprocess.CalledProcessError as e:
-        print("An error occurred while running the planner:")
-        print(e.stderr)
-
-    finally:
-        # Clean up temporary files
-        os.remove(domain_file_name)
-        os.remove(problem_file_name)
-        if os.path.exists(plan_file_name):
-            os.remove(plan_file_name)
-
-
-# Function to read the plan from the plan file
-def read_plan(plan_file_name: str) -> List[str]:
-    plan = []
-    try:
-        with open(plan_file_name, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith(";"):
-                    plan.append(line)
-    except FileNotFoundError:
-        print("Plan file not found.")
-    return plan
+    else:
+        print("No plan could be found.")
 
 
 if __name__ == "__main__":

@@ -18,6 +18,9 @@ humans:
           configuration:
             y: 0
             x: 0
+      planner:
+        name: downward
+        configuration: null
 
 constraints:
     - name: speed_limit
@@ -34,8 +37,8 @@ environment:
       attr:
         - temperature
       landmarks:
-          - name: fire
-            configuration:
-              y: 3
-              x: 2
-              temperature: 100
+        - name: fire
+          configuration:
+            y: 3
+            x: 2
+            temperature: 100
