@@ -6,7 +6,7 @@ from pddl.core import Domain, Problem
 from pddl.logic import Predicate, constants, variables
 from pddl.requirements import Requirements
 
-from intelligence.neuro_symbol import DownwardPlanner
+from neuro_symbol import DownwardPlanner
 
 
 class NeuralToPDDL:
