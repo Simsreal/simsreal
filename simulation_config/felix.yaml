@@ -18,9 +18,16 @@ humans:
           configuration:
             y: 0
             x: 0
-      planner:
-        name: downward
-        configuration: null
+      planning:
+        receipes:
+          - ctx: yx
+            guide: guided_yx
+            configuration:
+              grid_size_height: 5
+              grid_size_width: 5
+        planner:
+          name: downward
+          configuration: null
 
 constraints:
     - name: speed_limit

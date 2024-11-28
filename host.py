@@ -13,15 +13,15 @@ from human.constraints import *
 from human.context import *
 from human.humans import *
 from human.instincts import *
+from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.receipes import *
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from intelligence.memory import Memory
-from intelligence.neuro_symbol import DownwardPlanner
 from schema.environment import EnvironmentConfig, Landmarks
 
 CONFIG_DIR = "simulation_config"
-DOWNWARD_PATH = "downward"
+DOWNWARD_PATH = "downward/fast-downward.py"
 
 
 class Host:
@@ -97,18 +97,6 @@ class Host:
             ctx_size = sum([ctx.size for ctx in context])
             ctx_names = [ctx.name for ctx in context]
 
-            if "planner" not in human_config:
-                planner_name = "downward"  # default planner
-                planner_config = {}
-            else:
-                planner_name = human_config["planner"]["name"]
-                planner_config = human_config["planner"]["configuration"]
-            planner = (
-                self.Planners[planner_name](**planner_config)
-                if planner_config is not None
-                else self.Planners[planner_name]()
-            )
-
             nn_module = LSTM(
                 modules=human_config["memory"]["modules"],
                 hidden_size=human_config["memory"]["hidden_size"],
@@ -125,11 +113,29 @@ class Host:
             )
 
             plan_receipes = {}
-            for ctx in context:
-                for guide in ctx.guides:
-                    if guide not in memory.output_modules:
-                        continue
-                    plan_receipes[(ctx.name, guide)] = self.Receipes[(ctx.name, guide)]
+
+            if "planning" in human_config and "receipes" in human_config["planning"]:
+                for receipe_config in human_config["planning"]["receipes"]:
+                    ctx_name = receipe_config["ctx"]
+                    guide = receipe_config["guide"]
+                    plan_receipes[(ctx_name, guide)] = self.Receipes[(ctx_name, guide)](
+                        **receipe_config["configuration"], agent=human_config["name"]
+                    )
+
+            if "planning" not in human_config:
+                planner_name = "downward"  # default planner
+                planner_config = {}
+            else:
+                planner_name = human_config["planning"]["planner"]["name"]
+                planner_config = human_config["planning"]["planner"]["configuration"]
+
+            planner = (
+                self.Planners[planner_name](
+                    plan_receipes=plan_receipes, **planner_config
+                )
+                if planner_config is not None
+                else self.Planners[planner_name](plan_receipes=plan_receipes)
+            )
 
             human = self.Humans[human_config["name"]](
                 perceptors=perceptors,
@@ -137,7 +143,6 @@ class Host:
                 constraints=self.constraints,
                 memory=memory,
                 context=context,
-                plan_receipes=plan_receipes,
                 planner=planner,
                 device=self.device,
             )
