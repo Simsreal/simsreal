@@ -14,6 +14,7 @@ from human.context import *
 from human.humans import *
 from human.instincts import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
+from human.neuro_symbol.fake_executor import FakeExecutor
 from human.neuro_symbol.receipes import *
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
@@ -39,9 +40,10 @@ class Host:
     Constraints = {"speed_limit": SpeedLimit, "physical_boundary": PhysicalBoundary}
     Ctx = {"yx": YX}
     Planners = {"downward": DownwardPlanner}
-    Receipes = {
+    PlanReceipes = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
     }
+    Executors = {"fake": FakeExecutor}
 
     def __init__(self):
         self.config_file = os.environ["CONFIG_FILE"]
@@ -61,6 +63,7 @@ class Host:
 
         human_configs = self.config["humans"]
         for human_config in human_configs:
+            # perceptions
             perceptors = (
                 [
                     self.Perceptors[perceptor["name"]](**perceptor["configuration"])
@@ -112,15 +115,16 @@ class Host:
                 nn_module=nn_module,
             )
 
+            # planning and executions
             plan_receipes = {}
 
             if "planning" in human_config and "receipes" in human_config["planning"]:
                 for receipe_config in human_config["planning"]["receipes"]:
                     ctx_name = receipe_config["ctx"]
                     guide = receipe_config["guide"]
-                    plan_receipes[(ctx_name, guide)] = self.Receipes[(ctx_name, guide)](
-                        **receipe_config["configuration"], agent=human_config["name"]
-                    )
+                    plan_receipes[(ctx_name, guide)] = self.PlanReceipes[
+                        (ctx_name, guide)
+                    ](**receipe_config["configuration"], agent=human_config["name"])
 
             if "planning" not in human_config:
                 planner_name = "downward"  # default planner
@@ -137,6 +141,8 @@ class Host:
                 else self.Planners[planner_name](plan_receipes=plan_receipes)
             )
 
+            executor = self.Executors["fake"]()
+
             human = self.Humans[human_config["name"]](
                 perceptors=perceptors,
                 instincts=instincts,
@@ -144,6 +150,7 @@ class Host:
                 memory=memory,
                 context=context,
                 planner=planner,
+                executor=executor,
                 device=self.device,
             )
             human_env = self.Env[self.config["environment"]["env"]](
