@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Deque, Dict, List
 
-from neuro_symbol import NeuroSymbol, SymbolicAction
+from neuro_symbol.neuro_symbol import NeuroSymbol
+from neuro_symbol.symoblic_action import SymbolicAction
 from schema.execution import ExecutionStatus
 
 
