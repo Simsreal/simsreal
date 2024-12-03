@@ -100,3 +100,4 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 
 # Interesting papers
 * https://babyagi.org/
+* https://github.com/yoheinakajima/babyagi

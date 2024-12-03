@@ -221,7 +221,7 @@ if __name__ == "__main__":
     import uvicorn
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="felix")
+    parser.add_argument("--config", type=str, default="genA/felix")
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
     os.environ["DOWNWARD_PATH"] = DOWNWARD_PATH
