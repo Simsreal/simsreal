@@ -6,6 +6,8 @@ prometheus*
 *.deb
 *.pddl
 downward/
+IsaacSim-ros_workspaces
+turtlebot3/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

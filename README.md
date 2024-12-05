@@ -1,6 +1,12 @@
 # Simsreal
 Consciousness emerges
 
+## Prerequisites
+Install development packages (rapidly changing during early development)
+```bash
+pip install -r requirements-dev.txt
+```
+
 # Promethus and Grafana
 ## installation
 
@@ -98,6 +104,30 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 ```
 
+# ROS/ ROS2
+Tutorial for ROS2 with Isaac Sim.
+Must complete to get familiarize with ROS2 with Isaac Sim.
+
+```bash
+git clone https://github.com/isaac-sim/IsaacSim-ros_workspaces
+
+cd IsaacSim-ros_workspaces/humble_ws
+
+colcon build
+```
+
+## Turtlebot3
+```bash
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git turtlebot3
+```
+
+
+https://docs.omniverse.nvidia.com/isaacsim/latest/ros2_tutorials/index.html
+
 # Interesting papers
 * https://babyagi.org/
 * https://github.com/yoheinakajima/babyagi
+* https://research.a-star.edu.sg/articles/highlights/robot-olivias-lessons-in-tool-mastery/
+
+# Recommended reading
+* https://docs.omniverse.nvidia.com/isaacsim/latest/advanced_tutorials/tutorial_advanced_omnigraph_shortcuts.html
