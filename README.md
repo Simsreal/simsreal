@@ -1,7 +1,14 @@
-# Simsreal
-Consciousness emerges
-
 ![Simsreal](./src/images/simsreal_logo.png)
+
+## Table of Contents
+- [Prerequisites](#prerequisites)
+  - [Clone the repository](#clone-the-repository)
+  - [Install development packages](#install-development-packages)
+  - [Install NVIDIA Isaac Sim](#install-nvidia-isaac-sim)
+  - [Install ROS2 Humble](#install-ros2-humble)
+  - [Install Prometheus and Grafana (optional)](#install-prometheus-and-grafana-optional)
+  - [Update submodules](#update-submodules)
+- [Start Simsreal](#start-simsreal)
 
 ## Prerequisites
 
