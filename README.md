@@ -26,7 +26,8 @@ Please install Isaac Sim version `4.2.0` for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.
 
 ### Install ROS2 Humble (Windows/ Linux)
-
+Please install ROS2 Humble for development.
+Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_ros.html) to install ROS2 Humble.
 
 ### Install Prometheus and Grafana (optional)
 Prometheus and grafana are used to visualize intelligence's metrics and context.
@@ -52,17 +53,16 @@ check `http://localhost:8000/metrics` to see if the metrics are being scraped.
 
 visit `http://localhost:3000` to start create dashboards.
 
-# Run the app
+# Start Simsreal
+The backend of Simsreal handles the consciousness emergence.
 ```bash
 python host.py
 ```
 
-# Web
 For rapid prototyping, we use streamlit as the web framework.
 ```bash
 streamlit run web/streamlit/main.py
 ```
-
 
 # Interesting papers
 * https://babyagi.org/
