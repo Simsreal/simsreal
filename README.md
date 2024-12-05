@@ -1,6 +1,6 @@
 ## Onboarding
 [![Slack](https://img.shields.io/badge/slack-join%20chat-blue.svg)](https://join.slack.com/t/simsreal/shared_invite/zt-2vwyklm9d-ppni~ex4pc4~t~5sBGpwFw)
-
+[![Jira](https://img.shields.io/badge/jira-view%20project-blue.svg)](https://simsreal.atlassian.net/jira/software/c/projects/SR/boards/4?assignee=712020%3Acbb6a13b-ccf1-4d9d-8f59-7c4584c2d4ca)
 ## Table of Contents
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
