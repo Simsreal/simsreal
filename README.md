@@ -40,11 +40,11 @@ chmod +x setup.sh
 Please install Isaac Sim version `4.2.0` for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.
 
-### Install ROS2 Humble (Windows/ Linux)
+### Install ROS2 Humble
 Please install ROS2 Humble for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_ros.html) to install ROS2 Humble.
 
-### Install Prometheus and Grafana (optional)
+### Install Prometheus and Grafana
 Prometheus and grafana are used to visualize intelligence's metrics and context.
 * TODO: integrate with ROS2 topics
 
