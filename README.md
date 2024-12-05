@@ -7,7 +7,6 @@
   - [Install NVIDIA Isaac Sim](#install-nvidia-isaac-sim)
   - [Install ROS2 Humble](#install-ros2-humble)
   - [Install Prometheus and Grafana (optional)](#install-prometheus-and-grafana-optional)
-  - [Update submodules](#update-submodules)
 - [Start Simsreal](#start-simsreal)
 
 ## Prerequisites
@@ -23,7 +22,7 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 ```
 
-update the submodules
+#### update the submodules
 ```bash
 git submodule update --init --recursive
 git pull --recurse-submodules
