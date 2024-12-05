@@ -14,14 +14,19 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 ```
 
-### Install development packages (rapidly changing during early development)
+### Install development packages
 ```bash
 pip install -r requirements-dev.txt
+chmod +x setup.sh
+./setup.sh
 ```
 
 ### Install NVIDIA Isaac Sim
+Please install Isaac Sim version `4.2.0` for development.
+Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.
 
 ### Install ROS2 Humble (Windows/ Linux)
+
 
 ### Install Prometheus and Grafana (optional)
 Prometheus and grafana are used to visualize intelligence's metrics and context.
@@ -44,16 +49,6 @@ python host.py
 ```
 check `http://localhost:8000/metrics` to see if the metrics are being scraped.
 
-To install grafana (linux/ wsl2)
-```bash
-sudo apt-get install -y adduser libfontconfig1
-wget https://dl.grafana.com/oss/release/grafana_8.5.2_amd64.deb
-sudo dpkg -i grafana_8.5.2_amd64.deb
-
-sudo systemctl daemon-reload
-sudo systemctl start grafana-server
-sudo systemctl enable grafana-server.service
-```
 
 visit `http://localhost:3000` to start create dashboards.
 
@@ -68,26 +63,6 @@ For rapid prototyping, we use streamlit as the web framework.
 streamlit run web/streamlit/main.py
 ```
 
-# PDDL & Downward
-```bash
-sudo apt update
-sudo apt install build-essential cmake git
-
-git clone https://github.com/aibasel/downward.git
-cd downward
-
-./build.py
-```
-
-
-# ROS/ ROS2
-```bash
-git clone https://github.com/isaac-sim/IsaacSim-ros_workspaces
-cd IsaacSim-ros_workspaces/humble_ws
-colcon build
-```
-
-https://docs.omniverse.nvidia.com/isaacsim/latest/ros2_tutorials/index.html
 
 # Interesting papers
 * https://babyagi.org/
