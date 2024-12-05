@@ -3,14 +3,29 @@ Consciousness emerges
 
 ## Prerequisites
 
+### Clone the repository
+The easiest way to clone the repository is to create a ssh key and use it to clone the repository through ssh.
+```bash
+# create a sshkey for the first time
+export SSHKEY=~/.ssh/id_ed25519_second
+export GIT_SSH_COMMAND="ssh -i $SSHKEY"
+GIT_SSH_COMMAND="ssh -i $SSHKEY" git clone git@github.com:Simsreal/simsreal.git
+GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
+GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
+```
+
 ### Install development packages (rapidly changing during early development)
 ```bash
 pip install -r requirements-dev.txt
 ```
 
+### Install NVIDIA Isaac Sim
+
+### Install ROS2 Humble (Windows/ Linux)
+
 ### Install Prometheus and Grafana (optional)
 Prometheus and grafana are used to visualize intelligence's metrics and context.
-* TODO: integrate with ROS2 topics\
+* TODO: integrate with ROS2 topics
 
 To install prometheus, download from [here](https://prometheus.io/download/) and follow the instructions below.
 
@@ -40,9 +55,15 @@ sudo systemctl start grafana-server
 sudo systemctl enable grafana-server.service
 ```
 
-visit `http://localhost:3000` and all set.
+visit `http://localhost:3000` to start create dashboards.
 
-# Streamlit
+# Run the app
+```bash
+python host.py
+```
+
+# Web
+For rapid prototyping, we use streamlit as the web framework.
 ```bash
 streamlit run web/streamlit/main.py
 ```
@@ -58,31 +79,13 @@ cd downward
 ./build.py
 ```
 
-```bash
-export SSHKEY=~/.ssh/id_ed25519_second
-export GIT_SSH_COMMAND="ssh -i $SSHKEY"
-GIT_SSH_COMMAND="ssh -i $SSHKEY" git clone git@github.com:Simsreal/simsreal.git
-GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
-GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
-```
 
 # ROS/ ROS2
-Tutorial for ROS2 with Isaac Sim.
-Must complete to get familiarize with ROS2 with Isaac Sim.
-
 ```bash
 git clone https://github.com/isaac-sim/IsaacSim-ros_workspaces
-
 cd IsaacSim-ros_workspaces/humble_ws
-
 colcon build
 ```
-
-## Turtlebot3
-```bash
-git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git turtlebot3
-```
-
 
 https://docs.omniverse.nvidia.com/isaacsim/latest/ros2_tutorials/index.html
 

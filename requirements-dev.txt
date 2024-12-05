@@ -8,3 +8,4 @@ icecream
 uvicorn
 prometheus-client
 pddl
+streamlit
