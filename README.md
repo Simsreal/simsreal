@@ -22,12 +22,6 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 ```
 
-#### update the submodules
-```bash
-git submodule update --init --recursive
-git pull --recurse-submodules
-```
-
 ### Install development packages
 ```bash
 pip install -r requirements-dev.txt
