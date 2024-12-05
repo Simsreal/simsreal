@@ -1,4 +1,3 @@
-![Simsreal](./src/images/simsreal_logo.png)
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
