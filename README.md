@@ -1,6 +1,5 @@
 ## Onboarding
-[![Slack](https://img.shields.io/badge/slack-join%20chat-blue.svg)](https://your-slack-invite-link](https://join.slack.com/t/simsreal/shared_invite/zt-2vwyklm9d-ppni~ex4pc4~t~5sBGpwFw)
-
+[![Slack](https://img.shields.io/badge/slack-join%20chat-blue.svg)]([https://your-slack-invite-link](https://join.slack.com/t/simsreal/shared_invite/zt-2vwyklm9d-ppni~ex4pc4~t~5sBGpwFw))
 ## Table of Contents
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
