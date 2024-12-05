@@ -29,7 +29,7 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 | Submodule | Description |
 |-----------|-------------|
 | simsreal | main repo |
-| environment | Isaac Sim environment, fake environment, ROS2 bridge builds |
+| environment | 3D physics-based simulation environment, ROS2 bridge builds |
 | intelligence | the foundations for consciousness, abstract classes as references when developing intelligence |
 | human | primarily focused development of intelligence in Simsreal |
 | neuro_symbol | high-level symbolic reasoning for humans to reason and create actions |
