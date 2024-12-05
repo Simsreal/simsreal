@@ -1,6 +1,8 @@
 # Simsreal
 Consciousness emerges
 
+![Simsreal](./src/images/simsreal_logo.png)
+
 ## Prerequisites
 
 ### Clone the repository
@@ -12,6 +14,12 @@ export GIT_SSH_COMMAND="ssh -i $SSHKEY"
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git clone git@github.com:Simsreal/simsreal.git
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
+```
+
+update the submodules
+```bash
+git submodule update --init --recursive
+git pull --recurse-submodules
 ```
 
 ### Install development packages
@@ -63,11 +71,3 @@ For rapid prototyping, we use streamlit as the web framework.
 ```bash
 streamlit run web/streamlit/main.py
 ```
-
-# Interesting papers
-* https://babyagi.org/
-* https://github.com/yoheinakajima/babyagi
-* https://research.a-star.edu.sg/articles/highlights/robot-olivias-lessons-in-tool-mastery/
-
-# Recommended reading
-* https://docs.omniverse.nvidia.com/isaacsim/latest/advanced_tutorials/tutorial_advanced_omnigraph_shortcuts.html
