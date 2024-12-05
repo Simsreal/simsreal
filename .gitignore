@@ -1,6 +1,7 @@
 experiments/
 *.mp4
 *.png
+!src/images/*
 prometheus*
 *.gz
 *.deb
