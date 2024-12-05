@@ -26,6 +26,16 @@ GIT_SSH_COMMAND="ssh -i $SSHKEY" git submodule update --init --recursive
 GIT_SSH_COMMAND="ssh -i $SSHKEY" git pull --recurse-submodules
 ```
 
+| Submodule | Description |
+|-----------|-------------|
+| simsreal | main repo |
+| environment | Isaac Sim environment, fake environment, ROS2 bridge builds |
+| intelligence | the foundations for consciousness, abstract classes as references when developing intelligence |
+| human | primarily focused development of intelligence in Simsreal |
+| neuro_symbol | high-level symbolic reasoning for humans to reason and create actions |
+| web | streamlit web app |
+| utilities | utility functions |
+
 ### Install development packages
 ```bash
 pip install -r requirements-dev.txt
