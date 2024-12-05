@@ -2,71 +2,34 @@
 Consciousness emerges
 
 ## Prerequisites
-Install development packages (rapidly changing during early development)
+
+### Install development packages (rapidly changing during early development)
 ```bash
 pip install -r requirements-dev.txt
 ```
 
-# Promethus and Grafana
-## installation
+### Install Prometheus and Grafana (optional)
+Prometheus and grafana are used to visualize intelligence's metrics and context.
+* TODO: integrate with ROS2 topics\
 
-prometheus - [Download page](https://prometheus.io/download/)
+To install prometheus, download from [here](https://prometheus.io/download/) and follow the instructions below.
+
 ```bash
 tar xvf prometheus-*.tar.gz
 cd prometheus-*
 ```
-
-Edit `prometheus.yml` inside. Sample:
-```yaml
-# my global config
-global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-  # scrape_timeout is set to the global default (10s).
-
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          # - alertmanager:9093
-
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
-
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
-scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "prometheus"
-
-    # metrics_path defaults to '/metrics'
-    # scheme defaults to 'http'.
-
-    static_configs:
-      - targets: ["localhost:9090"]
-
-  - job_name: "human_app"
-    static_configs:
-      - targets: ["localhost:8000"]
-
-```
-
+You can find sample `prometheus.yml` in the `prometheus-*` directory. There is a default one in [here](./testing/prometheus.yml).
 start prometheus
 ```bash
 ./prometheus --config.file=prometheus.yml
 ```
-
 start the app
 ```bash
 python host.py
 ```
-
 check `http://localhost:8000/metrics` to see if the metrics are being scraped.
 
-grafana (linux)
+To install grafana (linux/ wsl2)
 ```bash
 sudo apt-get install -y adduser libfontconfig1
 wget https://dl.grafana.com/oss/release/grafana_8.5.2_amd64.deb
@@ -94,7 +57,6 @@ cd downward
 
 ./build.py
 ```
-
 
 ```bash
 export SSHKEY=~/.ssh/id_ed25519_second
