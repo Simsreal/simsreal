@@ -76,7 +76,6 @@ class Host:
 
         human_configs = self.config["humans"]
         for human_config in human_configs:
-            # perceptions
             perceptors = (
                 [
                     self.Perceptors[perceptor["name"]](**perceptor["configuration"])
@@ -132,7 +131,6 @@ class Host:
                     nn_module=nn_module,
                 )
 
-            # planning and executions
             plan_receipes = {}
             planner_name = None
             planner_config = {}
