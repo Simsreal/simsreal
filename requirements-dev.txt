@@ -9,3 +9,4 @@ uvicorn
 prometheus-client
 pddl
 streamlit
+rclpy

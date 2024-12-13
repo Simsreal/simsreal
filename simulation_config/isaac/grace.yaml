@@ -1,0 +1,10 @@
+humans:
+  - name: grace
+    instincts: null
+    memory: null
+    context: null
+    planning: null
+
+constraints: null
+
+environment: null
