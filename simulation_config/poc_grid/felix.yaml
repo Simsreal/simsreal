@@ -28,6 +28,9 @@ humans:
         planner:
           name: downward
           configuration: null
+      executor:
+        name: fake
+        configuration: null
 
 constraints:
     - name: speed_limit

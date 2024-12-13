@@ -4,7 +4,14 @@ humans:
     memory: null
     context: null
     planning: null
+    executor:
+      name: ros2
+      configuration: null
 
 constraints: null
 
-environment: null
+environment:
+  env: isaac_sim
+  configuration:
+    name: sim_world_0
+    attr: null

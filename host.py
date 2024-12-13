@@ -16,6 +16,7 @@ from human.instincts import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.fake_executor import FakeExecutor
 from human.neuro_symbol.receipes import *
+from human.neuro_symbol.ros2_executor import Ros2Executor
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from intelligence.memory import Memory
@@ -26,7 +27,10 @@ DOWNWARD_PATH = "downward/fast-downward.py"
 
 
 class Host:
-    Env = {"grid2d": Grid2D}
+    Env = {
+        "grid2d": Grid2D,
+        "isaac_sim": IsaacSim,
+    }
     Humans = {
         "alice": Alice,
         "bob": Bob,
@@ -34,6 +38,7 @@ class Host:
         "david": David,
         "ella": Ella,
         "felix": Felix,
+        "grace": Grace,
     }
     Perceptors = {"grid_vision": GridVision}
     Instincts = {"fear_of_cold": FearOfCold}
@@ -43,7 +48,10 @@ class Host:
     PlanReceipes = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
     }
-    Executors = {"fake": FakeExecutor}
+    Executors = {
+        "fake": FakeExecutor,
+        "ros2": Ros2Executor,
+    }
 
     def __init__(self):
         self.config_file = os.environ["CONFIG_FILE"]
@@ -87,7 +95,7 @@ class Host:
                     else self.Instincts[instinct["name"]]()
                     for instinct in human_config["instincts"]
                 ]
-                if "instincts" in human_config
+                if "instincts" in human_config and human_config["instincts"] is not None
                 else []
             )
 
@@ -98,55 +106,68 @@ class Host:
                     else self.Ctx[context["name"]]()
                     for context in human_config["context"]
                 ]
-                if "context" in human_config
+                if "context" in human_config and human_config["context"] is not None
                 else []
             )
 
             ctx_size = sum([ctx.size for ctx in context])
             ctx_names = [ctx.name for ctx in context]
 
-            nn_module = LSTM(
-                modules=human_config["memory"]["modules"],
-                hidden_size=human_config["memory"]["hidden_size"],
-                num_layers=human_config["memory"]["num_layers"],
-                ctx_size=ctx_size,
-                ctx_names=ctx_names,
-                device=self.device,
-            )
+            if "memory" in human_config and human_config["memory"] is None:
+                nn_module = None
+                memory = None
+            else:
+                nn_module = LSTM(
+                    modules=human_config["memory"]["modules"],
+                    hidden_size=human_config["memory"]["hidden_size"],
+                    num_layers=human_config["memory"]["num_layers"],
+                    ctx_size=ctx_size,
+                    ctx_names=ctx_names,
+                    device=self.device,
+                )
 
-            memory = Memory(
-                id=human_config["name"],
-                capacity=human_config["memory"]["memory_capacity"],
-                nn_module=nn_module,
-            )
+                memory = Memory(
+                    id=human_config["name"],
+                    capacity=human_config["memory"]["memory_capacity"],
+                    nn_module=nn_module,
+                )
 
             # planning and executions
             plan_receipes = {}
+            planner_name = None
+            planner_config = {}
+            planner = None
+            executor = None
 
-            if "planning" in human_config and "receipes" in human_config["planning"]:
-                for receipe_config in human_config["planning"]["receipes"]:
-                    ctx_name = receipe_config["ctx"]
-                    guide = receipe_config["guide"]
-                    plan_receipes[(ctx_name, guide)] = self.PlanReceipes[
-                        (ctx_name, guide)
-                    ](**receipe_config["configuration"], agent=human_config["name"])
+            if "planning" in human_config and human_config["planning"] is not None:
+                if "receipes" in human_config["planning"]:
+                    for receipe_config in human_config["planning"]["receipes"]:
+                        ctx_name = receipe_config["ctx"]
+                        guide = receipe_config["guide"]
+                        plan_receipes[(ctx_name, guide)] = self.PlanReceipes[
+                            (ctx_name, guide)
+                        ](**receipe_config["configuration"], agent=human_config["name"])
 
-            if "planning" not in human_config:
-                planner_name = "downward"  # default planner
-                planner_config = {}
-            else:
                 planner_name = human_config["planning"]["planner"]["name"]
                 planner_config = human_config["planning"]["planner"]["configuration"]
 
-            planner = (
-                self.Planners[planner_name](
-                    plan_receipes=plan_receipes, **planner_config
+            if planner_name is not None:
+                planner = (
+                    self.Planners[planner_name](
+                        plan_receipes=plan_receipes, **planner_config
+                    )
+                    if planner_config is not None
+                    else self.Planners[planner_name](plan_receipes=plan_receipes)
                 )
-                if planner_config is not None
-                else self.Planners[planner_name](plan_receipes=plan_receipes)
-            )
 
-            executor = self.Executors["fake"]()
+            if "executor" in human_config and human_config["executor"] is not None:
+                executor_name = human_config["executor"]["name"]
+                executor_config = human_config["executor"]["configuration"]
+                executor = (
+                    self.Executors[executor_name](**executor_config)
+                    if executor_config is not None
+                    else self.Executors[executor_name]()
+                )
 
             human = self.Humans[human_config["name"]](
                 perceptors=perceptors,
