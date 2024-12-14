@@ -57,7 +57,7 @@ class Host:
         self.config_file = os.environ["CONFIG_FILE"]
         self.config = yaml.safe_load(open(self.config_file))
 
-        self.constraints = (
+        self.constraints: List[Constraint] = (
             [
                 self.Constraints[constraint["name"]](**constraint["configuration"])
                 if constraint["configuration"] is not None
@@ -69,7 +69,7 @@ class Host:
         )
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.env = self.Env[self.config["environment"]["env"]](
+        self.env: Environment = self.Env[self.config["environment"]["env"]](
             **self.config["environment"]["configuration"], create=True
         )
         self.humans: List[Human] = []
