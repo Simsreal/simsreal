@@ -11,6 +11,9 @@ humans:
         publishers:
           - topic: /joint_command
             configuration: null
+        subscribers:
+          - topic: /joint_states
+            configuration: null
 
 constraints: null
 
@@ -18,6 +21,3 @@ environment:
   env: isaac_sim
   configuration:
     name: sim_world_0
-    subscribers:
-      - topic: /joint_states
-        configuration: null

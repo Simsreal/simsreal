@@ -92,22 +92,22 @@ class Host:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         env_type = self.config["environment"]["env"]
         if env_type == "isaac_sim":
-            subscriber_nodes = {}
-            for subscriber in self.config["environment"]["configuration"][
-                "subscribers"
-            ]:
-                topic = subscriber["topic"]
-                configuration = subscriber["configuration"]
-                subscriber_nodes[topic] = (
-                    self.IsaacSubscribers[topic](**configuration)
-                    if configuration is not None
-                    else self.IsaacSubscribers[topic]()
-                )
-            self.config["environment"]["configuration"][
-                "subscribers"
-            ] = subscriber_nodes
-            ic(self.config["environment"]["configuration"])
-            exit()
+            rclpy.init(args=None)  # must be called before adding rclpy nodes
+            # subscriber_nodes = {}
+            # if self.config["environment"]["configuration"]["subscribers"] is not None:
+            #     for subscriber in self.config["environment"]["configuration"][
+            #         "subscribers"
+            #     ]:
+            #         topic = subscriber["topic"]
+            #         configuration = subscriber["configuration"]
+            #         subscriber_nodes[topic] = (
+            #             self.IsaacSubscribers[topic](**configuration)
+            #             if configuration is not None
+            #             else self.IsaacSubscribers[topic]()
+            #         )
+            # self.config["environment"]["configuration"][
+            #     "subscribers"
+            # ] = subscriber_nodes
 
         self.env: Environment = self.Env[env_type](
             **self.config["environment"]["configuration"], create=True
@@ -212,7 +212,14 @@ class Host:
                         and "publishers" in executor_config
                         else []
                     )
+                    subscribers = (
+                        executor_config["subscribers"]
+                        if executor_config is not None
+                        and "subscribers" in executor_config
+                        else []
+                    )
                     publishers_nodes = {}
+                    subscribers_nodes = {}
 
                     for publisher in publishers:
                         publisher_name = publisher["topic"]
@@ -225,6 +232,23 @@ class Host:
                         publishers_nodes[publisher_name] = publisher_node
 
                     executor_config["publishers"] = publishers_nodes
+
+                    for subscriber in subscribers:
+                        subscriber_name = subscriber["topic"]
+                        subscriber_config = subscriber["configuration"]
+                        subscriber_node = (
+                            self.IsaacSubscribers[subscriber_name](
+                                **subscriber_config,
+                                subscription_data=self.env.subscription_data,
+                            )
+                            if subscriber_config is not None
+                            else self.IsaacSubscribers[subscriber_name](
+                                subscription_data=self.env.subscription_data
+                            )
+                        )
+                        subscribers_nodes[subscriber_name] = subscriber_node
+
+                    executor_config["subscribers"] = subscribers_nodes
 
                 executor = (
                     self.Executors[executor_name](**executor_config)
