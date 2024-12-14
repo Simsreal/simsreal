@@ -2,8 +2,9 @@
 import gc
 import os
 from contextlib import asynccontextmanager
-from typing import List
+from typing import Dict, List, Tuple
 
+import rclpy
 import torch
 import yaml
 from fastapi import FastAPI
@@ -16,23 +17,24 @@ from human.context import *
 from human.environment.isaac import *
 from human.humans import *
 from human.instincts import *
+from human.neuro_symbol import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.receipes import *
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from intelligence.memory import Memory
-from schema.environment import EnvironmentConfig, Landmarks
+from schema.environment import EnvironmentConfig, Landmarks  # for grid2d
 
 CONFIG_DIR = "simulation_config"
 DOWNWARD_PATH = "downward/fast-downward.py"
 
 
 class Host:
-    Env = {
+    Env: Dict[str, Environment] = {
         "grid2d": Grid2DEnv,
         "isaac_sim": IsaacSimEnv,
     }
-    Humans = {
+    Humans: Dict[str, Human] = {
         "alice": Alice,
         "bob": Bob,
         "charles": Charles,
@@ -41,22 +43,33 @@ class Host:
         "felix": Felix,
         "grace": Grace,
     }
-    Perceptors = {"grid_vision": GridVision}
-    Instincts = {"fear_of_cold": FearOfCold}
-    Constraints = {"speed_limit": SpeedLimit, "physical_boundary": PhysicalBoundary}
-    Ctx = {"yx": YX}
-    Planners = {"downward": DownwardPlanner}
-    PlanReceipes = {
+    Perceptors: Dict[str, Perceptor] = {
+        "grid_vision": GridVision,
+    }
+    Instincts: Dict[str, Instinct] = {
+        "fear_of_cold": FearOfCold,
+    }
+    Constraints: Dict[str, Constraint] = {
+        "speed_limit": SpeedLimit,
+        "physical_boundary": PhysicalBoundary,
+    }
+    Ctx: Dict[str, Context] = {
+        "yx": YX,
+    }
+    Planners: Dict[str, Planner] = {
+        "downward": DownwardPlanner,
+    }
+    PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
     }
-    Executors = {
+    Executors: Dict[str, Executor] = {
         "fake": FakeExecutor,
         "ros2": Ros2Executor,
     }
-    IsaacPublishers = {
+    IsaacPublishers: Dict[str, rclpy.node.Node] = {
         "/joint_command": HumanJointPublisher,
     }
-    IsaacSubscribers = {
+    IsaacSubscribers: Dict[str, rclpy.node.Node] = {
         "/joint_states": HumanJointSubscriber,
     }
 
@@ -76,7 +89,8 @@ class Host:
         )
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.env: Environment = self.Env[self.config["environment"]["env"]](
+        env_type = self.config["environment"]["env"]
+        self.env: Environment = self.Env[env_type](
             **self.config["environment"]["configuration"], create=True
         )
         self.humans: List[Human] = []
@@ -167,21 +181,32 @@ class Host:
 
             if "executor" in human_config and human_config["executor"] is not None:
                 executor_name = human_config["executor"]["name"]
-                executor_config = human_config["executor"]["configuration"]
-                publishers = executor_config["publishers"]
-                publishers_nodes = {}
-
-                for publisher in publishers:
-                    publisher_name = publisher["topic"]
-                    publisher_config = publisher["configuration"]
-                    publisher_node = (
-                        self.IsaacPublishers[publisher_name](**publisher_config)
-                        if publisher_config is not None
-                        else self.IsaacPublishers[publisher_name]()
+                if (
+                    "configuration" in human_config["executor"]
+                    and human_config["executor"]["configuration"] is not None
+                ):
+                    executor_config = human_config["executor"]["configuration"]
+                    publishers = (
+                        executor_config["publishers"]
+                        if executor_config is not None
+                        and "publishers" in executor_config
+                        else []
                     )
-                    publishers_nodes[publisher_name] = publisher_node
+                    publishers_nodes = {}
 
-                executor_config["publishers"] = publishers_nodes
+                    for publisher in publishers:
+                        publisher_name = publisher["topic"]
+                        publisher_config = publisher["configuration"]
+                        publisher_node = (
+                            self.IsaacPublishers[publisher_name](**publisher_config)
+                            if publisher_config is not None
+                            else self.IsaacPublishers[publisher_name]()
+                        )
+                        publishers_nodes[publisher_name] = publisher_node
+
+                    executor_config["publishers"] = publishers_nodes
+                else:
+                    executor_config = {}
 
                 executor = (
                     self.Executors[executor_name](**executor_config)
@@ -199,10 +224,15 @@ class Host:
                 executor=executor,
                 device=self.device,
             )
-            human_env = self.Env[self.config["environment"]["env"]](
-                **self.config["environment"]["configuration"], create=False
-            )
-            human.manifest(human_env)
+
+            if env_type == "isaac_sim":
+                human.manifest(self.env)
+            else:
+                human_env = self.Env[env_type](
+                    **self.config["environment"]["configuration"], create=False
+                )
+                human.manifest(human_env)
+
             self.humans.append(human)
 
         set_host(self)
