@@ -93,21 +93,6 @@ class Host:
         env_type = self.config["environment"]["env"]
         if env_type == "isaac_sim":
             rclpy.init(args=None)  # must be called before adding rclpy nodes
-            # subscriber_nodes = {}
-            # if self.config["environment"]["configuration"]["subscribers"] is not None:
-            #     for subscriber in self.config["environment"]["configuration"][
-            #         "subscribers"
-            #     ]:
-            #         topic = subscriber["topic"]
-            #         configuration = subscriber["configuration"]
-            #         subscriber_nodes[topic] = (
-            #             self.IsaacSubscribers[topic](**configuration)
-            #             if configuration is not None
-            #             else self.IsaacSubscribers[topic]()
-            #         )
-            # self.config["environment"]["configuration"][
-            #     "subscribers"
-            # ] = subscriber_nodes
 
         self.env: Environment = self.Env[env_type](
             **self.config["environment"]["configuration"], create=True
@@ -240,10 +225,12 @@ class Host:
                             self.IsaacSubscribers[subscriber_name](
                                 **subscriber_config,
                                 subscription_data=self.env.subscription_data,
+                                subscription_locks=self.env.subscription_locks,
                             )
                             if subscriber_config is not None
                             else self.IsaacSubscribers[subscriber_name](
-                                subscription_data=self.env.subscription_data
+                                subscription_data=self.env.subscription_data,
+                                subscription_locks=self.env.subscription_locks,
                             )
                         )
                         subscribers_nodes[subscriber_name] = subscriber_node
