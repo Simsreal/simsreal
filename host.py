@@ -13,6 +13,7 @@ from prometheus_client import start_http_server
 from environment import *
 from human.constraints import *
 from human.context import *
+from human.environment.isaac import *
 from human.humans import *
 from human.instincts import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
@@ -51,6 +52,12 @@ class Host:
     Executors = {
         "fake": FakeExecutor,
         "ros2": Ros2Executor,
+    }
+    IsaacPublishers = {
+        "/joint_command": HumanJointPublisher,
+    }
+    IsaacSubscribers = {
+        "/joint_states": HumanJointSubscriber,
     }
 
     def __init__(self):
@@ -161,6 +168,21 @@ class Host:
             if "executor" in human_config and human_config["executor"] is not None:
                 executor_name = human_config["executor"]["name"]
                 executor_config = human_config["executor"]["configuration"]
+                publishers = executor_config["publishers"]
+                publishers_nodes = {}
+
+                for publisher in publishers:
+                    publisher_name = publisher["topic"]
+                    publisher_config = publisher["configuration"]
+                    publisher_node = (
+                        self.IsaacPublishers[publisher_name](**publisher_config)
+                        if publisher_config is not None
+                        else self.IsaacPublishers[publisher_name]()
+                    )
+                    publishers_nodes[publisher_name] = publisher_node
+
+                executor_config["publishers"] = publishers_nodes
+
                 executor = (
                     self.Executors[executor_name](**executor_config)
                     if executor_config is not None
@@ -188,6 +210,7 @@ class Host:
     def start(self):
         for human in self.humans:
             human.let_be_thread.start()
+            human.executor.start()
 
     def stop(self):
         for human in self.humans:
@@ -195,7 +218,7 @@ class Host:
             human.let_be_thread.join()
 
             if human.executor is not None:
-                human.executor.close()
+                human.executor.stop()
 
         self.env.close()
 

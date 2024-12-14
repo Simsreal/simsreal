@@ -13,6 +13,7 @@ class TestROS2Bridge(Node):
 
         # Create the publisher. This publisher will publish a JointState message to the /joint_command topic.
         self.publisher_ = self.create_publisher(JointState, "joint_command", 10)
+        # print(type(self.publisher_))
 
         # Create a JointState message
         self.joint_state = JointState()
