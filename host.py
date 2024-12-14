@@ -1,6 +1,8 @@
 # flake8: noqa: F403, E741, F405
+import gc
 import os
 from contextlib import asynccontextmanager
+from typing import List
 
 import torch
 import yaml
@@ -14,9 +16,7 @@ from human.context import *
 from human.humans import *
 from human.instincts import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
-from human.neuro_symbol.fake_executor import FakeExecutor
 from human.neuro_symbol.receipes import *
-from human.neuro_symbol.ros2_executor import Ros2Executor
 from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from intelligence.memory import Memory
@@ -28,8 +28,8 @@ DOWNWARD_PATH = "downward/fast-downward.py"
 
 class Host:
     Env = {
-        "grid2d": Grid2D,
-        "isaac_sim": IsaacSim,
+        "grid2d": Grid2DEnv,
+        "isaac_sim": IsaacSimEnv,
     }
     Humans = {
         "alice": Alice,
@@ -72,7 +72,7 @@ class Host:
         self.env = self.Env[self.config["environment"]["env"]](
             **self.config["environment"]["configuration"], create=True
         )
-        self.humans = []
+        self.humans: List[Human] = []
 
         human_configs = self.config["humans"]
         for human_config in human_configs:
@@ -167,7 +167,7 @@ class Host:
                     else self.Executors[executor_name]()
                 )
 
-            human = self.Humans[human_config["name"]](
+            human: Human = self.Humans[human_config["name"]](
                 perceptors=perceptors,
                 instincts=instincts,
                 constraints=self.constraints,
@@ -194,6 +194,9 @@ class Host:
             human.terminate = True
             human.let_be_thread.join()
 
+            if human.executor is not None:
+                human.executor.close()
+
         self.env.close()
 
 
@@ -203,6 +206,7 @@ async def lifespan(app: FastAPI):
     host.start()
     yield
     host.stop()
+    gc.collect()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -215,12 +219,18 @@ async def root():
 
 @app.post("/update_env")
 async def update_env(env_config: EnvironmentConfig):
+    """
+    For IsaacSim or real world, environment should not be changed here.
+    """
     ic(env_config)
     return "not implemented"
 
 
 @app.post("/update_landmarks")
 async def update_landmarks(landmarks: Landmarks):
+    """
+    Only used for grid2d
+    """
     host = get_host()
     landmarks = landmarks.model_dump()["landmarks"]
     host.env.update_landmarks(landmarks)

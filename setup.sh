@@ -16,3 +16,5 @@ git clone https://github.com/isaac-sim/IsaacSim-ros_workspaces
 ./downward/build.py
 cd IsaacSim-ros_workspaces/humble_ws
 # colcon build
+
+sudo apt install -y humble-sensor-msgs

@@ -6,7 +6,8 @@ humans:
     planning: null
     executor:
       name: ros2
-      configuration: null
+      configuration:
+        n_threads: 2
 
 constraints: null
 
