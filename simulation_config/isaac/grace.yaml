@@ -2,7 +2,9 @@ humans:
   - name: grace
     instincts: null
     memory: null
-    context: null
+    context:
+      - name: joint_position
+        configuration: null
     planning: null
     executor:
       name: ros2

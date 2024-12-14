@@ -46,6 +46,7 @@ class Host:
     }
     Ctx: Dict[str, Context] = {
         "yx": YX,
+        "joint_position": JointPosition,
     }
     Perceptors: Dict[str, Perceptor] = {
         "grid_vision": GridVision,
@@ -67,10 +68,10 @@ class Host:
         "fake": FakeExecutor,
         "ros2": Ros2Executor,
     }
-    IsaacPublishers: Dict[str, rclpy.node.Node] = {
+    Ros2Publishers: Dict[str, rclpy.node.Node] = {
         "/joint_command": HumanJointPublisher,
     }
-    IsaacSubscribers: Dict[str, rclpy.node.Node] = {
+    Ros2Subscribers: Dict[str, rclpy.node.Node] = {
         "/joint_states": HumanJointSubscriber,
     }
 
@@ -210,9 +211,9 @@ class Host:
                         publisher_name = publisher["topic"]
                         publisher_config = publisher["configuration"]
                         publisher_node = (
-                            self.IsaacPublishers[publisher_name](**publisher_config)
+                            self.Ros2Publishers[publisher_name](**publisher_config)
                             if publisher_config is not None
-                            else self.IsaacPublishers[publisher_name]()
+                            else self.Ros2Publishers[publisher_name]()
                         )
                         publishers_nodes[publisher_name] = publisher_node
 
@@ -222,13 +223,13 @@ class Host:
                         subscriber_name = subscriber["topic"]
                         subscriber_config = subscriber["configuration"]
                         subscriber_node = (
-                            self.IsaacSubscribers[subscriber_name](
+                            self.Ros2Subs[subscriber_name](
                                 **subscriber_config,
                                 subscription_data=self.env.subscription_data,
                                 subscription_locks=self.env.subscription_locks,
                             )
                             if subscriber_config is not None
-                            else self.IsaacSubscribers[subscriber_name](
+                            else self.Ros2Subs[subscriber_name](
                                 subscription_data=self.env.subscription_data,
                                 subscription_locks=self.env.subscription_locks,
                             )
