@@ -33,6 +33,7 @@ class Host:
     Env: Dict[str, Environment] = {
         "grid2d": Grid2DEnv,
         "isaac_sim": IsaacSimEnv,
+        "real_world": NotImplementedError,
     }
     Humans: Dict[str, Human] = {
         "alice": Alice,
@@ -43,24 +44,24 @@ class Host:
         "felix": Felix,
         "grace": Grace,
     }
+    Ctx: Dict[str, Context] = {
+        "yx": YX,
+    }
     Perceptors: Dict[str, Perceptor] = {
         "grid_vision": GridVision,
-    }
-    Instincts: Dict[str, Instinct] = {
-        "fear_of_cold": FearOfCold,
     }
     Constraints: Dict[str, Constraint] = {
         "speed_limit": SpeedLimit,
         "physical_boundary": PhysicalBoundary,
     }
-    Ctx: Dict[str, Context] = {
-        "yx": YX,
-    }
-    Planners: Dict[str, Planner] = {
-        "downward": DownwardPlanner,
+    Instincts: Dict[str, Instinct] = {
+        "fear_of_cold": FearOfCold,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
+    }
+    Planners: Dict[str, Planner] = {
+        "downward": DownwardPlanner,
     }
     Executors: Dict[str, Executor] = {
         "fake": FakeExecutor,
@@ -90,6 +91,24 @@ class Host:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         env_type = self.config["environment"]["env"]
+        if env_type == "isaac_sim":
+            subscriber_nodes = {}
+            for subscriber in self.config["environment"]["configuration"][
+                "subscribers"
+            ]:
+                topic = subscriber["topic"]
+                configuration = subscriber["configuration"]
+                subscriber_nodes[topic] = (
+                    self.IsaacSubscribers[topic](**configuration)
+                    if configuration is not None
+                    else self.IsaacSubscribers[topic]()
+                )
+            self.config["environment"]["configuration"][
+                "subscribers"
+            ] = subscriber_nodes
+            ic(self.config["environment"]["configuration"])
+            exit()
+
         self.env: Environment = self.Env[env_type](
             **self.config["environment"]["configuration"], create=True
         )
@@ -181,6 +200,7 @@ class Host:
 
             if "executor" in human_config and human_config["executor"] is not None:
                 executor_name = human_config["executor"]["name"]
+                executor_config = {}
                 if (
                     "configuration" in human_config["executor"]
                     and human_config["executor"]["configuration"] is not None
@@ -205,8 +225,6 @@ class Host:
                         publishers_nodes[publisher_name] = publisher_node
 
                     executor_config["publishers"] = publishers_nodes
-                else:
-                    executor_config = {}
 
                 executor = (
                     self.Executors[executor_name](**executor_config)
