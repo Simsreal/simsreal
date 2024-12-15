@@ -6,7 +6,7 @@
   - [Install development packages](#install-development-packages)
   - [Install NVIDIA Isaac Sim](#install-nvidia-isaac-sim)
   - [Install ROS2 Humble](#install-ros2-humble)
-  - [Install Prometheus and Grafana (optional)](#install-prometheus-and-grafana-optional)
+  - [Install Prometheus and Grafana](#install-prometheus-and-grafana)
 - [Start Simsreal](#start-simsreal)
 
 ## Prerequisites
