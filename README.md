@@ -59,7 +59,7 @@ Sample world of `grace.usd`:
 ![alt text](./src/images/isaac_sim_grace.png)
 
 ### Simsreal
-Once loaded a world in Isaac Sim, click `Run` button to start the simulation. Then connects the world withconsciousness by running:
+Once loaded a world in Isaac Sim, click `Play` button or press `Spacebar` to start the simulation. Then connects the world withconsciousness by running:
 ```bash
 # isaac-sim
 python host.py --config isaac/grace
