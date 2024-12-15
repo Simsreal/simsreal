@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List
 
+import numpy as np
+
 
 @dataclass
 class JointStateMessage:
@@ -21,3 +23,16 @@ class JointStateMessage:
     position: List[float] = field(default_factory=list)
     velocity: List[float] = field(default_factory=list)
     effort: List[float] = field(default_factory=list)
+
+
+@dataclass
+class ImageMessage:
+    """
+    ROS2 Image message schema.
+    """
+
+    timestamp: float
+    height: int
+    width: int
+    encoding: str
+    data: np.array

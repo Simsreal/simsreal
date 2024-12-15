@@ -46,7 +46,10 @@ class Host:
     }
     Ctx: Dict[str, Context] = {
         "yx": YX,
-        "joint_position": JointPosition,
+        "joint_position": HumanJointPosition,
+        "joint_velocity": HumanJointVelocity,
+        "joint_effort": HumanJointEffort,
+        "vision_1280x720": HumanVision1280X720,
     }
     Perceptors: Dict[str, Perceptor] = {
         "grid_vision": GridVision,
@@ -73,6 +76,7 @@ class Host:
     }
     Ros2Subscribers: Dict[str, rclpy.node.Node] = {
         "/joint_states": HumanJointSubscriber,
+        "/camera/image_raw": HumanVisionSubscriber,
     }
 
     def __init__(self):
@@ -102,6 +106,7 @@ class Host:
 
         human_configs = self.config["humans"]
         for human_config in human_configs:
+            identifier = human_config["name"]
             perceptors = (
                 [
                     self.Perceptors[perceptor["name"]](**perceptor["configuration"])
@@ -126,9 +131,14 @@ class Host:
 
             context = (
                 [
-                    self.Ctx[context["name"]](**context["configuration"])
+                    self.Ctx[context["name"]](
+                        identifier=identifier,
+                        **context["configuration"],
+                    )
                     if context["configuration"] is not None
-                    else self.Ctx[context["name"]]()
+                    else self.Ctx[context["name"]](
+                        identifier=identifier,
+                    )
                     for context in human_config["context"]
                 ]
                 if "context" in human_config and human_config["context"] is not None
@@ -152,7 +162,7 @@ class Host:
                 )
 
                 memory = Memory(
-                    id=human_config["name"],
+                    id=identifier,
                     capacity=human_config["memory"]["memory_capacity"],
                     nn_module=nn_module,
                 )
@@ -170,7 +180,7 @@ class Host:
                         guide = receipe_config["guide"]
                         plan_receipes[(ctx_name, guide)] = self.PlanReceipes[
                             (ctx_name, guide)
-                        ](**receipe_config["configuration"], agent=human_config["name"])
+                        ](**receipe_config["configuration"], agent=identifier)
 
                 planner_name = human_config["planning"]["planner"]["name"]
                 planner_config = human_config["planning"]["planner"]["configuration"]
@@ -211,9 +221,13 @@ class Host:
                         publisher_name = publisher["topic"]
                         publisher_config = publisher["configuration"]
                         publisher_node = (
-                            self.Ros2Publishers[publisher_name](**publisher_config)
+                            self.Ros2Publishers[publisher_name](
+                                identifier=identifier, **publisher_config
+                            )
                             if publisher_config is not None
-                            else self.Ros2Publishers[publisher_name]()
+                            else self.Ros2Publishers[publisher_name](
+                                identifier=identifier
+                            )
                         )
                         publishers_nodes[publisher_name] = publisher_node
 
@@ -223,13 +237,15 @@ class Host:
                         subscriber_name = subscriber["topic"]
                         subscriber_config = subscriber["configuration"]
                         subscriber_node = (
-                            self.Ros2Subs[subscriber_name](
+                            self.Ros2Subscribers[subscriber_name](
                                 **subscriber_config,
+                                identifier=identifier,
                                 subscription_data=self.env.subscription_data,
                                 subscription_locks=self.env.subscription_locks,
                             )
                             if subscriber_config is not None
-                            else self.Ros2Subs[subscriber_name](
+                            else self.Ros2Subscribers[subscriber_name](
+                                identifier=identifier,
                                 subscription_data=self.env.subscription_data,
                                 subscription_locks=self.env.subscription_locks,
                             )
@@ -244,7 +260,7 @@ class Host:
                     else self.Executors[executor_name]()
                 )
 
-            human: Human = self.Humans[human_config["name"]](
+            human: Human = self.Humans[identifier](
                 perceptors=perceptors,
                 instincts=instincts,
                 constraints=self.constraints,

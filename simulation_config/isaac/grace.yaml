@@ -5,6 +5,12 @@ humans:
     context:
       - name: joint_position
         configuration: null
+      - name: joint_velocity
+        configuration: null
+      - name: joint_effort
+        configuration: null
+      - name: vision_1280x720
+        configuration: null
     planning: null
     executor:
       name: ros2
@@ -16,7 +22,8 @@ humans:
         subscribers:
           - topic: /joint_states
             configuration: null
-
+          - topic: /camera/image_raw
+            configuration: null
 constraints: null
 
 environment:
