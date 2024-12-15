@@ -293,7 +293,8 @@ class Host:
     def start(self):
         for human in self.humans:
             human.let_be_thread.start()
-            human.executor.start()
+            if human.executor is not None:
+                human.executor.start()
 
     def stop(self):
         for human in self.humans:

@@ -43,4 +43,4 @@ constraints: null
 environment:
   env: isaac_sim
   configuration:
-    name: sim_world_0
+    name: isaac_sim
