@@ -42,7 +42,7 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 
 ## Launch Simsreal
 ### Isaac-sim
-Start NVIDIA Isaac Sim and loads environments. Check existing worlds (`.usd` files) in [here](./environment/isaac_sim_env/usds/), and import one of them. Alternatively, if you are familiar with Isaac Sim, you can create your own world with action graphs and ROS2 bridge.
+Start NVIDIA Isaac Sim and loads environments. Check existing worlds (`.usd` files) in [here](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds/), and import one of them. Alternatively, if you are familiar with Isaac Sim, you can create your own world with action graphs and ROS2 bridge.
 
 Sample world of `grace.usd`:
 ![alt text](./src/images/isaac_sim_grace.png)
@@ -62,4 +62,4 @@ If you don't have Isaac Sim installed, you can try run following to simulate con
 python host.py --config grid_2d/felix
 ```
 
-To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](./human/).
+To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).
