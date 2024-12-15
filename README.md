@@ -44,7 +44,7 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 (Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
 
 ## Contribution
-View [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
 ### Isaac-sim
