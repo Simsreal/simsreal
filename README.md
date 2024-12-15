@@ -20,7 +20,7 @@ git clone git@github.com:Simsreal/simsreal.git
 git submodule update --init --recursive
 git pull --recurse-submodules
 ```
-To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md)
+To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md).
 
 ### Install development packages
 ```bash
@@ -48,7 +48,7 @@ Sample world of `grace.usd`:
 ![alt text](./src/images/isaac_sim_grace.png)
 
 ### Simsreal
-Once loaded world in Isaac Sim, click `Run` button to start the simulation. Then connects the world withconsciousness by running:
+Once loaded a world in Isaac Sim, click `Run` button to start the simulation. Then connects the world withconsciousness by running:
 ```bash
 # isaac-sim
 python host.py --config isaac/grace
@@ -62,4 +62,4 @@ If you don't have Isaac Sim installed, you can try run following to simulate con
 python host.py --config grid_2d/felix
 ```
 
-To understand the flow of consciousness emergence, you can have a look at high-level flowchart in [here](./human/)
+To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](./human/).
