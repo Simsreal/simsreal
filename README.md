@@ -20,16 +20,7 @@ git clone git@github.com:Simsreal/simsreal.git
 git submodule update --init --recursive
 git pull --recurse-submodules
 ```
-
-| Submodule | Description |
-|-----------|-------------|
-| simsreal | Main repo |
-| environment | 3D physics-based simulation environment, ROS2 bridge builds. Robot/ world configurations |
-| intelligence | The foundations for consciousness, abstract classes as references when developing intelligence |
-| human | Primarily focused development of intelligence in Simsreal |
-| neuro_symbol | High-level symbolic reasoning for humans to reason and create actions from granular behaviors |
-| web | Streamlit web app |
-| utilities | Utility functions |
+To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md)
 
 ### Install development packages
 ```bash
@@ -61,8 +52,13 @@ Once loaded world in Isaac Sim, click `Run` button to start the simulation. Then
 ```bash
 # isaac-sim
 python host.py --config isaac/grace
+```
 
-# there is grid2d world for testing as well:
+#### Grid2D
+`Grid2D` is a simple 2D grid environment for testing. Most of experiment subjects for `Grid2D` are deprecated.
+
+If you don't have Isaac Sim installed, you can try run following to simulate consciousness emergence in a minimal setup:
+```bash
 python host.py --config grid_2d/felix
 ```
 
