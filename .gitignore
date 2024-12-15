@@ -1,9 +1,9 @@
 experiments/
 *.mp4
 *.png
-!src/images/*
-!docs/*
 prometheus*
+!src/images/*
+!docs/*.md
 *.gz
 *.deb
 *.pddl
