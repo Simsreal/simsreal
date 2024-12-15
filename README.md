@@ -44,8 +44,19 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 (Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
 
 ## Contribution
+### Important notes
 Please make sure you run `pre-commit install` to install pre-commit hooks at **each** submodule you work on.
 
+### World (or USDs)
+Welcome to create or modify existing worlds. Feel free to create a PR in [environment](https://github.com/Simsreal/environment) to share your world in `isaac_sim_env/usds/`.
+
+### Sensors
+We are actively adding below sensors to humans being simulated:
+* `contact_sensor`
+* `audio_sensor`
+* others not included in the list but human can sense and available in Isaac Sim now or future.
+
+If you want to add a new sensor, please import `grace.usd` in `https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds` here, and create a copy with added sensors.
 
 ### TODOs (not in near future)
 * Github workflows for pre-commit
