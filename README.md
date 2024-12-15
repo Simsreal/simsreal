@@ -57,7 +57,7 @@ Sample world of `grace.usd`:
 ![alt text](./src/images/isaac_sim_grace.png)
 
 ### Simsreal
-The backend of Simsreal handles the consciousness emergence.
+Once loaded world in Isaac Sim, click `Run` button to start the simulation. Then connects the world withconsciousness by running:
 ```bash
 # isaac-sim
 python host.py --config isaac/grace
@@ -66,4 +66,4 @@ python host.py --config isaac/grace
 python host.py --config grid_2d/felix
 ```
 
-To understand the flow, you can have a look at high-level flowchart in [here](./human/)
+To understand the flow of consciousness emergence, you can have a look at high-level flowchart in [here](./human/)
