@@ -49,13 +49,21 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 ### Install Prometheus and Grafana
 (Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
 
-# Start Simsreal
+## Launch Simsreal
+### Isaac-sim
+Start NVIDIA Isaac Sim and loads environments. Check existing worlds (`.usd` files) in [here](./environment/isaac_sim_env/usds/), and import one of them. Alternatively, if you are familiar with Isaac Sim, you can create your own world with action graphs and ROS2 bridge.
+
+Sample world of `grace.usd`:
+![alt text](./src/images/isaac_sim_grace.png)
+
+### Simsreal
 The backend of Simsreal handles the consciousness emergence.
 ```bash
-python host.py
+# isaac-sim
+python host.py --config isaac/grace
+
+# there is grid2d world for testing as well:
+python host.py --config grid_2d/felix
 ```
 
-For rapid prototyping, we use streamlit as the web framework.
-```bash
-streamlit run web/streamlit/main.py
-```
+To understand the flow, you can have a look at high-level flowchart in [here](./human/)
