@@ -49,6 +49,12 @@ class Host:
         "joint_position": HumanJointPosition,
         "joint_velocity": HumanJointVelocity,
         "joint_effort": HumanJointEffort,
+        "imu_orientation": HumanImuOrientation,
+        "imu_orientation_covariance": HumanImuOrientationCovariance,
+        "imu_angular_velocity": HumanImuAngularVelocity,
+        "imu_angular_velocity_covariance": HumanImuAngularVelocityCovariance,
+        "imu_linear_acceleration": HumanImuLinearAcceleration,
+        "imu_linear_acceleration_covariance": HumanImuLinearAccelerationCovariance,
         "vision_1280x720": HumanVision1280X720,
     }
     Perceptors: Dict[str, Perceptor] = {
@@ -77,6 +83,7 @@ class Host:
     Ros2Subscribers: Dict[str, rclpy.node.Node] = {
         "/joint_states": HumanJointSubscriber,
         "/camera/image_raw": HumanVisionSubscriber,
+        "/imu": HumanImuSubscriber,
     }
 
     def __init__(self):
