@@ -1,5 +1,7 @@
 [![Slack](https://img.shields.io/badge/slack-join%20chat-yellow.svg)](https://join.slack.com/t/simsreal/shared_invite/zt-2vwyklm9d-ppni~ex4pc4~t~5sBGpwFw)
 [![Jira](https://img.shields.io/badge/jira-view%20project-blue.svg)](https://simsreal.atlassian.net/jira/software/c/projects/SR/boards/4?assignee=712020%3Acbb6a13b-ccf1-4d9d-8f59-7c4584c2d4ca)
+![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)
+
 ## Table of Contents
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
@@ -7,7 +9,8 @@
   - [Install NVIDIA Isaac Sim](#install-nvidia-isaac-sim)
   - [Install ROS2 Humble](#install-ros2-humble)
   - [Install Prometheus and Grafana](#install-prometheus-and-grafana)
-- [Start Simsreal](#start-simsreal)
+- [Contribution](#contribution)
+- [Launch Simsreal](#launch-simsreal)
 
 ## Prerequisites
 
@@ -39,6 +42,14 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 
 ### Install Prometheus and Grafana
 (Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
+
+## Contribution
+Please make sure you run `pre-commit install` to install pre-commit hooks at **each** submodule you work on.
+
+
+### TODOs (not in near future)
+* Github workflows for pre-commit
+* Branch protection
 
 ## Launch Simsreal
 ### Isaac-sim
