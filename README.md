@@ -57,7 +57,7 @@ We are actively adding below sensors to human `Grace`:
 * `audio_sensor`
 * others not included in the list but human can sense and available in Isaac Sim now or future.
 
-If you want to add a new sensor or enhance/modify existing sensors, please import `grace.usd` in `https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds` here, and create a copy with added sensors with the corresponding [OmniGraph/Action Graph](https://docs.omniverse.nvidia.com/isaacsim/latest/features/sensors_simulation/sensor_simulation_physics_sensors.html).
+If you want to add a new sensor or enhance/modify existing sensors, please import `grace.usd` in [here](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds), and create a copy with added sensors with the corresponding [OmniGraph/Action Graph](https://docs.omniverse.nvidia.com/isaacsim/latest/features/sensors_simulation/sensor_simulation_physics_sensors.html).
 
 ### TODOs (not in near future)
 * Github workflows for pre-commit
