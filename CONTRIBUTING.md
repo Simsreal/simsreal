@@ -6,6 +6,7 @@ The goal of Simsreal is to be a pioneer who creates AGI, build use-cases around 
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
+- [Beliefs](#beliefs)
 - [What you can contribute](#what-you-can-contribute)
 - [Intelligence](#intelligence)
 - [Worlds](#world)
@@ -15,6 +16,15 @@ The goal of Simsreal is to be a pioneer who creates AGI, build use-cases around 
 1. Follow [README.md](README.md) to setup the environment for development, that includes pip packages in `requirements-dev.txt`, ROS2 Humble, Isaac Sim, etc.
 2. Able to start Simsreal application, e.g. by `python host.py --config isaac/grace`.
 3. Run `pre-commit install` at **every** submodule you work on, which is critical for accessible code quality for everyone including yourself.
+
+## Beliefs
+Building AGI which does not exist now is constructing a viable hypothesis with clear progressing path, and it's very important all Simsreal contributors have the same beliefs on the ways we approach to AGI, to enable a shared AGI vision and stable progressions to our success, and most importantly establishing core guidelines for your contributions.
+
+Here are some of our beliefs, which are not likely to be changed, but likely to be expanded (for clarity and consistency):
+* All modern AI, includings Large Language Models (LLMs) do not lead to AGI, because they are experience machines.
+* AGI relies on *on-the-fly* learning where it takes place at "now" and "here". Traditional training-deployment does not apply here.
+* Intelligence or consciousness is emergent and a product of memory, perceptions, and available context, which are driven by instincts.
+* Intelligence can have actions only on joints where they can control.
 
 ## What you can contribute
 We believed the effectiveness of contribution is maximized when you are familiar and feel interested with specific components of Simsreal you work on, and we are happily offering you a general guide for you to kickstart your contribution.
