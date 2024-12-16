@@ -81,7 +81,7 @@ Welcome to create or modify existing worlds. Feel free to create a PR in [enviro
 * The objects you created in the world are enabled with `physics` and interactable with [Sensors](#sensors).
 
 ## Sensors
-Building human with sensors is crucial to make `Perceptions` enriched and its subsequent processing
+Building human with sensors is crucial to make `Perceptions` enriched and its subsequent processing.
 
 Our goal is to make humans created have as much sensory experience as possible, and we are actively adding below sensors to human `Grace`:
 * `contact_sensor`
