@@ -4,6 +4,7 @@ Thank you for your interest in contributing to Simsreal. Especially there is no 
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
+- [What you can contribute](#what-you-can-contribute)
 - [Intelligence](#intelligence)
 - [Worlds](#world)
 - [Sensors](#sensors)
