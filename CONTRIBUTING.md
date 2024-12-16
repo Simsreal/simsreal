@@ -5,7 +5,7 @@ Thank you for your interest in contributing to Simsreal. Especially there is no 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Intelligence](#intelligence)
-- [Worlds](#worlds)
+- [Worlds](#world)
 - [Sensors](#sensors)
 
 ## Prerequisites
@@ -73,16 +73,24 @@ python host.py --config isaac/grace
 ```
 
 
-## World (or USDs)
+## World
 Welcome to create or modify existing worlds. Feel free to create a PR in [environment](https://github.com/Simsreal/environment) to share your world in `isaac_sim_env/usds/`.
 
+### General guidelines
+* Make incremental changes to world complexity, e.g. adding more objects, more complex scenes, etc.
+* The objects you created in the world are enabled with `physics` and interactable with [Sensors](#sensors).
+
 ## Sensors
-We are actively adding below sensors to human `Grace`:
+Building human with sensors is crucial to make `Perceptions` enriched and its subsequent processing
+
+Our goal is to make humans created have as much sensory experience as possible, and we are actively adding below sensors to human `Grace`:
 * `contact_sensor`
 * `audio_sensor`
 * others not included in the list but human can sense and available in Isaac Sim now or future.
 
-If you want to add a new sensor or enhance/modify existing sensors, please import [grace.usd](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds) in Isaac Sim, and create a copy with added sensors with the corresponding [OmniGraph/Action Graph](https://docs.omniverse.nvidia.com/isaacsim/latest/features/sensors_simulation/sensor_simulation_physics_sensors.html).
+You can get started by importing [grace.usd](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds) in Isaac Sim and work on a copy of it.
+
+Remember to the corresponding [OmniGraph/Action Graph](https://docs.omniverse.nvidia.com/isaacsim/latest/features/sensors_simulation/sensor_simulation_physics_sensors.html) for your created sensors to make sure they are published over `ROS2 Bridge`.
 
 ## TODOs (not in near future)
 * Github workflows for pre-commit
