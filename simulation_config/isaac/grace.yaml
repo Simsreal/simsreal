@@ -11,7 +11,7 @@ humans:
         hidden_size: 100
         num_layers: 1
         modules:
-          - name: perceived_temp
+          - name: joint_position
             configuration: null
     context:
       - name: vision_1280x720

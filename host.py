@@ -17,16 +17,17 @@ from human.context import *
 from human.environment.isaac import *
 from human.humans import *
 from human.instincts import *
+from human.memory.cerebrum import LSTM
 from human.neuro_symbol import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.receipes import *
-from human.nn_modules.cerebrum import LSTM
 from human.perceptors import *
 from intelligence.memory import Memory
 from schema.environment import EnvironmentConfig, Landmarks  # for grid2d
 
 CONFIG_DIR = "simulation_config"
 DOWNWARD_PATH = "downward/fast-downward.py"
+EXPERIMENT_DIR = "experiments"
 
 
 class Host:
@@ -152,10 +153,10 @@ class Host:
             perception_latent_names = [perceptor.name for perceptor in perceptors]
 
             if "memory" in human_config and human_config["memory"] is None:
-                nn_module = None
+                cerebrum = None
                 memory = None
             else:
-                nn_module = LSTM(
+                cerebrum = LSTM(
                     modules=human_config["memory"]["modules"],
                     hidden_size=human_config["memory"]["hidden_size"],
                     num_layers=human_config["memory"]["num_layers"],
@@ -167,7 +168,7 @@ class Host:
                 memory = Memory(
                     id=identifier,
                     capacity=human_config["memory"]["memory_capacity"],
-                    nn_module=nn_module,
+                    cerebrum=cerebrum,
                 )
 
             plan_receipes = {}
@@ -225,11 +226,16 @@ class Host:
                         publisher_config = publisher["configuration"]
                         publisher_node = (
                             self.Ros2Publishers[publisher_name](
-                                identifier=identifier, **publisher_config
+                                **publisher_config,
+                                identifier=identifier,
+                                publish_data=self.env.publish_data,
+                                publish_locks=self.env.publish_locks,
                             )
                             if publisher_config is not None
                             else self.Ros2Publishers[publisher_name](
-                                identifier=identifier
+                                publish_data=self.env.publish_data,
+                                publish_locks=self.env.publish_locks,
+                                identifier=identifier,
                             )
                         )
                         publishers_nodes[publisher_name] = publisher_node
@@ -359,9 +365,13 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="isaac/grace")
+
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
     os.environ["DOWNWARD_PATH"] = DOWNWARD_PATH
+    os.environ["EXPERIMENT_DIR"] = os.path.join(EXPERIMENT_DIR, args.config)
+
+    os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
 
     try:
         start_http_server(8000)
