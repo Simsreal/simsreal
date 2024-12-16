@@ -17,14 +17,14 @@ Thank you for your interest in contributing to Simsreal. Especially there is no 
 We believed the effectiveness of contribution is maximized when you are familiar and feel interested with specific components of Simsreal you work on, and we are happily offering you a general guide for you to kickstart your contribution.
 
 1. [Intelligence](#intelligence)
-* related topics: Test-time training, Human Cognitives (e.g. Perceptions, Instincts), PyTorch Modules as Memory.
-2. [Worlds](#worlds) / [Sensors](#sensors)
-* related topics: USD, Isaac Sim, ROS2 bridge, 3D content creations
+Related topics: Test-time training, Human Cognitives (e.g. Perceptions, Instincts), PyTorch Modules as Memory.
+2. [World](#world) / [Sensors](#sensors)
+Related topics: USD, Isaac Sim, ROS2 bridge, 3D content creations
 
 ## Intelligence
-Developing intelligence in Simsreal is developing the [emergence of consciousness](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png), which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others.
+Developing intelligence in Simsreal is developing the [emergence of consciousness](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png), which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others. All consciousness components are abstracted in `intelligence` submodule.
 
-To let any humans use these components and to follow a principle of code modularity, there is a sample workflow for you to follow. Here is an example where you want to create `photoreceptor` as `Perceptor`:
+There is a sample workflow for you to follow, where we create `photoreceptor` as `Perceptor`:
 
 1. Create a new file or modify an file in `human/perceptors/vision.py`
 2. Develop a new `Perceptor` class, `Photoreceptor(Perceptor)`, and implement the expected method by `Perceptor` which is `perceive()`
@@ -36,8 +36,6 @@ class Photoreceptor(Perceptor):
     def perceive(self, *args, **kwargs):
         ...
 ```
-
-All consciousness components are abstracted in `intelligence`, you are welcome to get familiar with them and how they work to contribute emergence of consciousness.
 
 3. Add the new `Perceptor` class to `__all__` in `human/perceptors/__init__.py`
 ```python
@@ -67,7 +65,6 @@ humans:
       - ...
 ```
 
-6. Run the simulation with updated `simulation_config`
 ```bash
 python host.py --config isaac/grace
 ```
