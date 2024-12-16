@@ -13,9 +13,8 @@ The goal of Simsreal is to be a pioneer who creates AGI, build use-cases around 
 - [Sensors](#sensors)
 
 ## Beliefs on AGI
-To create a shared AGI vision and stable progressions to Simsreal's success, and most importantly establishing core guidelines for you to familiarize with Simsreal and contribute to it, we encourage all Simsreal contributors have the same beliefs on the ways we approach to AGI.
+To create a shared AGI vision and stable progressions to Simsreal's success, and most importantly establishing core guidelines for you to familiarize with Simsreal and contribute to it, we encourage all Simsreal contributors have the same beliefs on the ways Simsreal approach to AGI:
 
-Here are some of our beliefs, which are not likely to be changed, but likely to be expanded (for clarity and consistency):
 * All modern AI, includings Large Language Models (LLMs) do not lead to AGI.
 * AGI relies on *on-the-fly* learning where it takes place at "now" and "here". Traditional training-deployment does not apply here.
 * AGI's consciousness is emergent and a product of memory, perceptions, and available context, which are driven by instincts.
@@ -46,6 +45,7 @@ Related topics:
 * ROS2, ROS2 Bridge (Robot-Python interface, Pub/Sub)
 
 3. General workflows (Not in near future)
+
 Related topics:
 * Pre-commit
 * Branch protection
