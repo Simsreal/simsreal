@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to Simsreal. Especially there is no existing reference to what AGI should be, the journey to AGI is challenging but exciting and fun.
 
-The goal of Simsreal is to be a pioneer who creates AGI, build use-cases around it that opens an entirely fresh horizon for general public and businesses.
+We aim to be a pioneer who creates AGI, build use-cases around it that opens an entirely fresh horizon for general public and businesses.
 
 ## Table of Contents
 - [Beliefs on AGI](#beliefs-on-agi)
