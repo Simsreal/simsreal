@@ -362,7 +362,7 @@ if __name__ == "__main__":
     import uvicorn
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="grid_2d/felix")
+    parser.add_argument("--config", type=str, default="isaac/grace")
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
     os.environ["DOWNWARD_PATH"] = DOWNWARD_PATH

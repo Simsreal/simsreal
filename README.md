@@ -47,7 +47,7 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-### Isaac-sim
+### Isaac Sim
 Start NVIDIA Isaac Sim and loads environments. Check existing worlds (`.usd` files) in [here](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds/), and import one of them. Alternatively, if you are familiar with Isaac Sim, you can create your own world with action graphs and ROS2 bridge.
 
 Sample world of `grace.usd`:
