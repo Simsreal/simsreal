@@ -59,6 +59,7 @@ class Host:
     }
     Perceptors: Dict[str, Perceptor] = {
         "grid_vision": GridVision,
+        "photoreceptor": Photoreceptor,
     }
     Constraints: Dict[str, Constraint] = {
         "speed_limit": SpeedLimit,

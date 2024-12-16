@@ -2,7 +2,58 @@
 
 ## Important notes
 * Please make sure you run `pre-commit install` to install pre-commit hooks at **each** submodule you work on.
-<!-- * We are relying on Isaac Sim to incorporate physics constraints in simulations, so there is no need to model physical constraints on our own. -->
+
+## Intelligence
+Developing intelligence in Simsreal is developing the emergence of consciousness, which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others.
+
+To let any humans use these components and to follow a principle of code modularity, there is a sample workflow for you to follow. Here is an example where you want to create `photoreceptor` as `Perceptor`:
+
+1. Create a new file or modify an file in `human/perceptors/vision.py`
+2. Develop a new `Perceptor` class, `Photoreceptor(Perceptor)`, and implement the expected method by `Perceptor` which is `perceive()`
+```python
+class Photoreceptor(Perceptor):
+    def __init__(self):
+        super().__init__("photoreceptor")
+
+    def perceive(self, *args, **kwargs):
+        ...
+```
+
+All consciousness components are abstracted in `intelligence`, you are welcome to get familiar with them and how they work to contribute emergence of consciousness.
+
+3. Add the new `Perceptor` class to `__all__` in `human/perceptors/__init__.py`
+```python
+from .vision import Photoreceptor, ...
+
+__all__ = [
+    "...",
+    "Photoreceptor",
+]
+```
+
+4. Update `self` attributes in `host.py` to include the new `Perceptor` class, that is to put `photoreceptor: Photoreceptor` in `Host.Perceptors`
+```python
+class Host:
+    Perceptors: Dict[str, Perceptor] = {
+        "...", ...
+        "photoreceptor": Photoreceptor,
+    }
+```
+5. Update `simulation_config/isaac/grace.yaml` to include the new `Perceptor` class and its configuration
+```yaml
+humans:
+  - name: grace
+    perceptors:
+      - name: photoreceptor
+        configuration: null
+      - ...
+```
+
+6. Run the simulation with updated `simulation_config`
+```bash
+python host.py --config isaac/grace
+```
+
 
 ## World (or USDs)
 Welcome to create or modify existing worlds. Feel free to create a PR in [environment](https://github.com/Simsreal/environment) to share your world in `isaac_sim_env/usds/`.

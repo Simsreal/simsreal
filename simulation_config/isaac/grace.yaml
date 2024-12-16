@@ -1,5 +1,8 @@
 humans:
   - name: grace
+    perceptors:
+      - name: photoreceptor
+        configuration: null
     instincts: null
     memory: null
     context:

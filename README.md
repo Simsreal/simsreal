@@ -57,7 +57,7 @@ Sample world of `grace.usd`:
 Once loaded a world in Isaac Sim, click `Play` button or press `Spacebar` to start the simulation. Then connects the world withconsciousness by running:
 ```bash
 # isaac-sim
-python host.py --config isaac/grace
+python host.py --config isaac/grace # or any other config under simulation_config/
 ```
 
 #### Grid2D
