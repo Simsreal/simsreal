@@ -37,6 +37,7 @@ Your contributions should have these principles in mind:
 1. Modularity and reusability: the addition/removal of codes do not break the system and can be easily re-used and integrated.
 2. Type-annotated functions, parameters, and classes.
 3. Inheritance of abstract classes: most classes implemented in `human` have their inheritance from abstracted concepts defined in `intelligence` submodule. This is a necessary step to reinforce our [Beliefs on AGI](#beliefs-on-agi) and make sure your contributions are consistent with the overall design.
+4. Practicality: make sure the robot as a result of your contribution in Isaac Sim is realistic enought to be operated in real-world.
 
 
 For example, most classes implemented in `human` have their inheritance from abstracted concepts defined in `intelligence` submodule. This is a necessary step to reinforce our [Beliefs on AGI](#beliefs-on-agi) and make sure your contributions are consistent with the overall design.
