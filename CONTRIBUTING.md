@@ -46,25 +46,25 @@ We believed the effectiveness of contribution is maximized when you are familiar
 
 1. [Intelligence](#intelligence)
 
-Related topics:
-* Test-time Learning
-* Human Cognitives (e.g. Perceptions, Instincts)
-* PyTorch Modules as Memory/ Experience Machine
-* Neuro-Symbolic AI (for planning)
+  Related topics:
+  * Test-time Learning
+  * Human Cognitives (e.g. Perceptions, Instincts)
+  * PyTorch Modules as Memory/ Experience Machine
+  * Neuro-Symbolic AI (for planning)
 
 2. [World](#world) / [Sensors](#sensors)
 
-Related topics:
-* USD/ 3D-content creations (3D objects)
-* Physics-based Simulation (Collisions, gravity, etc.)
-* ROS2, ROS2 Bridge (Robot-Python interface, Pub/Sub)
+  Related topics:
+  * USD/ 3D-content creations (3D objects)
+  * Physics-based Simulation (Collisions, gravity, etc.)
+  * ROS2, ROS2 Bridge (Robot-Python interface, Pub/Sub)
 
 3. General workflows (Not in near future)
 
-Related topics:
-* Pre-commit
-* Branch protection
-* Github workflows
+  Related topics:
+  * Pre-commit
+  * Branch protection
+  * Github workflows
 
 ## Intelligence
 Developing intelligence in Simsreal is developing the [emergence of consciousness](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png), which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others. All consciousness components are abstracted in `intelligence` submodule.
