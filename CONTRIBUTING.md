@@ -44,6 +44,12 @@ Related topics:
 * Physics-based Simulation (Collisions, gravity, etc.)
 * ROS2, ROS2 Bridge (Robot-Python interface, Pub/Sub)
 
+3. General workflows (Not in near future)
+Related topics:
+* Pre-commit
+* Branch protection
+* Github workflows
+
 ## Intelligence
 Developing intelligence in Simsreal is developing the [emergence of consciousness](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png), which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others. All consciousness components are abstracted in `intelligence` submodule.
 
@@ -111,7 +117,3 @@ Our goal is to make humans created have as much sensory experience as possible, 
 You can get started by importing [grace.usd](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds) in Isaac Sim and work on a copy of it.
 
 Remember to the corresponding [OmniGraph/Action Graph](https://docs.omniverse.nvidia.com/isaacsim/latest/features/sensors_simulation/sensor_simulation_physics_sensors.html) for your created sensors to make sure they are published over `ROS2 Bridge`.
-
-## TODOs (not in near future)
-* Github workflows for pre-commit
-* Branch protection
