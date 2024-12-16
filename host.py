@@ -31,7 +31,6 @@ DOWNWARD_PATH = "downward/fast-downward.py"
 
 class Host:
     Env: Dict[str, Environment] = {
-        "grid2d": Grid2DEnv,  # Deprecated
         "isaac_sim": IsaacSimEnv,
         "real_world": NotImplementedError,
     }
@@ -68,7 +67,6 @@ class Host:
         "downward": DownwardPlanner,
     }
     Executors: Dict[str, Executor] = {
-        "fake": FakeExecutor,
         "ros2": Ros2Executor,
     }
     Ros2Publishers: Dict[str, rclpy.node.Node] = {
