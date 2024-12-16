@@ -1,7 +1,18 @@
 # Contributing to Simsreal
 
-## Important notes
-* Please make sure you run `pre-commit install` to install pre-commit hooks at **each** submodule you work on.
+Thank you for your interest in contributing to Simsreal. Especially there is no existing reference to what AGI should be, the journey to AGI is challenging but exciting and fun.
+
+## Prerequisites
+1. Follow [README.md](README.md) to setup the environment for development, that includes pip packages in `requirements-dev.txt`, ROS2 Humble, Isaac Sim, etc.
+2. Able to start Simsreal application, e.g. by `python host.py --config isaac/grace`.
+3. Run `pre-commit install` at **every** submodule you work on, which is critical for accessible code quality for everyone including yourself.
+
+### Specifications
+#### Simsreal
+Familiar with Simsreal [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).
+
+#### Worlds
+Familiar with USD environment, Isaac Sim, ROS2 bridge, etc.
 
 ## Intelligence
 Developing intelligence in Simsreal is developing the emergence of consciousness, which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others.
