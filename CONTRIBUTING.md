@@ -17,9 +17,9 @@ Thank you for your interest in contributing to Simsreal. Especially there is no 
 We believed the effectiveness of contribution is maximized when you are familiar and feel interested with specific components of Simsreal you work on, and we are happily offering you a general guide for you to kickstart your contribution.
 
 1. [Intelligence](#intelligence)
-* related topics: `test-time training`, `human cognitives (e.g. Perceptions, Instincts)`, `PyTorch modules` (as memory).
+* related topics: Test-time training, Human Cognitives (e.g. Perceptions, Instincts), PyTorch Modules as Memory.
 2. [Worlds](#worlds) / [Sensors](#sensors)
-* related topics: `USD`, `Isaac Sim`, `ROS2 bridge`, `3D content creations`
+* related topics: USD, Isaac Sim, ROS2 bridge, 3D content creations
 
 ## Intelligence
 Developing intelligence in Simsreal is developing the [emergence of consciousness](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png), which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others.
