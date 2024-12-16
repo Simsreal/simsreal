@@ -19,7 +19,7 @@ To create a shared AGI vision and stable progressions to Simsreal's success, and
 * All modern AI, includings Large Language Models (LLMs) do not lead to AGI.
 * AGI relies on *on-the-fly* learning where it takes place at "now" and "here". Traditional training-deployment does not apply here.
 * AGI's consciousness is emergent and a product of memory, perceptions, and available context, which are driven by instincts.
-* AGI can have actions only on joints where they can control.
+* AGI can only act on controllable joints/limbs
 
 ## Prerequisites
 Once completed these items, you are ready to contribute to Simsreal:
