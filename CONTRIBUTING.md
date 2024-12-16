@@ -5,14 +5,14 @@ Thank you for your interest in contributing to Simsreal. Especially there is no 
 The goal of Simsreal is to be a pioneer who creates AGI, build use-cases around it that opens an entirely fresh horizon for general public and businesses.
 
 ## Table of Contents
-- [Beliefs](#beliefs)
+- [Beliefs on AGI](#beliefs-on-agi)
 - [Prerequisites](#prerequisites)
 - [What you can contribute](#what-you-can-contribute)
 - [Intelligence](#intelligence)
 - [Worlds](#world)
 - [Sensors](#sensors)
 
-## Beliefs
+## Beliefs on AGI
 To create a shared AGI vision and stable progressions to Simsreal's success, and most importantly establishing core guidelines for you to familiarize with Simsreal and contribute to it, we encourage all Simsreal contributors have the same beliefs on the ways we approach to AGI.
 
 Here are some of our beliefs, which are not likely to be changed, but likely to be expanded (for clarity and consistency):
