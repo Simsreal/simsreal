@@ -115,6 +115,7 @@ Welcome to create or modify existing worlds. Feel free to create a PR in [enviro
 ### General guidelines
 * Make incremental changes to world complexity, e.g. adding more objects, more complex scenes, etc.
 * The objects you created in the world are enabled with `physics` and interactable with [Sensors](#sensors).
+* Often ask yourself: how does this change affect the human's consciousness upon perceiving it?
 
 ## Sensors
 Building human with sensors is crucial to make `Perceptions` enriched and its subsequent processing.
