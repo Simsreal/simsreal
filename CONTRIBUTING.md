@@ -14,7 +14,9 @@ We aim to be a pioneer who creates AGI, build use-cases around it that opens an 
 - [Sensors](#sensors)
 
 ## Beliefs on AGI
-To create a shared AGI vision and stable progressions to Simsreal's success, and most importantly establishing core guidelines for you to familiarize with Simsreal and contribute to it, we encourage all Simsreal contributors have the same beliefs on the ways Simsreal approach to AGI:
+To create a shared AGI vision and stable progressions to Simsreal's success, and most importantly establishing core guidelines for you to familiarize with Simsreal and contribute to it.
+
+We encourage all Simsreal contributors shared the same beliefs with Simsreal approach on AGI:
 
 * All modern AI, includings Large Language Models (LLMs) do not scale to or even reach AGI.
 * Enriched sensory experience is crucial for AGI's consciousness.
