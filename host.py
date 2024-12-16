@@ -108,6 +108,22 @@ class Host:
         human_configs = self.config["humans"]
         for human_config in human_configs:
             identifier = human_config["name"]
+            context = (
+                [
+                    self.Ctx[context["name"]](
+                        identifier=identifier,
+                        **context["configuration"],
+                    )
+                    if context["configuration"] is not None
+                    else self.Ctx[context["name"]](
+                        identifier=identifier,
+                    )
+                    for context in human_config["context"]
+                ]
+                if "context" in human_config and human_config["context"] is not None
+                else []
+            )
+
             perceptors = (
                 [
                     self.Perceptors[perceptor["name"]](
@@ -129,22 +145,6 @@ class Host:
                     for instinct in human_config["instincts"]
                 ]
                 if "instincts" in human_config and human_config["instincts"] is not None
-                else []
-            )
-
-            context = (
-                [
-                    self.Ctx[context["name"]](
-                        identifier=identifier,
-                        **context["configuration"],
-                    )
-                    if context["configuration"] is not None
-                    else self.Ctx[context["name"]](
-                        identifier=identifier,
-                    )
-                    for context in human_config["context"]
-                ]
-                if "context" in human_config and human_config["context"] is not None
                 else []
             )
 
