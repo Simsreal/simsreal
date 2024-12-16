@@ -40,10 +40,9 @@ Related topics:
 2. [World](#world) / [Sensors](#sensors)
 
 Related topics:
-* USD
-* Physics Simulation
-* ROS2 bridge
-* 3D content creations
+* USD/ 3D-content creations (3D objects)
+* Physics-based Simulation (Collisions, gravity, etc.)
+* ROS2, ROS2 Bridge (Robot-Python interface, Pub/Sub)
 
 ## Intelligence
 Developing intelligence in Simsreal is developing the [emergence of consciousness](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png), which involves components including `Constraint`, `Context`, `Instinct`, `Memory`, `Perceptors`, and others. All consciousness components are abstracted in `intelligence` submodule.
