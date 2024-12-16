@@ -62,7 +62,6 @@ We believed the effectiveness of contribution is maximized when you are familiar
 3. General workflows (Not in near future)
 
   Related topics:
-  * Pre-commit
   * Branch protection
   * Github workflows
 
