@@ -7,6 +7,7 @@ The goal of Simsreal is to be a pioneer who creates AGI, build use-cases around 
 ## Table of Contents
 - [Beliefs on AGI](#beliefs-on-agi)
 - [Prerequisites](#prerequisites)
+- [Principles](#principles)
 - [What you can contribute](#what-you-can-contribute)
 - [Intelligence](#intelligence)
 - [Worlds](#world)
@@ -21,10 +22,22 @@ To create a shared AGI vision and stable progressions to Simsreal's success, and
 * AGI can have actions only on joints where they can control.
 
 ## Prerequisites
+Once completed these items, you are ready to contribute to Simsreal:
+
 1. Follow [README.md](README.md) to setup the environment for development, that includes pip packages in `requirements-dev.txt`, ROS2 Humble, Isaac Sim, etc.
 2. Able to start Simsreal application, e.g. by `python host.py --config isaac/grace`.
 3. Use `host.py` as your entry point to understand and study how Simsreal works.
 4. Run `pre-commit install` at **every** submodule you work on, which is critical for accessible code quality for everyone including yourself.
+
+## Principles
+Your contributions should have these principles in mind:
+1. Modularity
+- [ ] the addition/removal of codes do not break the system
+- [ ] the code you added can be easily re-used
+2. Type annotations
+3. Inheritance of abstract classes
+Most classes implemented in `human` have their inheritance from abstracted concepts defined in `intelligence` submodule. This is a necessary step to reinforce our [Beliefs on AGI](#beliefs-on-agi) and make sure your contributions are consistent with the overall design.
+
 
 ## What you can contribute
 We believed the effectiveness of contribution is maximized when you are familiar and feel interested with specific components of Simsreal you work on, and we are happily offering you a general guide for you to kickstart your contribution.
