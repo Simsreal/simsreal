@@ -2,9 +2,17 @@ humans:
   - name: grace
     perceptors:
       - name: photoreceptor
-        configuration: null
+        configuration:
+          latent_dim: 512
+          vision_context_name: vision_1280x720
     instincts: null
-    memory: null
+    memory:
+        memory_capacity: 100
+        hidden_size: 100
+        num_layers: 1
+        modules:
+          - name: perceived_temp
+            configuration: null
     context:
       - name: vision_1280x720
         configuration: null

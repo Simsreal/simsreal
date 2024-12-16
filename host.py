@@ -31,17 +31,11 @@ DOWNWARD_PATH = "downward/fast-downward.py"
 
 class Host:
     Env: Dict[str, Environment] = {
-        "grid2d": Grid2DEnv,
+        "grid2d": Grid2DEnv,  # Deprecated
         "isaac_sim": IsaacSimEnv,
         "real_world": NotImplementedError,
     }
     Humans: Dict[str, Human] = {
-        "alice": Alice,
-        "bob": Bob,
-        "charles": Charles,
-        "david": David,
-        "ella": Ella,
-        "felix": Felix,
         "grace": Grace,
     }
     Ctx: Dict[str, Context] = {
@@ -58,7 +52,6 @@ class Host:
         "vision_1280x720": HumanVision1280X720,
     }
     Perceptors: Dict[str, Perceptor] = {
-        "grid_vision": GridVision,
         "photoreceptor": Photoreceptor,
     }
     Constraints: Dict[str, Constraint] = {
@@ -117,9 +110,11 @@ class Host:
             identifier = human_config["name"]
             perceptors = (
                 [
-                    self.Perceptors[perceptor["name"]](**perceptor["configuration"])
+                    self.Perceptors[perceptor["name"]](
+                        device=self.device, **perceptor["configuration"]
+                    )
                     if perceptor["configuration"] is not None
-                    else self.Perceptors[perceptor["name"]]()
+                    else self.Perceptors[perceptor["name"]](device=self.device)
                     for perceptor in human_config["perceptors"]
                 ]
                 if "perceptors" in human_config
@@ -153,8 +148,10 @@ class Host:
                 else []
             )
 
-            ctx_size = sum([ctx.size for ctx in context])
-            ctx_names = [ctx.name for ctx in context]
+            perception_latent_size = sum(
+                [perceptor.latent_size for perceptor in perceptors]
+            )
+            perception_latent_names = [perceptor.name for perceptor in perceptors]
 
             if "memory" in human_config and human_config["memory"] is None:
                 nn_module = None
@@ -164,8 +161,8 @@ class Host:
                     modules=human_config["memory"]["modules"],
                     hidden_size=human_config["memory"]["hidden_size"],
                     num_layers=human_config["memory"]["num_layers"],
-                    ctx_size=ctx_size,
-                    ctx_names=ctx_names,
+                    perception_latent_size=perception_latent_size,
+                    perception_latent_names=perception_latent_names,
                     device=self.device,
                 )
 

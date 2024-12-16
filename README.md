@@ -60,12 +60,4 @@ Once loaded a world in Isaac Sim, click `Play` button or press `Spacebar` to sta
 python host.py --config isaac/grace # or any other config under simulation_config/
 ```
 
-#### Grid2D
-`Grid2D` is a simple 2D grid environment for testing. Most of experiment subjects for `Grid2D` are deprecated.
-
-If you don't have Isaac Sim installed, you can try run following to simulate consciousness emergence in a minimal setup:
-```bash
-python host.py --config grid_2d/felix
-```
-
 To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).
