@@ -3,7 +3,7 @@ humans:
     perceptors:
       - name: photoreceptor
         configuration:
-          latent_dim: 512
+          latent_dim: 64
           vision_context_name: vision_1280x720
     instincts: null
     memory:
