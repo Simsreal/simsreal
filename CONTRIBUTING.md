@@ -21,7 +21,7 @@ To create a shared AGI vision and stable progressions to Simsreal's success, and
 * AGI relies on *on-the-fly* learning where it takes place at "now" and "here". Traditional training-deployment does not apply here.
 * AGI's consciousness is emergent and a product of memory, perceptions, and available context.
 * AGI's consciousness is driven/ guided by instincts.
-* AGI can only act on controllable joints/limbs
+* AGI can only act on controllable joints/limbs.
 
 ## Prerequisites
 Once completed these items, you are ready to contribute to Simsreal:
