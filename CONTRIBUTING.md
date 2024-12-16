@@ -24,7 +24,8 @@ Here are some of our beliefs, which are not likely to be changed, but likely to 
 ## Prerequisites
 1. Follow [README.md](README.md) to setup the environment for development, that includes pip packages in `requirements-dev.txt`, ROS2 Humble, Isaac Sim, etc.
 2. Able to start Simsreal application, e.g. by `python host.py --config isaac/grace`.
-3. Run `pre-commit install` at **every** submodule you work on, which is critical for accessible code quality for everyone including yourself.
+3. Use `host.py` as your entry point to understand and study how Simsreal works.
+4. Run `pre-commit install` at **every** submodule you work on, which is critical for accessible code quality for everyone including yourself.
 
 ## What you can contribute
 We believed the effectiveness of contribution is maximized when you are familiar and feel interested with specific components of Simsreal you work on, and we are happily offering you a general guide for you to kickstart your contribution.
@@ -93,11 +94,6 @@ humans:
         configuration: null
       - ...
 ```
-
-```bash
-python host.py --config isaac/grace
-```
-
 
 ## World
 Welcome to create or modify existing worlds. Feel free to create a PR in [environment](https://github.com/Simsreal/environment) to share your world in `isaac_sim_env/usds/`.
