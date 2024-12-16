@@ -43,7 +43,7 @@ Type-annotated code is preferred because it makes others who read your code easi
 3. **Inheritance of abstract classes**
 Most classes implemented in `human` have their inheritance from abstracted concepts defined in `intelligence` submodule. This is a necessary step to reinforce our [Beliefs on AGI](#beliefs-on-agi) and make sure your contributions are consistent with the overall design.
 
-4. **Practicality**
+4. **Robot Practicality**
 Make sure the robot as a result of your contribution in Isaac Sim is realistic enought to be operated in real-world.
 Simsreal relies on `NVIDIA Isaac Sim` to model physical constraints, the only thing to care about is whether we can controll the robot in Real-world identically to how we do in Isaac Sim.
 
