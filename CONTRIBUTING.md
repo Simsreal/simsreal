@@ -48,7 +48,7 @@ Most classes implemented in `human` have their inheritance from abstracted conce
 
 4. **Robot Practicality**
 Make sure the robot as a result of your contribution in Isaac Sim is realistic enought to be operated in real-world.
-Simsreal relies on `NVIDIA Isaac Sim` to model physical constraints, the only thing to care about is whether we can controll the robot in Real-world identically to how we do in Isaac Sim.
+Simsreal relies on `NVIDIA Isaac Sim` to model physical constraints, the only thing to care about is whether we can controll the robot in Real-world identically to how robots operated in Isaac Sim.
 
 
 ## What you can contribute
