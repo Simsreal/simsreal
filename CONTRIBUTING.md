@@ -18,6 +18,7 @@ To create a shared AGI vision and stable progressions to Simsreal's success, and
 
 We encourage our contributors to share our beliefs on AGI:
 
+* *The essense of AGI* is the demonstration of *powerset* of the human-like cognitive behavior.
 * All modern AI, includings Large Language Models (LLMs) do not scale to or even reach AGI.
 * Enriched sensory experience is crucial for AGI's consciousness.
 * AGI relies on *on-the-fly* learning where it takes place at "now" and "here". Traditional training-deployment does not apply here.
