@@ -20,7 +20,7 @@ To create a shared AGI vision and stable progressions to Simsreal's success, and
 * Enriched sensory experience is crucial for AGI's consciousness.
 * AGI relies on *on-the-fly* learning where it takes place at "now" and "here". Traditional training-deployment does not apply here.
 * AGI's consciousness is emergent and a product of memory, perceptions, and available context.
-* AGI's consciousness is driven/ guided by instincts.
+* AGI's consciousness is driven/ guided by instincts, and thus their behaviours.
 * AGI can only act on controllable joints/limbs.
 
 ## Prerequisites
