@@ -13,6 +13,10 @@ humans:
         modules:
           - name: joint_position
             configuration: null
+          - name: joint_velocity
+            configuration: null
+          - name: joint_effort
+            configuration: null
     context:
       - name: vision_1280x720
         configuration: null

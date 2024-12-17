@@ -43,17 +43,22 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 ### Install Prometheus and Grafana
 (Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
 
+### Environment Variables
+```bash
+# in windows set PYTHON_IS to the path of python.bat in isaac-sim-4.2.0
+C:\Users\<USERNAME>\AppData\Local\ov\pkg\isaac-sim-4.2.0\python.bat
+```
+
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-### Isaac Sim
-Start NVIDIA Isaac Sim and loads environments. Check existing worlds (`.usd` files) in [here](https://github.com/Simsreal/environment/tree/main/isaac_sim_env/usds/), and import one of them. Alternatively, if you are familiar with Isaac Sim, you can create your own world with action graphs and ROS2 bridge.
+### 1. Isaac Sim
+```bash
+& $env:PYTHON_IS  environment/isaac_sim_env/python_src/grace.py
+```
 
-Sample world of `grace.usd`:
-![alt text](./src/images/isaac_sim_grace.png)
-
-### Simsreal
+### 2. Simsreal
 Once loaded a world in Isaac Sim, click `Play` button or press `Spacebar` to start the simulation. Then connects the world withconsciousness by running:
 ```bash
 # isaac-sim
