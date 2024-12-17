@@ -54,12 +54,13 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 
 ## Launch Simsreal
 ### 1. Isaac Sim
+Open a new terminal and start simulator.
 ```bash
-& $env:PYTHON_IS  environment/isaac_sim_env/python_src/grace.py
+& $env:PYTHON_IS  environment/simulators/grace.py
 ```
 
 ### 2. Simsreal
-Once loaded a world in Isaac Sim, click `Play` button or press `Spacebar` to start the simulation. Then connects the world withconsciousness by running:
+Open another terminal and starts Simsreal to enable robot consciousness
 ```bash
 # isaac-sim
 python host.py --config isaac/grace # or any other config under simulation_config/
