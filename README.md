@@ -44,10 +44,12 @@ Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/lates
 (Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
 
 ### Environment Variables
-```bash
-# in windows set PYTHON_IS to the path of python.bat in isaac-sim-4.2.0
-C:\Users\<USERNAME>\AppData\Local\ov\pkg\isaac-sim-4.2.0\python.bat
-```
+#### Windows
+Go to `Edit the system environment variables` and add `PYTHON_IS` and append Simsreal repository path to `PATH`
+
+* `PYTHON_IS` = `C:\Users\<USERNAME>\AppData\Local\ov\pkg\isaac-sim-4.2.0\python.bat`
+
+#### Linux
 
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
