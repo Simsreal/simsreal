@@ -25,7 +25,7 @@ from human.perceptors import *
 from intelligence.memory import Memory
 from schema.environment import EnvironmentConfig, Landmarks  # for grid2d
 
-CONFIG_DIR = "simulation_config"
+CONFIG_DIR = "human_config"
 DOWNWARD_PATH = "downward/fast-downward.py"
 EXPERIMENT_DIR = "experiments"
 

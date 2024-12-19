@@ -58,7 +58,7 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 ### 1. Isaac Sim
 Open a new terminal and start simulator.
 ```bash
-& $env:PYTHON_IS  environment/simulators/grace.py
+& $env:PYTHON_IS  simulators/launchers/grace.py
 ```
 
 ### 2. Simsreal
