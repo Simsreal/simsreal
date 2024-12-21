@@ -12,3 +12,4 @@ streamlit
 rclpy
 loguru
 rich
+mujoco
