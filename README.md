@@ -49,7 +49,7 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 
 * `PYTHON_IS` = `C:\Users\<USERNAME>\AppData\Local\ov\pkg\isaac-sim-4.2.0\python.bat`
 
-#### Linux
+<!-- #### Linux -->
 
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
@@ -57,7 +57,7 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 ## Launch Simsreal
 ```bash
 # isaac-sim
-python host.py --config grace # or any other config under simulation_config/
+python host.py --config grace # or any other config under humanconfig/
 ```
 
 To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).
