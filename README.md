@@ -33,15 +33,15 @@ chmod +x setup.sh
 ```
 
 ### Install NVIDIA Isaac Sim
-Please install Isaac Sim version `4.2.0` for development.
+*Optional* Please install Isaac Sim version `4.2.0` for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.
 
 ### Install ROS2 Humble
-Please install ROS2 Humble for development.
+*Optional* Please install ROS2 Humble for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_ros.html) to install ROS2 Humble.
 
 ### Install Prometheus and Grafana
-(Optional) Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
+*Optional* Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
 
 ### Environment Variables
 #### Windows
