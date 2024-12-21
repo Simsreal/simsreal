@@ -43,7 +43,8 @@ class Host:
         "grace": Grace,
     }
     Ctx: Dict[str, Context] = {
-        "vision_640x480": HumanVision640X480,
+        "robot_vision_640x480": RobotVision640X480,
+        "robot_joints": RobotJoints,
     }
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,

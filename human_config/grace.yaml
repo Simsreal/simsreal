@@ -4,40 +4,20 @@ human:
     - name: photoreceptor
       configuration:
         latent_dim: 64
-        vision_context_name: vision_640x480
+        vision_context_name: robot_vision_640x480
   instincts: null
   memory:
       memory_capacity: 100
       hidden_size: 100
       num_layers: 1
       modules:
-        - name: joint_position
+        - name: joint_effort
           configuration: null
-        # - name: joint_velocity
-        #   configuration: null
-        # - name: joint_effort
-        #   configuration: null
   context:
-    - name: vision_640x480
+    - name: robot_vision_640x480
       configuration: null
-    # - name: joint_position
-    #   configuration: null
-    # - name: joint_velocity
-    #   configuration: null
-    # - name: joint_effort
-    #   configuration: null
-    # - name: imu_orientation
-    #   configuration: null
-    # - name: imu_angular_velocity
-    #   configuration: null
-    # - name: imu_angular_velocity_covariance
-    #   configuration: null
-    # - name: imu_linear_acceleration
-    #   configuration: null
-    # - name: imu_linear_acceleration_covariance
-    #   configuration: null
-    # - name: imu_orientation_covariance
-    #   configuration: null
+    - name: robot_joints
+      configuration: null
   planning: null
   executor:
     name: mujoco
@@ -61,3 +41,4 @@ environment:
   configuration:
     name: mujoco
     robot_sub_port: 5556
+    env_pub_port: 5557
