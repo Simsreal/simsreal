@@ -1,61 +1,63 @@
-humans:
-  - name: grace
-    perceptors:
-      - name: photoreceptor
-        configuration:
-          latent_dim: 64
-          vision_context_name: vision_1280x720
-    instincts: null
-    memory:
-        memory_capacity: 100
-        hidden_size: 100
-        num_layers: 1
-        modules: null
-          # - name: joint_position
-          #   configuration: null
-          # - name: joint_velocity
-          #   configuration: null
-          # - name: joint_effort
-          #   configuration: null
-    context:
-      - name: vision_1280x720
-        configuration: null
-      # - name: joint_position
-      #   configuration: null
-      # - name: joint_velocity
-      #   configuration: null
-      # - name: joint_effort
-      #   configuration: null
-      # - name: imu_orientation
-      #   configuration: null
-      # - name: imu_angular_velocity
-      #   configuration: null
-      # - name: imu_angular_velocity_covariance
-      #   configuration: null
-      # - name: imu_linear_acceleration
-      #   configuration: null
-      # - name: imu_linear_acceleration_covariance
-      #   configuration: null
-      # - name: imu_orientation_covariance
-      #   configuration: null
-    planning: null
-    executor:
-      name: mujoco
+human:
+  name: grace
+  perceptors:
+    - name: photoreceptor
       configuration:
-        # n_threads: 2
-        publishers: null
-          # - topic: /joint_command
-          #   configuration: null
-        subscribers: null
-          # - topic: /joint_states
-          #   configuration: null
-          # - topic: /camera/image_raw
-          #   configuration: null
-          # - topic: /imu
-          #   configuration: null
+        latent_dim: 64
+        vision_context_name: vision_1280x720
+  instincts: null
+  memory:
+      memory_capacity: 100
+      hidden_size: 100
+      num_layers: 1
+      modules: null
+        # - name: joint_position
+        #   configuration: null
+        # - name: joint_velocity
+        #   configuration: null
+        # - name: joint_effort
+        #   configuration: null
+  context:
+    - name: vision_1280x720
+      configuration: null
+    # - name: joint_position
+    #   configuration: null
+    # - name: joint_velocity
+    #   configuration: null
+    # - name: joint_effort
+    #   configuration: null
+    # - name: imu_orientation
+    #   configuration: null
+    # - name: imu_angular_velocity
+    #   configuration: null
+    # - name: imu_angular_velocity_covariance
+    #   configuration: null
+    # - name: imu_linear_acceleration
+    #   configuration: null
+    # - name: imu_linear_acceleration_covariance
+    #   configuration: null
+    # - name: imu_orientation_covariance
+    #   configuration: null
+  planning: null
+  executor:
+    name: mujoco
+    configuration:
+      # n_threads: 2
+      publishers: null
+        # - topic: /joint_command
+        #   configuration: null
+      subscribers: null
+        # - topic: /joint_states
+        #   configuration: null
+        # - topic: /camera/image_raw
+        #   configuration: null
+        # - topic: /imu
+        #   configuration: null
+
 constraints: null
 
 environment:
   env: mujoco
   configuration:
     name: mujoco
+    robot_sub_port: 5556

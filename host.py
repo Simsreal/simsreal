@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Tuple
 import torch
 import yaml
 from fastapi import FastAPI
-from icecream import ic
+
+# from icecream import ic
 from prometheus_client import start_http_server
 
 from environment import *
@@ -105,225 +106,198 @@ class Host:
 
             rclpy.init(args=None)  # must be called before adding rclpy nodes
 
-        self.env: Environment = self.Env[env_type](
-            **self.config["environment"]["configuration"], create=True
+        # self.humans: List[Human] = []
+
+        human_config = self.config["human"]
+        # for human_config in human_configs:
+        identifier = human_config["name"]
+        env: Environment = self.Env[env_type](
+            **self.config["environment"]["configuration"]
+        )
+        context = (
+            [
+                self.Ctx[context["name"]](
+                    identifier=identifier,
+                    **context["configuration"],
+                )
+                if context["configuration"] is not None
+                else self.Ctx[context["name"]](
+                    identifier=identifier,
+                )
+                for context in human_config["context"]
+            ]
+            if "context" in human_config and human_config["context"] is not None
+            else []
         )
 
-        # simulator_type = self.config["simulator"]["name"]
-        # self.simulator: Simulator = self.Simulators[simulator_type](
-        #     env=self.env,
-        #     **self.config["simulator"]["configuration"]
-        # )
-
-        self.humans: List[Human] = []
-
-        human_configs = self.config["humans"]
-        for human_config in human_configs:
-            identifier = human_config["name"]
-            context = (
-                [
-                    self.Ctx[context["name"]](
-                        identifier=identifier,
-                        **context["configuration"],
-                    )
-                    if context["configuration"] is not None
-                    else self.Ctx[context["name"]](
-                        identifier=identifier,
-                    )
-                    for context in human_config["context"]
-                ]
-                if "context" in human_config and human_config["context"] is not None
-                else []
-            )
-
-            perceptors = (
-                [
-                    self.Perceptors[perceptor["name"]](
-                        device=self.device, **perceptor["configuration"]
-                    )
-                    if perceptor["configuration"] is not None
-                    else self.Perceptors[perceptor["name"]](device=self.device)
-                    for perceptor in human_config["perceptors"]
-                ]
-                if "perceptors" in human_config
-                else []
-            )
-
-            instincts = (
-                [
-                    self.Instincts[instinct["name"]](**instinct["configuration"])
-                    if instinct["configuration"] is not None
-                    else self.Instincts[instinct["name"]]()
-                    for instinct in human_config["instincts"]
-                ]
-                if "instincts" in human_config and human_config["instincts"] is not None
-                else []
-            )
-
-            perception_latent_size = sum(
-                [perceptor.latent_size for perceptor in perceptors]
-            )
-            perception_latent_names = [perceptor.name for perceptor in perceptors]
-
-            if "memory" in human_config and human_config["memory"] is None:
-                cerebrum = None
-                memory = None
-            else:
-                cerebrum = LSTM(
-                    modules=human_config["memory"]["modules"],
-                    hidden_size=human_config["memory"]["hidden_size"],
-                    num_layers=human_config["memory"]["num_layers"],
-                    perception_latent_size=perception_latent_size,
-                    perception_latent_names=perception_latent_names,
-                    device=self.device,
+        perceptors = (
+            [
+                self.Perceptors[perceptor["name"]](
+                    device=self.device, **perceptor["configuration"]
                 )
+                if perceptor["configuration"] is not None
+                else self.Perceptors[perceptor["name"]](device=self.device)
+                for perceptor in human_config["perceptors"]
+            ]
+            if "perceptors" in human_config
+            else []
+        )
 
-                memory = Memory(
-                    id=identifier,
-                    capacity=human_config["memory"]["memory_capacity"],
-                    cerebrum=cerebrum,
-                )
+        instincts = (
+            [
+                self.Instincts[instinct["name"]](**instinct["configuration"])
+                if instinct["configuration"] is not None
+                else self.Instincts[instinct["name"]]()
+                for instinct in human_config["instincts"]
+            ]
+            if "instincts" in human_config and human_config["instincts"] is not None
+            else []
+        )
 
-            plan_receipes = {}
-            planner_name = None
-            planner_config = {}
-            planner = None
-            executor = None
+        perception_latent_size = sum(
+            [perceptor.latent_size for perceptor in perceptors]
+        )
+        perception_latent_names = [perceptor.name for perceptor in perceptors]
 
-            if "planning" in human_config and human_config["planning"] is not None:
-                if "receipes" in human_config["planning"]:
-                    for receipe_config in human_config["planning"]["receipes"]:
-                        ctx_name = receipe_config["ctx"]
-                        guide = receipe_config["guide"]
-                        plan_receipes[(ctx_name, guide)] = self.PlanReceipes[
-                            (ctx_name, guide)
-                        ](**receipe_config["configuration"], agent=identifier)
-
-                planner_name = human_config["planning"]["planner"]["name"]
-                planner_config = human_config["planning"]["planner"]["configuration"]
-
-            if planner_name is not None:
-                planner = (
-                    self.Planners[planner_name](
-                        plan_receipes=plan_receipes, **planner_config
-                    )
-                    if planner_config is not None
-                    else self.Planners[planner_name](plan_receipes=plan_receipes)
-                )
-
-            if "executor" in human_config and human_config["executor"] is not None:
-                executor_name = human_config["executor"]["name"]
-                executor_config = {}
-                if (
-                    "configuration" in human_config["executor"]
-                    and human_config["executor"]["configuration"] is not None
-                ):
-                    executor_config = human_config["executor"]["configuration"]
-                    publishers = (
-                        executor_config.get("publishers", [])
-                        if executor_config is not None
-                        and "publishers" in executor_config
-                        and executor_config["publishers"] is not None
-                        else []
-                    )
-                    subscribers = (
-                        executor_config.get("subscribers", [])
-                        if executor_config is not None
-                        and "subscribers" in executor_config
-                        and executor_config["subscribers"] is not None
-                        else []
-                    )
-                    publishers_nodes = {}
-                    subscribers_nodes = {}
-
-                    for publisher in publishers:
-                        publisher_name = publisher["topic"]
-                        publisher_config = publisher["configuration"]
-                        publisher_node = (
-                            self.Ros2Publishers[publisher_name](
-                                **publisher_config,
-                                identifier=identifier,
-                                publish_data=self.env.publish_data,
-                                publish_locks=self.env.publish_locks,
-                            )
-                            if publisher_config is not None
-                            else self.Ros2Publishers[publisher_name](
-                                publish_data=self.env.publish_data,
-                                publish_locks=self.env.publish_locks,
-                                identifier=identifier,
-                            )
-                        )
-                        publishers_nodes[publisher_name] = publisher_node
-
-                    executor_config["publishers"] = publishers_nodes
-
-                    for subscriber in subscribers:
-                        subscriber_name = subscriber["topic"]
-                        subscriber_config = subscriber["configuration"]
-                        subscriber_node = (
-                            self.Ros2Subscribers[subscriber_name](
-                                **subscriber_config,
-                                identifier=identifier,
-                                subscription_data=self.env.subscription_data,
-                                subscription_locks=self.env.subscription_locks,
-                            )
-                            if subscriber_config is not None
-                            else self.Ros2Subscribers[subscriber_name](
-                                identifier=identifier,
-                                subscription_data=self.env.subscription_data,
-                                subscription_locks=self.env.subscription_locks,
-                            )
-                        )
-                        subscribers_nodes[subscriber_name] = subscriber_node
-
-                    executor_config["subscribers"] = subscribers_nodes
-
-                executor = (
-                    self.Executors[executor_name](**executor_config)
-                    if executor_config is not None
-                    else self.Executors[executor_name]()
-                )
-
-            human: Human = self.Humans[identifier](
-                perceptors=perceptors,
-                instincts=instincts,
-                constraints=self.constraints,
-                memory=memory,
-                context=context,
-                planner=planner,
-                executor=executor,
+        if "memory" in human_config and human_config["memory"] is None:
+            cerebrum = None
+            memory = None
+        else:
+            cerebrum = LSTM(
+                modules=human_config["memory"]["modules"],
+                hidden_size=human_config["memory"]["hidden_size"],
+                num_layers=human_config["memory"]["num_layers"],
+                perception_latent_size=perception_latent_size,
+                perception_latent_names=perception_latent_names,
                 device=self.device,
             )
 
-            if env_type == "isaac_sim":
-                human.manifest(self.env)
-            else:
-                human_env = self.Env[env_type](
-                    **self.config["environment"]["configuration"], create=False
+            memory = Memory(
+                id=identifier,
+                capacity=human_config["memory"]["memory_capacity"],
+                cerebrum=cerebrum,
+            )
+
+        plan_receipes = {}
+        planner_name = None
+        planner_config = {}
+        planner = None
+        executor = None
+
+        if "planning" in human_config and human_config["planning"] is not None:
+            if "receipes" in human_config["planning"]:
+                for receipe_config in human_config["planning"]["receipes"]:
+                    ctx_name = receipe_config["ctx"]
+                    guide = receipe_config["guide"]
+                    plan_receipes[(ctx_name, guide)] = self.PlanReceipes[
+                        (ctx_name, guide)
+                    ](**receipe_config["configuration"], agent=identifier)
+
+            planner_name = human_config["planning"]["planner"]["name"]
+            planner_config = human_config["planning"]["planner"]["configuration"]
+
+        if planner_name is not None:
+            planner = (
+                self.Planners[planner_name](
+                    plan_receipes=plan_receipes, **planner_config
                 )
-                human.manifest(human_env)
+                if planner_config is not None
+                else self.Planners[planner_name](plan_receipes=plan_receipes)
+            )
 
-            self.humans.append(human)
+        if "executor" in human_config and human_config["executor"] is not None:
+            executor_name = human_config["executor"]["name"]
+            executor_config = {}
+            if (
+                "configuration" in human_config["executor"]
+                and human_config["executor"]["configuration"] is not None
+            ):
+                executor_config = human_config["executor"]["configuration"]
+                publishers = (
+                    executor_config.get("publishers", [])
+                    if executor_config is not None
+                    and "publishers" in executor_config
+                    and executor_config["publishers"] is not None
+                    else []
+                )
+                subscribers = (
+                    executor_config.get("subscribers", [])
+                    if executor_config is not None
+                    and "subscribers" in executor_config
+                    and executor_config["subscribers"] is not None
+                    else []
+                )
+                publishers_nodes = {}
+                subscribers_nodes = {}
 
+                for publisher in publishers:
+                    publisher_name = publisher["topic"]
+                    publisher_config = publisher["configuration"]
+                    publisher_node = (
+                        self.Ros2Publishers[publisher_name](
+                            **publisher_config,
+                            identifier=identifier,
+                            publish_data=env.publish_data,
+                            publish_locks=env.publish_locks,
+                        )
+                        if publisher_config is not None
+                        else self.Ros2Publishers[publisher_name](
+                            publish_data=env.publish_data,
+                            publish_locks=env.publish_locks,
+                            identifier=identifier,
+                        )
+                    )
+                    publishers_nodes[publisher_name] = publisher_node
+
+                executor_config["publishers"] = publishers_nodes
+
+                for subscriber in subscribers:
+                    subscriber_name = subscriber["topic"]
+                    subscriber_config = subscriber["configuration"]
+                    subscriber_node = (
+                        self.Ros2Subscribers[subscriber_name](
+                            **subscriber_config,
+                            identifier=identifier,
+                            subscription_data=env.subscription_data,
+                            subscription_locks=env.subscription_locks,
+                        )
+                        if subscriber_config is not None
+                        else self.Ros2Subscribers[subscriber_name](
+                            identifier=identifier,
+                            subscription_data=env.subscription_data,
+                            subscription_locks=env.subscription_locks,
+                        )
+                    )
+                    subscribers_nodes[subscriber_name] = subscriber_node
+
+                executor_config["subscribers"] = subscribers_nodes
+
+            executor = (
+                self.Executors[executor_name](**executor_config)
+                if executor_config is not None
+                else self.Executors[executor_name]()
+            )
+
+        self.human: Human = self.Humans[identifier](
+            perceptors=perceptors,
+            instincts=instincts,
+            constraints=self.constraints,
+            memory=memory,
+            context=context,
+            planner=planner,
+            executor=executor,
+            device=self.device,
+        )
+
+        self.human.manifest(env)
         set_host(self)
 
     def start(self):
         # self.simulator.run()
-        for human in self.humans:
-            # human.let_be_thread.start()
-            if human.executor is not None:
-                human.executor.start()
+        self.human.let_be()
 
     def stop(self):
-        for human in self.humans:
-            human.terminate = True
-            human.let_be_thread.join()
-
-            if human.executor is not None:
-                human.executor.stop()
-
-        self.env.close()
-        # self.simulator.terminate()
+        self.human.terminate = True
 
 
 @asynccontextmanager
@@ -343,14 +317,9 @@ async def root():
     return str(type(get_host()))
 
 
-@app.post("/update_env")
-async def update_env():
-    raise NotImplementedError
-
-
-@app.post("/update_landmarks")
-async def update_landmarks():
-    raise NotImplementedError
+@app.post("/stop")
+async def stop():
+    get_host().stop()
 
 
 HOST: Host = None
@@ -382,6 +351,6 @@ if __name__ == "__main__":
 
     try:
         start_http_server(8000)
-        uvicorn.run(app, host="0.0.0.0", port=8001)
+        uvicorn.run(app, host="0.0.0.0", port=8300)
     except KeyboardInterrupt:
         pass
