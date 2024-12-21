@@ -55,19 +55,9 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-### 1. Simulator
-Open a new terminal and start simulator.
-```bash
-# windows
-& $env:PYTHON_IS  simulators/launchers/isaac/grace.py # isaac-sim
-& $env:PYTHON_IS  simulators/launchers/mujoco/grace.py # mujoco
-```
-
-### 2. Simsreal
-Open another terminal and starts Simsreal to enable robot consciousness
 ```bash
 # isaac-sim
-python host.py --config isaac/grace # or any other config under simulation_config/
+python host.py --config grace # or any other config under simulation_config/
 ```
 
 To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).

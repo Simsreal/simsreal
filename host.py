@@ -2,9 +2,8 @@
 import gc
 import os
 from contextlib import asynccontextmanager
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
-import rclpy
 import torch
 import yaml
 from fastapi import FastAPI
@@ -14,7 +13,6 @@ from prometheus_client import start_http_server
 from environment import *
 from human.constraints import *
 from human.context import *
-from human.environment.isaac import *
 from human.humans import *
 from human.instincts import *
 from human.memory.cerebrum import LSTM
@@ -24,6 +22,7 @@ from human.neuro_symbol.receipes import *
 from human.perceptors import *
 from intelligence.memory import Memory
 from schema.environment import EnvironmentConfig, Landmarks  # for grid2d
+from simulators import *
 
 CONFIG_DIR = "human_config"
 DOWNWARD_PATH = "downward/fast-downward.py"
@@ -31,8 +30,12 @@ EXPERIMENT_DIR = "experiments"
 
 
 class Host:
+    Simulators: Dict[str, Simulator] = {
+        "mujoco": GraceSimulatorMujoco,
+    }
     Env: Dict[str, Environment] = {
-        "isaac_sim": IsaacSimEnv,
+        # "isaac_sim": IsaacSimEnv,
+        "mujoco": MujocoEnv,
         "real_world": NotImplementedError,
     }
     Humans: Dict[str, Human] = {
@@ -68,15 +71,16 @@ class Host:
         "downward": DownwardPlanner,
     }
     Executors: Dict[str, Executor] = {
-        "ros2": Ros2Executor,
+        # "ros2": Ros2Executor,
+        "mujoco": MujocoExecutor,
     }
-    Ros2Publishers: Dict[str, rclpy.node.Node] = {
-        "/joint_command": HumanJointPublisher,
+    Ros2Publishers: Dict[str, Any] = {
+        # "/joint_command": HumanJointPublisher,
     }
-    Ros2Subscribers: Dict[str, rclpy.node.Node] = {
-        "/joint_states": HumanJointSubscriber,
-        "/camera/image_raw": HumanVisionSubscriber,
-        "/imu": HumanImuSubscriber,
+    Ros2Subscribers: Dict[str, Any] = {
+        # "/joint_states": HumanJointSubscriber,
+        # "/camera/image_raw": HumanVisionSubscriber,
+        # "/imu": HumanImuSubscriber,
     }
 
     def __init__(self):
@@ -97,11 +101,19 @@ class Host:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         env_type = self.config["environment"]["env"]
         if env_type == "isaac_sim":
+            import rclpy
+
             rclpy.init(args=None)  # must be called before adding rclpy nodes
 
         self.env: Environment = self.Env[env_type](
             **self.config["environment"]["configuration"], create=True
         )
+
+        simulator_type = self.config["simulator"]["name"]
+        self.simulator: Simulator = self.Simulators[simulator_type](
+            **self.config["simulator"]["configuration"]
+        )
+
         self.humans: List[Human] = []
 
         human_configs = self.config["humans"]
@@ -207,15 +219,17 @@ class Host:
                 ):
                     executor_config = human_config["executor"]["configuration"]
                     publishers = (
-                        executor_config["publishers"]
+                        executor_config.get("publishers", [])
                         if executor_config is not None
                         and "publishers" in executor_config
+                        and executor_config["publishers"] is not None
                         else []
                     )
                     subscribers = (
-                        executor_config["subscribers"]
+                        executor_config.get("subscribers", [])
                         if executor_config is not None
                         and "subscribers" in executor_config
+                        and executor_config["subscribers"] is not None
                         else []
                     )
                     publishers_nodes = {}
@@ -291,6 +305,7 @@ class Host:
             self.humans.append(human)
 
         set_host(self)
+        self.simulator.run()
 
     def start(self):
         for human in self.humans:
@@ -307,6 +322,7 @@ class Host:
                 human.executor.stop()
 
         self.env.close()
+        self.simulator.terminate()
 
 
 @asynccontextmanager
@@ -364,7 +380,7 @@ if __name__ == "__main__":
     import uvicorn
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="isaac/grace")
+    parser.add_argument("--config", type=str, default="grace")
 
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")

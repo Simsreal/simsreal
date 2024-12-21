@@ -10,13 +10,13 @@ humans:
         memory_capacity: 100
         hidden_size: 100
         num_layers: 1
-        modules:
-          - name: joint_position
-            configuration: null
-          - name: joint_velocity
-            configuration: null
-          - name: joint_effort
-            configuration: null
+        modules: null
+          # - name: joint_position
+          #   configuration: null
+          # - name: joint_velocity
+          #   configuration: null
+          # - name: joint_effort
+          #   configuration: null
     context:
       - name: vision_1280x720
         configuration: null
@@ -40,22 +40,27 @@ humans:
         configuration: null
     planning: null
     executor:
-      name: ros2
+      name: mujoco
       configuration:
-        n_threads: 2
-        publishers:
-          - topic: /joint_command
-            configuration: null
-        subscribers:
-          - topic: /joint_states
-            configuration: null
-          - topic: /camera/image_raw
-            configuration: null
-          - topic: /imu
-            configuration: null
+        # n_threads: 2
+        publishers: null
+          # - topic: /joint_command
+          #   configuration: null
+        subscribers: null
+          # - topic: /joint_states
+          #   configuration: null
+          # - topic: /camera/image_raw
+          #   configuration: null
+          # - topic: /imu
+          #   configuration: null
 constraints: null
 
 environment:
-  env: isaac_sim
+  env: mujoco
   configuration:
-    name: isaac_sim
+    name: mujoco
+
+simulator:
+  name: mujoco
+  configuration:
+    xml_path: simulators/models/grace/0/grace.xml
