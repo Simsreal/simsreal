@@ -20,24 +20,24 @@ humans:
     context:
       - name: vision_1280x720
         configuration: null
-      - name: joint_position
-        configuration: null
-      - name: joint_velocity
-        configuration: null
-      - name: joint_effort
-        configuration: null
-      - name: imu_orientation
-        configuration: null
-      - name: imu_angular_velocity
-        configuration: null
-      - name: imu_angular_velocity_covariance
-        configuration: null
-      - name: imu_linear_acceleration
-        configuration: null
-      - name: imu_linear_acceleration_covariance
-        configuration: null
-      - name: imu_orientation_covariance
-        configuration: null
+      # - name: joint_position
+      #   configuration: null
+      # - name: joint_velocity
+      #   configuration: null
+      # - name: joint_effort
+      #   configuration: null
+      # - name: imu_orientation
+      #   configuration: null
+      # - name: imu_angular_velocity
+      #   configuration: null
+      # - name: imu_angular_velocity_covariance
+      #   configuration: null
+      # - name: imu_linear_acceleration
+      #   configuration: null
+      # - name: imu_linear_acceleration_covariance
+      #   configuration: null
+      # - name: imu_orientation_covariance
+      #   configuration: null
     planning: null
     executor:
       name: mujoco
@@ -59,8 +59,3 @@ environment:
   env: mujoco
   configuration:
     name: mujoco
-
-simulator:
-  name: mujoco
-  configuration:
-    xml_path: simulators/models/grace/0/grace.xml

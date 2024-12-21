@@ -1,18 +1,5 @@
-from typing import Any, Dict, List
-
-from pydantic import BaseModel
+from enum import Enum, auto
 
 
-class Landmark(BaseModel):
-    name: str
-    configuration: Dict[str, Any]
-
-
-class Landmarks(BaseModel):
-    landmarks: List[Landmark]
-
-
-class EnvironmentConfig(BaseModel):
-    humans: Dict[str, Any]
-    constraints: Dict[str, Any]
-    environment: Dict[str, Any]
+class EnvDataType(Enum):
+    SIMULATOR = auto()

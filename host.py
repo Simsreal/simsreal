@@ -21,8 +21,8 @@ from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.receipes import *
 from human.perceptors import *
 from intelligence.memory import Memory
-from schema.environment import EnvironmentConfig, Landmarks  # for grid2d
-from simulators import *
+
+# from simulators import *
 
 CONFIG_DIR = "human_config"
 DOWNWARD_PATH = "downward/fast-downward.py"
@@ -30,9 +30,9 @@ EXPERIMENT_DIR = "experiments"
 
 
 class Host:
-    Simulators: Dict[str, Simulator] = {
-        "mujoco": GraceSimulatorMujoco,
-    }
+    # Simulators: Dict[str, Simulator] = {
+    #     "mujoco": GraceSimulatorMujoco,
+    # }
     Env: Dict[str, Environment] = {
         # "isaac_sim": IsaacSimEnv,
         "mujoco": MujocoEnv,
@@ -109,10 +109,11 @@ class Host:
             **self.config["environment"]["configuration"], create=True
         )
 
-        simulator_type = self.config["simulator"]["name"]
-        self.simulator: Simulator = self.Simulators[simulator_type](
-            **self.config["simulator"]["configuration"]
-        )
+        # simulator_type = self.config["simulator"]["name"]
+        # self.simulator: Simulator = self.Simulators[simulator_type](
+        #     env=self.env,
+        #     **self.config["simulator"]["configuration"]
+        # )
 
         self.humans: List[Human] = []
 
@@ -305,11 +306,11 @@ class Host:
             self.humans.append(human)
 
         set_host(self)
-        self.simulator.run()
 
     def start(self):
+        # self.simulator.run()
         for human in self.humans:
-            human.let_be_thread.start()
+            # human.let_be_thread.start()
             if human.executor is not None:
                 human.executor.start()
 
@@ -322,7 +323,7 @@ class Host:
                 human.executor.stop()
 
         self.env.close()
-        self.simulator.terminate()
+        # self.simulator.terminate()
 
 
 @asynccontextmanager
@@ -343,23 +344,13 @@ async def root():
 
 
 @app.post("/update_env")
-async def update_env(env_config: EnvironmentConfig):
-    """
-    For IsaacSim or real world, environment should not be changed here.
-    """
-    ic(env_config)
-    return "not implemented"
+async def update_env():
+    raise NotImplementedError
 
 
 @app.post("/update_landmarks")
-async def update_landmarks(landmarks: Landmarks):
-    """
-    Only used for grid2d
-    """
-    host = get_host()
-    landmarks = landmarks.model_dump()["landmarks"]
-    host.env.update_landmarks(landmarks)
-    return "ok"
+async def update_landmarks():
+    raise NotImplementedError
 
 
 HOST: Host = None

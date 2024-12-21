@@ -55,6 +55,12 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
+### Simulator
+```bash
+python simulators/launchers/mujoco/grace.py
+```
+
+### Simsreal
 ```bash
 # isaac-sim
 python host.py --config grace # or any other config under humanconfig/
