@@ -43,17 +43,7 @@ class Host:
         "grace": Grace,
     }
     Ctx: Dict[str, Context] = {
-        "yx": YX,
-        "joint_position": HumanJointPosition,
-        "joint_velocity": HumanJointVelocity,
-        "joint_effort": HumanJointEffort,
-        "imu_orientation": HumanImuOrientation,
-        "imu_orientation_covariance": HumanImuOrientationCovariance,
-        "imu_angular_velocity": HumanImuAngularVelocity,
-        "imu_angular_velocity_covariance": HumanImuAngularVelocityCovariance,
-        "imu_linear_acceleration": HumanImuLinearAcceleration,
-        "imu_linear_acceleration_covariance": HumanImuLinearAccelerationCovariance,
-        "vision_1280x720": HumanVision1280X720,
+        "vision_640x480": HumanVision640X480,
     }
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,
@@ -111,7 +101,7 @@ class Host:
         human_config = self.config["human"]
         # for human_config in human_configs:
         identifier = human_config["name"]
-        env: Environment = self.Env[env_type](
+        self.env: Environment = self.Env[env_type](
             **self.config["environment"]["configuration"]
         )
         context = (
@@ -237,13 +227,13 @@ class Host:
                         self.Ros2Publishers[publisher_name](
                             **publisher_config,
                             identifier=identifier,
-                            publish_data=env.publish_data,
-                            publish_locks=env.publish_locks,
+                            publish_data=self.env.publish_data,
+                            publish_locks=self.env.publish_locks,
                         )
                         if publisher_config is not None
                         else self.Ros2Publishers[publisher_name](
-                            publish_data=env.publish_data,
-                            publish_locks=env.publish_locks,
+                            publish_data=self.env.publish_data,
+                            publish_locks=self.env.publish_locks,
                             identifier=identifier,
                         )
                     )
@@ -258,14 +248,14 @@ class Host:
                         self.Ros2Subscribers[subscriber_name](
                             **subscriber_config,
                             identifier=identifier,
-                            subscription_data=env.subscription_data,
-                            subscription_locks=env.subscription_locks,
+                            subscription_data=self.env.subscription_data,
+                            subscription_locks=self.env.subscription_locks,
                         )
                         if subscriber_config is not None
                         else self.Ros2Subscribers[subscriber_name](
                             identifier=identifier,
-                            subscription_data=env.subscription_data,
-                            subscription_locks=env.subscription_locks,
+                            subscription_data=self.env.subscription_data,
+                            subscription_locks=self.env.subscription_locks,
                         )
                     )
                     subscribers_nodes[subscriber_name] = subscriber_node
@@ -289,15 +279,18 @@ class Host:
             device=self.device,
         )
 
-        self.human.manifest(env)
+        self.human.manifest(self.env)
         set_host(self)
 
     def start(self):
-        # self.simulator.run()
-        self.human.let_be()
+        if self.human.executor is not None:
+            self.human.executor.start()
+        self.env.activate()
 
     def stop(self):
-        self.human.terminate = True
+        if self.human.executor is not None:
+            self.human.executor.stop()
+        self.env.deactivate()
 
 
 @asynccontextmanager

@@ -4,21 +4,21 @@ human:
     - name: photoreceptor
       configuration:
         latent_dim: 64
-        vision_context_name: vision_1280x720
+        vision_context_name: vision_640x480
   instincts: null
   memory:
       memory_capacity: 100
       hidden_size: 100
       num_layers: 1
-      modules: null
-        # - name: joint_position
-        #   configuration: null
+      modules:
+        - name: joint_position
+          configuration: null
         # - name: joint_velocity
         #   configuration: null
         # - name: joint_effort
         #   configuration: null
   context:
-    - name: vision_1280x720
+    - name: vision_640x480
       configuration: null
     # - name: joint_position
     #   configuration: null
