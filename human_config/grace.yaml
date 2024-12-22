@@ -5,6 +5,10 @@ human:
       configuration:
         latent_dim: 64
         vision_context_name: robot_vision_640x480
+    - name: imu_perceptor
+      configuration:
+        latent_dim: 16
+        imu_context_name: robot_imu
   instincts: null
   memory:
       memory_capacity: 100
@@ -12,7 +16,11 @@ human:
       num_layers: 1
       modules:
         - name: joint_effort
-          configuration: null
+          configuration:
+            output_size: 78
+        - name: emotion
+          configuration:
+            output_size: 3
   context:
     - name: robot_vision_640x480
       configuration: null
