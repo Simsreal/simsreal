@@ -32,6 +32,9 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+## Install Unity
+*Optional*
+
 ### Install NVIDIA Isaac Sim
 *Optional* Please install Isaac Sim version `4.2.0` for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.

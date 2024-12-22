@@ -16,7 +16,13 @@ human:
   context:
     - name: robot_vision_640x480
       configuration: null
+    - name: robot_depth_vision_640x480
+      configuration: null
     - name: robot_joints
+      configuration: null
+    - name: robot_imu
+      configuration: null
+    - name: robot_contact
       configuration: null
   planning: null
   executor:
@@ -24,15 +30,8 @@ human:
     configuration:
       # n_threads: 2
       publishers: null
-        # - topic: /joint_command
-        #   configuration: null
       subscribers: null
-        # - topic: /joint_states
-        #   configuration: null
-        # - topic: /camera/image_raw
-        #   configuration: null
-        # - topic: /imu
-        #   configuration: null
+
 
 constraints: null
 

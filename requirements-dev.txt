@@ -13,3 +13,4 @@ rclpy
 loguru
 rich
 mujoco
+dm_control
