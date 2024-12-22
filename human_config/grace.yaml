@@ -14,7 +14,9 @@ human:
         latent_dim: 32
         n_joints: 78
         joints_context_name: robot_joints
-  instincts: null
+  instincts:
+    - name: rooting_reflex
+      configuration: null
   memory:
       memory_capacity: 100
       hidden_size: 100

@@ -59,7 +59,7 @@ class Host:
         "physical_boundary": PhysicalBoundary,
     }
     Instincts: Dict[str, Instinct] = {
-        # "fear_of_cold": FearOfCold,
+        "rooting_reflex": RootingReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
