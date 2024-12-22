@@ -52,6 +52,7 @@ class Host:
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,
         "imu_perceptor": ImuPerceptor,
+        "joints_perceptor": JointPerceptor,
     }
     Constraints: Dict[str, Constraint] = {
         "speed_limit": SpeedLimit,
