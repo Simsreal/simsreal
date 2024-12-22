@@ -268,7 +268,7 @@ if __name__ == "__main__":
     os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
 
     try:
-        start_http_server(8000)
+        # start_http_server(8000)
         uvicorn.run(app, host="0.0.0.0", port=8300)
     except KeyboardInterrupt:
         pass
