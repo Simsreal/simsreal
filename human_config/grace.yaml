@@ -38,13 +38,6 @@ human:
     - name: robot_contact
       configuration: null
   planning: null
-  executor:
-    name: mujoco
-    configuration:
-      # n_threads: 2
-      publishers: null
-      subscribers: null
-
 
 constraints: null
 

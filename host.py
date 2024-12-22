@@ -59,7 +59,7 @@ class Host:
         "physical_boundary": PhysicalBoundary,
     }
     Instincts: Dict[str, Instinct] = {
-        "fear_of_cold": FearOfCold,
+        # "fear_of_cold": FearOfCold,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
@@ -69,7 +69,7 @@ class Host:
     }
     Executors: Dict[str, Executor] = {
         # "ros2": Ros2Executor,
-        "mujoco": MujocoExecutor,
+        # "mujoco": MujocoExecutor,
     }
     Ros2Publishers: Dict[str, Any] = {
         # "/joint_command": HumanJointPublisher,
@@ -101,8 +101,6 @@ class Host:
             import rclpy
 
             rclpy.init(args=None)  # must be called before adding rclpy nodes
-
-        # self.humans: List[Human] = []
 
         human_config = self.config["human"]
         # for human_config in human_configs:
@@ -178,7 +176,6 @@ class Host:
         planner_name = None
         planner_config = {}
         planner = None
-        executor = None
 
         if "planning" in human_config and human_config["planning"] is not None:
             if "receipes" in human_config["planning"]:
@@ -201,79 +198,6 @@ class Host:
                 else self.Planners[planner_name](plan_receipes=plan_receipes)
             )
 
-        if "executor" in human_config and human_config["executor"] is not None:
-            executor_name = human_config["executor"]["name"]
-            executor_config = {}
-            if (
-                "configuration" in human_config["executor"]
-                and human_config["executor"]["configuration"] is not None
-            ):
-                executor_config = human_config["executor"]["configuration"]
-                publishers = (
-                    executor_config.get("publishers", [])
-                    if executor_config is not None
-                    and "publishers" in executor_config
-                    and executor_config["publishers"] is not None
-                    else []
-                )
-                subscribers = (
-                    executor_config.get("subscribers", [])
-                    if executor_config is not None
-                    and "subscribers" in executor_config
-                    and executor_config["subscribers"] is not None
-                    else []
-                )
-                publishers_nodes = {}
-                subscribers_nodes = {}
-
-                for publisher in publishers:
-                    publisher_name = publisher["topic"]
-                    publisher_config = publisher["configuration"]
-                    publisher_node = (
-                        self.Ros2Publishers[publisher_name](
-                            **publisher_config,
-                            identifier=identifier,
-                            publish_data=self.env.publish_data,
-                            publish_locks=self.env.publish_locks,
-                        )
-                        if publisher_config is not None
-                        else self.Ros2Publishers[publisher_name](
-                            publish_data=self.env.publish_data,
-                            publish_locks=self.env.publish_locks,
-                            identifier=identifier,
-                        )
-                    )
-                    publishers_nodes[publisher_name] = publisher_node
-
-                executor_config["publishers"] = publishers_nodes
-
-                for subscriber in subscribers:
-                    subscriber_name = subscriber["topic"]
-                    subscriber_config = subscriber["configuration"]
-                    subscriber_node = (
-                        self.Ros2Subscribers[subscriber_name](
-                            **subscriber_config,
-                            identifier=identifier,
-                            subscription_data=self.env.subscription_data,
-                            subscription_locks=self.env.subscription_locks,
-                        )
-                        if subscriber_config is not None
-                        else self.Ros2Subscribers[subscriber_name](
-                            identifier=identifier,
-                            subscription_data=self.env.subscription_data,
-                            subscription_locks=self.env.subscription_locks,
-                        )
-                    )
-                    subscribers_nodes[subscriber_name] = subscriber_node
-
-                executor_config["subscribers"] = subscribers_nodes
-
-            executor = (
-                self.Executors[executor_name](**executor_config)
-                if executor_config is not None
-                else self.Executors[executor_name]()
-            )
-
         self.human: Human = self.Humans[identifier](
             perceptors=perceptors,
             instincts=instincts,
@@ -281,7 +205,6 @@ class Host:
             memory=memory,
             context=context,
             planner=planner,
-            executor=executor,
             device=self.device,
         )
 
@@ -289,13 +212,9 @@ class Host:
         set_host(self)
 
     def start(self):
-        if self.human.executor is not None:
-            self.human.executor.start()
         self.env.activate()
 
     def stop(self):
-        if self.human.executor is not None:
-            self.human.executor.stop()
         self.env.deactivate()
 
 
