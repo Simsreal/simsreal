@@ -22,9 +22,9 @@ human:
       hidden_size: 100
       num_layers: 1
       modules:
-        - name: joint_effort
+        - name: neck_joints
           configuration:
-            output_size: 78
+            output_size: 9
         - name: emotion
           configuration:
             output_size: 3

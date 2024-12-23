@@ -12,6 +12,9 @@ IsaacSim-ros_workspaces
 turtlebot3/
 *.sas
 MUJOCO_LOG.TXT
+MJDATA.TXT
+MJMODEL.TXT
+snapshot*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -65,6 +65,7 @@ We believed the effectiveness of contribution is maximized when you are familiar
 2. [World](#world) / [Sensors](#sensors)
 
   Related topics:
+  * Robotics low-level control
   * USD/ 3D-content creations (3D objects)
   * Physics-based Simulation (Collisions, gravity, etc.)
   * ROS2, ROS2 Bridge (Robot-Python interface, Pub/Sub)
