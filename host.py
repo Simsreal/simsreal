@@ -58,10 +58,7 @@ class Host:
         "imu_perceptor": ImuPerceptor,
         "joints_perceptor": JointPerceptor,
     }
-    Constraints: Dict[str, Constraint] = {
-        "speed_limit": SpeedLimit,
-        "physical_boundary": PhysicalBoundary,
-    }
+    Constraints: Dict[str, Constraint] = {}
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
     }
@@ -137,7 +134,7 @@ class Host:
                 else self.Perceptors[perceptor["name"]](device=self.device)
                 for perceptor in human_config["perceptors"]
             ]
-            if "perceptors" in human_config
+            if "perceptors" in human_config and human_config["perceptors"] is not None
             else []
         )
 
