@@ -58,9 +58,14 @@ class Host:
         "imu_perceptor": ImuPerceptor,
         "joints_perceptor": JointPerceptor,
     }
+    Cerebrum: Dict[str, torch.nn.Module] = {
+        "lstm": LSTM,
+        # "xlstm": xLSTMCerebrum,
+    }
     Constraints: Dict[str, Constraint] = {}
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
+        "suck_reflex": SuckReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
@@ -158,7 +163,7 @@ class Host:
             cerebrum = None
             memory = None
         else:
-            cerebrum = LSTM(
+            cerebrum = self.Cerebrum[human_config["memory"]["cerebrum"]](
                 modules=human_config["memory"]["modules"],
                 hidden_size=human_config["memory"]["hidden_size"],
                 num_layers=human_config["memory"]["num_layers"],

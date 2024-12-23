@@ -13,4 +13,3 @@ class DJointState:
     xpos: np.ndarray
     parent_geoms: List[str] | None = field(default=None)
     child_geoms: List[str] | None = field(default=None)
-    # contact: Any
