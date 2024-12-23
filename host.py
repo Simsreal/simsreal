@@ -48,6 +48,10 @@ class Host:
         "robot_joints": RobotJoints,
         "robot_imu": RobotImu,
         "robot_contact": RobotContact,
+        "robot_efc_force": RobotEfcForce,
+        "robot_geom_mapping": RobotGeomMapping,
+        "robot_geom_xmat": RobotGeomXmat,
+        "robot_geoms": RobotGeoms,
     }
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,

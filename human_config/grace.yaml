@@ -39,6 +39,14 @@ human:
       configuration: null
     - name: robot_contact
       configuration: null
+    - name: robot_efc_force
+      configuration: null
+    - name: robot_geom_mapping
+      configuration: null
+    - name: robot_geom_xmat
+      configuration: null
+    - name: robot_geoms
+      configuration: null
   planning: null
 
 constraints: null
