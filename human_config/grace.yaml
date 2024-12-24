@@ -20,8 +20,8 @@ human:
     - name: suck_reflex
       configuration: null
   memory:
-      cerebrum: lstm
-      memory_capacity: 100
+      cerebrum: xlstm
+      context_length: 100
       hidden_size: 100
       num_layers: 1
       modules:

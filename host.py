@@ -16,7 +16,7 @@ from human.constraints import *
 from human.context import *
 from human.humans import *
 from human.instincts import *
-from human.memory.cerebrum import LSTM
+from human.memory.cerebrum import LSTM, xLSTMCerebrum
 from human.neuro_symbol import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.receipes import *
@@ -60,7 +60,7 @@ class Host:
     }
     Cerebrum: Dict[str, torch.nn.Module] = {
         "lstm": LSTM,
-        # "xlstm": xLSTMCerebrum,
+        "xlstm": xLSTMCerebrum,
     }
     Constraints: Dict[str, Constraint] = {}
     Instincts: Dict[str, Instinct] = {
@@ -163,8 +163,10 @@ class Host:
             cerebrum = None
             memory = None
         else:
+            context_length = human_config["memory"]["context_length"]
             cerebrum = self.Cerebrum[human_config["memory"]["cerebrum"]](
                 modules=human_config["memory"]["modules"],
+                context_length=context_length,
                 hidden_size=human_config["memory"]["hidden_size"],
                 num_layers=human_config["memory"]["num_layers"],
                 perception_latent_size=perception_latent_size,
@@ -174,7 +176,7 @@ class Host:
 
             memory = Memory(
                 id=identifier,
-                capacity=human_config["memory"]["memory_capacity"],
+                context_length=context_length,
                 cerebrum=cerebrum,
             )
 
@@ -270,6 +272,8 @@ if __name__ == "__main__":
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
     os.environ["DOWNWARD_PATH"] = DOWNWARD_PATH
     os.environ["EXPERIMENT_DIR"] = os.path.join(EXPERIMENT_DIR, args.config)
+    os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
+    os.environ["CUDA_HOME"] = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1"
 
     os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
 
