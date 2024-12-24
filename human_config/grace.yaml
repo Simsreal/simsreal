@@ -50,6 +50,8 @@ human:
       configuration: null
     - name: robot_geoms
       configuration: null
+    - name: robot_ik
+      configuration: null
   planning: null
 
 constraints: null

@@ -10,7 +10,11 @@ class DJointState:
     qpos: np.ndarray
     qvel: np.ndarray
     effort: np.ndarray
+    qpos_adr: slice
+    qvel_adr: slice
+    effort_adr: slice
     xpos: np.ndarray
     axis: np.ndarray
+    offset: np.ndarray
     parent_geoms: List[str] | None = field(default=None)
     child_geoms: List[str] | None = field(default=None)

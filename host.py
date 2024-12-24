@@ -52,6 +52,7 @@ class Host:
         "robot_geom_mapping": RobotGeomMapping,
         "robot_geom_xmat": RobotGeomXmat,
         "robot_geoms": RobotGeoms,
+        "robot_ik": RobotIk,
     }
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,
@@ -167,8 +168,6 @@ class Host:
             cerebrum = self.Cerebrum[human_config["memory"]["cerebrum"]](
                 modules=human_config["memory"]["modules"],
                 context_length=context_length,
-                hidden_size=human_config["memory"]["hidden_size"],
-                num_layers=human_config["memory"]["num_layers"],
                 perception_latent_size=perception_latent_size,
                 perception_latent_names=perception_latent_names,
                 device=self.device,
