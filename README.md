@@ -36,10 +36,12 @@ chmod +x setup.sh
 *Optional*
 
 ### Install NVIDIA Isaac Sim
+**Not necessary** currently we use mujoco simulator.
 *Optional* Please install Isaac Sim version `4.2.0` for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.
 
 ### Install ROS2 Humble
+**Not necessary** currently we use mujoco simulator.
 *Optional* Please install ROS2 Humble for development.
 Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_ros.html) to install ROS2 Humble.
 
@@ -71,7 +73,6 @@ python simulators/launchers/mujoco/grace.py
 
 ### Simsreal
 ```bash
-# isaac-sim
 python host.py --config grace # or any other config under humanconfig/
 ```
 
