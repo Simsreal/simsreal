@@ -59,7 +59,7 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 
 ## Launch Simsreal
 ### Compute Server
-*Note* Only tested in WSL2 environment
+Computer server must be started before next steps. It is very powerful too to provide multi-processing for compute-intensive tasks.
 ```bash
 uvicorn compute_server.cpu.app:app --host 0.0.0.0 --port 8301 --workers 4
 ```
