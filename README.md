@@ -58,6 +58,12 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
+### Compute Server
+*Note* Only tested in WSL2 environment
+```bash
+uvicorn compute_server.cpu.app:app --host 0.0.0.0 --port 8301 --workers 4
+```
+
 ### Simulator
 ```bash
 python simulators/launchers/mujoco/grace.py
