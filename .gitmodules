@@ -19,3 +19,6 @@
 [submodule "simulators"]
 	path = simulators
 	url = git@github.com:Simsreal/simulators.git
+[submodule "compute_server"]
+	path = compute_server
+	url = git@github.com:Simsreal/compute_server.git
