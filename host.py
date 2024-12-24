@@ -67,6 +67,7 @@ class Host:
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
         "suck_reflex": SuckReflex,
+        "tonic_neck_reflex": TonicNeckReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
@@ -266,6 +267,7 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="grace")
+    parser.add_argument("-uc", "--unconsciousness", action="store_true")
 
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
@@ -273,6 +275,7 @@ if __name__ == "__main__":
     os.environ["EXPERIMENT_DIR"] = os.path.join(EXPERIMENT_DIR, args.config)
     os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
     os.environ["CUDA_HOME"] = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1"
+    os.environ["UNCONSCIOUSNESS"] = str(args.unconsciousness)
 
     os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
 

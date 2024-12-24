@@ -19,8 +19,10 @@ human:
       configuration: null
     - name: suck_reflex
       configuration: null
+    - name: tonic_neck_reflex
+      configuration: null
   memory:
-      cerebrum: xlstm
+      cerebrum: lstm
       context_length: 100
       hidden_size: 100
       num_layers: 1
