@@ -25,9 +25,15 @@ human:
       hidden_size: 100
       num_layers: 1
       modules:
-        - name: neck_joint_efforts
+        - name: neck_efforts
           configuration:
             output_size: 3
+        - name: left_arm_efforts
+          configuration:
+            output_size: 7
+        - name: right_arm_efforts
+          configuration:
+            output_size: 7
         - name: emotion
           configuration:
             output_size: 3
