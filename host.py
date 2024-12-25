@@ -268,6 +268,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="grace")
     parser.add_argument("-uc", "--unconsciousness", action="store_true")
+    parser.add_argument("-d", "--debug", action="store_true")
 
     args = parser.parse_args()
     os.environ["CONFIG_FILE"] = os.path.join(CONFIG_DIR, f"{args.config}.yaml")
@@ -276,6 +277,7 @@ if __name__ == "__main__":
     os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
     os.environ["CUDA_HOME"] = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1"
     os.environ["UNCONSCIOUSNESS"] = str(args.unconsciousness)
+    os.environ["DEBUG"] = str(args.debug)
 
     os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
 
