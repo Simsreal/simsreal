@@ -12,7 +12,7 @@ human:
     - name: joints_perceptor
       configuration:
         latent_dim: 32
-        n_joints: 22
+        n_joints: 25
         joints_context_name: robot_joints
   instincts:
     - name: rooting_reflex
@@ -30,12 +30,12 @@ human:
         - name: neck_efforts
           configuration:
             output_size: 3
-        - name: left_arm_efforts
-          configuration:
-            output_size: 7
-        - name: right_arm_efforts
-          configuration:
-            output_size: 7
+        # - name: left_arm_efforts
+        #   configuration:
+        #     output_size: 7
+        # - name: right_arm_efforts
+        #   configuration:
+        #     output_size: 7
         - name: emotion
           configuration:
             output_size: 3

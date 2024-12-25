@@ -69,7 +69,7 @@ uvicorn compute_server.cpu.app:app --host 0.0.0.0 --port 8301 --workers 4
 ### Simulator
 You must run simulator if you want to enable *consciousness*.
 ```bash
-python simulators/launchers/mujoco/grace.py
+python simulators/launchers/grace_simulator.py
 ```
 
 ### Simsreal

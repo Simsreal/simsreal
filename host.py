@@ -66,8 +66,8 @@ class Host:
     Constraints: Dict[str, Constraint] = {}
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
-        "suck_reflex": SuckReflex,
-        "tonic_neck_reflex": TonicNeckReflex,
+        # "suck_reflex": SuckReflex,
+        # "tonic_neck_reflex": TonicNeckReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
