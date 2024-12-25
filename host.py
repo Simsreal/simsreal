@@ -1,12 +1,12 @@
 # flake8: noqa: F403, E741, F405
 import gc
 import os
-from contextlib import asynccontextmanager
+import traceback
 from typing import Any, Dict, List, Tuple
 
+import httpx
 import torch
 import yaml
-from fastapi import FastAPI
 
 # from icecream import ic
 from prometheus_client import start_http_server
@@ -89,6 +89,7 @@ class Host:
     }
 
     def __init__(self):
+        self.client = httpx.Client()
         self.config_file = os.environ["CONFIG_FILE"]
         self.config = yaml.safe_load(open(self.config_file))
 
@@ -147,9 +148,13 @@ class Host:
 
         instincts = (
             [
-                self.Instincts[instinct["name"]](**instinct["configuration"])
+                self.Instincts[instinct["name"]](
+                    compute_client=self.client, **instinct["configuration"]
+                )
                 if instinct["configuration"] is not None
-                else self.Instincts[instinct["name"]]()
+                else self.Instincts[instinct["name"]](
+                    compute_client=self.client,
+                )
                 for instinct in human_config["instincts"]
             ]
             if "instincts" in human_config and human_config["instincts"] is not None
@@ -217,53 +222,19 @@ class Host:
         )
 
         self.human.manifest(self.env)
-        set_host(self)
 
     def start(self):
-        self.env.activate()
+        if os.environ["VERBOSE"] == "silent":
+            self.env.run_silent()
+        else:
+            self.env.run()
 
     def stop(self):
         self.env.deactivate()
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    host = Host()
-    host.start()
-    yield
-    host.stop()
-    gc.collect()
-
-
-app = FastAPI(lifespan=lifespan)
-
-
-@app.get("/")
-async def root():
-    return str(type(get_host()))
-
-
-@app.post("/stop")
-async def stop():
-    get_host().stop()
-
-
-HOST: Host = None
-
-
-def set_host(host: Host):
-    global HOST
-    HOST = host
-
-
-def get_host() -> Host:
-    return HOST
-
-
 if __name__ == "__main__":
     from argparse import ArgumentParser
-
-    import uvicorn
 
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="grace")
@@ -282,9 +253,13 @@ if __name__ == "__main__":
     os.environ["DEBUG"] = str(args.debug)
 
     os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
-
+    host = Host()
     try:
-        # start_http_server(8000)
-        uvicorn.run(app, host="0.0.0.0", port=8300)
-    except KeyboardInterrupt:
-        pass
+        host.start()
+    except Exception as e:
+        traceback.print_exc()
+        print(e)
+    finally:
+        host.stop()
+        host.client.close()
+        gc.collect()
