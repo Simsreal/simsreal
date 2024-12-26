@@ -17,6 +17,7 @@ from human.context import *
 from human.humans import *
 from human.instincts import *
 from human.memory.cerebrum import LSTM, xLSTMCerebrum
+from human.memory.emotions import MCTS, PolicyValueNet
 from human.neuro_symbol import *
 from human.neuro_symbol.downward_planner import DownwardPlanner
 from human.neuro_symbol.receipes import *
@@ -62,29 +63,24 @@ class Host:
         "lstm": LSTM,
         "xlstm": xLSTMCerebrum,
     }
+    Amygdala: Dict[str, torch.nn.Module] = {
+        "aji5emo": {
+            "mcts": MCTS,
+            "policy_value_net": PolicyValueNet,
+        },
+    }
     Constraints: Dict[str, Constraint] = {}
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
         "suck_reflex": SuckReflex,
         "tonic_neck_reflex": TonicNeckReflex,
+        "righting_reflex": RightingReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
     }
     Planners: Dict[str, Planner] = {
         "downward": DownwardPlanner,
-    }
-    Executors: Dict[str, Executor] = {
-        # "ros2": Ros2Executor,
-        # "mujoco": MujocoExecutor,
-    }
-    Ros2Publishers: Dict[str, Any] = {
-        # "/joint_command": HumanJointPublisher,
-    }
-    Ros2Subscribers: Dict[str, Any] = {
-        # "/joint_states": HumanJointSubscriber,
-        # "/camera/image_raw": HumanVisionSubscriber,
-        # "/imu": HumanImuSubscriber,
     }
 
     def __init__(self):
@@ -105,11 +101,6 @@ class Host:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         env_type = self.config["environment"]["env"]
-        if env_type == "isaac_sim":
-            import rclpy
-
-            rclpy.init(args=None)  # must be called before adding rclpy nodes
-
         human_config = self.config["human"]
         # for human_config in human_configs:
         identifier = human_config["name"]
@@ -167,9 +158,12 @@ class Host:
 
         if "memory" in human_config and human_config["memory"] is None:
             cerebrum = None
+            amygdala = None
             memory = None
         else:
             context_length = human_config["memory"]["context_length"]
+
+            # 大腦
             cerebrum = self.Cerebrum[human_config["memory"]["cerebrum"]](
                 modules=human_config["memory"]["modules"],
                 context_length=context_length,
@@ -178,10 +172,18 @@ class Host:
                 device=self.device,
             )
 
+            # 杏仁核
+            amygdala = self.Amygdala[human_config["memory"]["amygdala"]]
+            amygdala["n_instincts"] = len(instincts)
+            assert (
+                "emotion" in cerebrum.output_modules
+            ), "memory must have emotion module"
+
             memory = Memory(
                 id=identifier,
                 context_length=context_length,
                 cerebrum=cerebrum,
+                amygdala=amygdala,
             )
 
         plan_receipes = {}
