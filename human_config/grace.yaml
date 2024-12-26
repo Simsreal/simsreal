@@ -17,8 +17,8 @@ human:
   instincts:
     - name: rooting_reflex
       configuration: null
-    # - name: suck_reflex
-    #   configuration: null
+    - name: suck_reflex
+      configuration: null
     # - name: tonic_neck_reflex
     #   configuration: null
   memory:
@@ -30,12 +30,12 @@ human:
         - name: neck_efforts
           configuration:
             output_size: 3
-        # - name: left_arm_efforts
-        #   configuration:
-        #     output_size: 7
-        # - name: right_arm_efforts
-        #   configuration:
-        #     output_size: 7
+        - name: left_arm_efforts
+          configuration:
+            output_size: 3
+        - name: right_arm_efforts
+          configuration:
+            output_size: 3
         - name: emotion
           configuration:
             output_size: 3
@@ -45,6 +45,10 @@ human:
     - name: robot_depth_vision_640x480
       configuration: null
     - name: robot_joints
+      configuration: null
+    - name: robot_qpos
+      configuration: null
+    - name: robot_qvel
       configuration: null
     - name: robot_imu
       configuration: null
@@ -58,8 +62,8 @@ human:
       configuration: null
     - name: robot_geoms
       configuration: null
-    # - name: robot_ik
-    #   configuration: null
+    - name: robot_ik
+      configuration: null
   planning: null
 
 constraints: null

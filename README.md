@@ -63,7 +63,7 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 ### Compute Server
 You must run compute server before next steps if you want to enable *consciousness*.
 ```bash
-uvicorn compute_server.cpu.app:app --host 0.0.0.0 --port 8301 --workers 4
+uvicorn compute_server.app:app --host 0.0.0.0 --port 8301 --workers 4
 ```
 
 ### Simulator
@@ -74,8 +74,7 @@ python simulators/launchers/grace_simulator.py
 
 ### Simsreal
 ```bash
-python host.py --config grace # conscious
-python host.py --config grace -uc # unconscious
+python host.py --config grace
 ```
 
 To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).

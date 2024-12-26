@@ -46,6 +46,8 @@ class Host:
         "robot_vision_640x480": RobotVision640X480,
         "robot_depth_vision_640x480": RobotDepthVision640X480,
         "robot_joints": RobotJoints,
+        "robot_qpos": RobotQpos,
+        "robot_qvel": RobotQvel,
         "robot_imu": RobotImu,
         "robot_contact": RobotContact,
         "robot_efc_force": RobotEfcForce,
