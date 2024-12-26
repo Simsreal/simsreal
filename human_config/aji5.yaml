@@ -19,8 +19,8 @@ human:
       configuration: null
     - name: suck_reflex
       configuration: null
-    # - name: tonic_neck_reflex
-    #   configuration: null
+    - name: tonic_neck_reflex
+      configuration: null
   memory:
       cerebrum: lstm
       context_length: 100

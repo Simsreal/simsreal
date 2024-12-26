@@ -66,7 +66,7 @@ class Host:
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
         "suck_reflex": SuckReflex,
-        # "tonic_neck_reflex": TonicNeckReflex,
+        "tonic_neck_reflex": TonicNeckReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     os.environ["EXPERIMENT_DIR"] = os.path.join(EXPERIMENT_DIR, args.config)
     os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
     os.environ["CUDA_HOME"] = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1"
-    os.environ["UNCONSCIOUSNESS"] = str(args.unconsciousness)
+    os.environ["UNCONSCIOUS"] = str(args.unconsciousness)
     os.environ["VERBOSE"] = "silent" if args.silent else "verbose"
     os.environ["DEBUG"] = str(args.debug)
 
