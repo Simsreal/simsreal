@@ -32,7 +32,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-## Install Unity
+### Install Unity
 *Optional*
 
 ### Install NVIDIA Isaac Sim
@@ -69,12 +69,12 @@ uvicorn compute_server.app:app --host 0.0.0.0 --port 8301 --workers 4
 ### Simulator
 You must run simulator if you want to enable *consciousness*.
 ```bash
-python simulators/launchers/grace_simulator.py
+python simulators/launchers/aji5_simulator.py
 ```
 
 ### Simsreal
 ```bash
-python host.py --config grace
+python host.py --config adji5
 ```
 
 To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).

@@ -31,16 +31,13 @@ EXPERIMENT_DIR = "experiments"
 
 
 class Host:
-    # Simulators: Dict[str, Simulator] = {
-    #     "mujoco": GraceSimulatorMujoco,
-    # }
     Env: Dict[str, Environment] = {
         # "isaac_sim": IsaacSimEnv,
         "mujoco": MujocoEnv,
         "real_world": NotImplementedError,
     }
     Humans: Dict[str, Human] = {
-        "grace": Grace,
+        "aji5": Aji5,
     }
     Ctx: Dict[str, Context] = {
         "robot_vision_640x480": RobotVision640X480,
@@ -68,7 +65,7 @@ class Host:
     Constraints: Dict[str, Constraint] = {}
     Instincts: Dict[str, Instinct] = {
         "rooting_reflex": RootingReflex,
-        # "suck_reflex": SuckReflex,
+        "suck_reflex": SuckReflex,
         # "tonic_neck_reflex": TonicNeckReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
@@ -239,7 +236,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="grace")
+    parser.add_argument("--config", type=str, default="aji5")
     parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
     parser.add_argument("-s", "--silent", action="store_true")
