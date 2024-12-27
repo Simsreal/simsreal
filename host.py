@@ -189,6 +189,7 @@ class Host:
             amygdala = amygdala_config["mcts"](
                 policy_value_net=policy_value_net,
                 instinct_names=instinct_names,
+                device=self.device,
             )
 
             memory = Memory(
