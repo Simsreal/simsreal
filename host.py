@@ -151,6 +151,8 @@ class Host:
             else []
         )
 
+        instinct_names = [instinct.name for instinct in instincts]
+
         perception_latent_size = sum(
             [perceptor.latent_size for perceptor in perceptors]
         )
@@ -173,11 +175,21 @@ class Host:
             )
 
             # 杏仁核
-            amygdala = self.Amygdala[human_config["memory"]["amygdala"]]
-            amygdala["n_instincts"] = len(instincts)
-            assert (
-                "emotion" in cerebrum.output_modules
-            ), "memory must have emotion module"
+            amygdala_config = self.Amygdala[human_config["memory"]["amygdala"]]
+            if amygdala_config is not None:
+                assert (
+                    "emotion" in cerebrum.output_modules
+                ), "memory must have emotion module"
+
+            policy_value_net = amygdala_config["policy_value_net"](
+                state_dim=len(instincts),
+                instinct_dim=len(instincts),
+                hidden_dim=64,
+            )
+            amygdala = amygdala_config["mcts"](
+                policy_value_net=policy_value_net,
+                instinct_names=instinct_names,
+            )
 
             memory = Memory(
                 id=identifier,
