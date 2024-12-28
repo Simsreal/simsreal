@@ -21,8 +21,8 @@ human:
       configuration: null
     - name: tonic_neck_reflex
       configuration: null
-    # - name: neck_righting_reflex
-    #   configuration: null
+    - name: neck_righting_reflex
+      configuration: null
   memory:
       cerebrum: lstm
       amygdala: aji5emo
