@@ -39,6 +39,9 @@ human:
         - name: right_arm_efforts
           configuration:
             output_size: 3
+        - name: core_efforts
+          configuration:
+            output_size: 3
         - name: emotion
           configuration:
             output_size: 3
