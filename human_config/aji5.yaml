@@ -21,8 +21,8 @@ human:
       configuration: null
     - name: tonic_neck_reflex
       configuration: null
-    - name: neck_righting_reflex
-      configuration: null
+    # - name: neck_righting_reflex
+    #   configuration: null
   memory:
       cerebrum: lstm
       amygdala: aji5emo
@@ -30,18 +30,9 @@ human:
       hidden_size: 100
       num_layers: 1
       modules:
-        - name: neck_efforts
+        - name: joint_efforts
           configuration:
-            output_size: 3
-        - name: left_arm_efforts
-          configuration:
-            output_size: 3
-        - name: right_arm_efforts
-          configuration:
-            output_size: 3
-        - name: core_efforts
-          configuration:
-            output_size: 3
+            output_size: 25
         - name: emotion
           configuration:
             output_size: 3
@@ -49,6 +40,8 @@ human:
     - name: robot_vision_640x480
       configuration: null
     - name: robot_depth_vision_640x480
+      configuration: null
+    - name: robot_joint_mapping
       configuration: null
     - name: robot_joints
       configuration: null

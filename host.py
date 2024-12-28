@@ -43,6 +43,7 @@ class Host:
     Ctx: Dict[str, Context] = {
         "robot_vision_640x480": RobotVision640X480,
         "robot_depth_vision_640x480": RobotDepthVision640X480,
+        "robot_joint_mapping": RobotJointMapping,
         "robot_joints": RobotJoints,
         "robot_qpos": RobotQpos,
         "robot_qvel": RobotQvel,
@@ -175,22 +176,27 @@ class Host:
             )
 
             # 杏仁核
-            amygdala_config = self.Amygdala[human_config["memory"]["amygdala"]]
+            amygdala_config = (
+                self.Amygdala[human_config["memory"]["amygdala"]]
+                if human_config["memory"]["amygdala"] is not None
+                else None
+            )
+            amygdala = None
             if amygdala_config is not None:
                 assert (
                     "emotion" in cerebrum.output_modules
                 ), "memory must have emotion module"
 
-            policy_value_net = amygdala_config["policy_value_net"](
-                state_dim=len(instincts),
-                instinct_dim=len(instincts),
-                hidden_dim=64,
-            )
-            amygdala = amygdala_config["mcts"](
-                policy_value_net=policy_value_net,
-                instinct_names=instinct_names,
-                device=self.device,
-            )
+                policy_value_net = amygdala_config["policy_value_net"](
+                    state_dim=len(instincts),
+                    instinct_dim=len(instincts),
+                    hidden_dim=64,
+                )
+                amygdala = amygdala_config["mcts"](
+                    policy_value_net=policy_value_net,
+                    instinct_names=instinct_names,
+                    device=self.device,
+                )
 
             memory = Memory(
                 id=identifier,
