@@ -6,9 +6,7 @@
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
   - [Install development packages](#install-development-packages)
-  - [Install NVIDIA Isaac Sim](#install-nvidia-isaac-sim)
-  - [Install ROS2 Humble](#install-ros2-humble)
-  - [Install Prometheus and Grafana](#install-prometheus-and-grafana)
+  - [Install Unity](#install-unity)
 - [Contribution](#contribution)
 - [Launch Simsreal](#launch-simsreal)
 
@@ -33,20 +31,7 @@ chmod +x setup.sh
 ```
 
 ### Install Unity
-*Optional*
-
-### Install NVIDIA Isaac Sim
-**Not necessary** currently we use mujoco simulator.
-*Optional* Please install Isaac Sim version `4.2.0` for development.
-Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_workstation.html) to install Omniverse and Isaac Sim.
-
-### Install ROS2 Humble
-**Not necessary** currently we use mujoco simulator.
-*Optional* Please install ROS2 Humble for development.
-Follow [official documentation](https://docs.omniverse.nvidia.com/isaacsim/latest/installation/install_ros.html) to install ROS2 Humble.
-
-### Install Prometheus and Grafana
-*Optional* Prometheus and grafana are used to visualize intelligence's metrics and context. Refer to [docs/prometheus_grafana.md](docs/prometheus_grafana.md) for more details.
+*Optional* In progress of migration to Unity. Stay Tuned~!
 
 ### Environment Variables
 #### Windows
