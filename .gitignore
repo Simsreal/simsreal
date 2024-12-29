@@ -16,6 +16,7 @@ MJDATA.TXT
 MJMODEL.TXT
 snapshot*
 mujoco/
+IsaacLab/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

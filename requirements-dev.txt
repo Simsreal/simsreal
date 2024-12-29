@@ -9,7 +9,6 @@ uvicorn
 prometheus-client
 pddl
 streamlit
-rclpy
 loguru
 rich
 mujoco
