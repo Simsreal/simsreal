@@ -15,14 +15,14 @@ human:
         n_joints: 25
         joints_context_name: robot_joints
   instincts:
-    - name: rooting_reflex
-      configuration: null
+    # - name: rooting_reflex
+    #   configuration: null
     - name: suck_reflex
       configuration: null
-    - name: tonic_neck_reflex
-      configuration: null
-    - name: neck_righting_reflex
-      configuration: null
+    # - name: tonic_neck_reflex
+    #   configuration: null
+    # - name: neck_righting_reflex
+    #   configuration: null
   memory:
       cerebrum: lstm
       amygdala: aji5emo
@@ -61,8 +61,8 @@ human:
       configuration: null
     - name: robot_geoms
       configuration: null
-    - name: robot_ik
-      configuration: null
+    # - name: robot_ik
+    #   configuration: null
   planning: null
 
 constraints: null

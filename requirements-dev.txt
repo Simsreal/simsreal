@@ -16,3 +16,6 @@ dm_control
 uvicorn[standard]
 mlagents
 mlagents_envs
+httpx
+pyzmq
+xlstm

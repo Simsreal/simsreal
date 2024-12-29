@@ -56,7 +56,7 @@ uvicorn compute_server.app:app --host 0.0.0.0 --port 8301 --workers 4
 ### Simulator
 You must run simulator if you want to enable *consciousness*.
 ```bash
-python simulators/launchers/aji5_simulator.py
+python simulators/simulators/aji5_simulator.py
 ```
 **Notice: migrating to Unity**
 
