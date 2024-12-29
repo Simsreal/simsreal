@@ -58,6 +58,7 @@ You must run simulator if you want to enable *consciousness*.
 ```bash
 python simulators/launchers/aji5_simulator.py
 ```
+**Notice: migrating to Unity**
 
 ### Simsreal
 ```bash

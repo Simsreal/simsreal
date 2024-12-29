@@ -15,6 +15,7 @@ MUJOCO_LOG.TXT
 MJDATA.TXT
 MJMODEL.TXT
 snapshot*
+mujoco/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
