@@ -15,13 +15,11 @@ human:
         n_joints: 25
         joints_ctx: robot_joints
         joint_mapping_ctx: robot_joint_mapping
-    # - name: force_perceptor
-    #   configuration:
-    #     latent_dim: 32
-    #     # n_geoms: todo
-    #     contact_ctx: robot_contact
-    #     efc_force_ctx: robot_efc_force
-    #     geom_mapping_ctx: robot_geom_mapping
+    - name: force_perceptor
+      configuration:
+        latent_dim: 32
+        force_ctx: robot_force
+        body_geoms_ctx: robot_body_geoms
   instincts:
     - name: rooting_reflex
       configuration: null
