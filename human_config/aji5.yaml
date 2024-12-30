@@ -4,21 +4,29 @@ human:
     - name: photoreceptor
       configuration:
         latent_dim: 64
-        vision_context_name: robot_vision_640x480
+        vision_ctx: robot_vision_640x480
     - name: imu_perceptor
       configuration:
         latent_dim: 16
-        imu_context_name: robot_imu
+        imu_ctx: robot_imu
     - name: joints_perceptor
       configuration:
         latent_dim: 32
         n_joints: 25
-        joints_context_name: robot_joints
+        joints_ctx: robot_joints
+        joint_mapping_ctx: robot_joint_mapping
+    # - name: force_perceptor
+    #   configuration:
+    #     latent_dim: 32
+    #     # n_geoms: todo
+    #     contact_ctx: robot_contact
+    #     efc_force_ctx: robot_efc_force
+    #     geom_mapping_ctx: robot_geom_mapping
   instincts:
-    # - name: rooting_reflex
-    #   configuration: null
-    - name: suck_reflex
+    - name: rooting_reflex
       configuration: null
+    # - name: suck_reflex
+    #   configuration: null
     # - name: tonic_neck_reflex
     #   configuration: null
     # - name: neck_righting_reflex
@@ -53,6 +61,8 @@ human:
       configuration: null
     - name: robot_contact
       configuration: null
+    - name: robot_force
+      configuration: null
     - name: robot_efc_force
       configuration: null
     - name: robot_geom_mapping
@@ -61,8 +71,8 @@ human:
       configuration: null
     - name: robot_geoms
       configuration: null
-    # - name: robot_ik
-    #   configuration: null
+    - name: robot_body_geoms
+      configuration: null
   planning: null
 
 constraints: null

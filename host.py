@@ -53,12 +53,14 @@ class Host:
         "robot_geom_mapping": RobotGeomMapping,
         "robot_geom_xmat": RobotGeomXmat,
         "robot_geoms": RobotGeoms,
-        "robot_ik": RobotIk,
+        "robot_body_geoms": RobotBodyGeoms,
+        "robot_force": RobotForce,
     }
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,
         "imu_perceptor": ImuPerceptor,
         "joints_perceptor": JointPerceptor,
+        "force_perceptor": ForcePerceptor,
     }
     Cerebrum: Dict[str, torch.nn.Module] = {
         "lstm": LSTM,
