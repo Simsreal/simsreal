@@ -19,3 +19,7 @@ mlagents_envs
 httpx
 pyzmq
 xlstm
+torch
+matplotlib
+torchvision
+opencv-pthon

@@ -18,6 +18,7 @@ The easiest way to clone the repository is to create a ssh key and use it to clo
 export SSHKEY=~/.ssh/id_ed25519_second
 export GIT_SSH_COMMAND="ssh -i $SSHKEY"
 git clone git@github.com:Simsreal/simsreal.git
+cd simsreal
 git submodule update --init --recursive
 git pull --recurse-submodules
 ```
