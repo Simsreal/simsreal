@@ -71,6 +71,10 @@ human:
       configuration: null
     - name: robot_body_geoms
       configuration: null
+    - name: robot_sites
+      configuration: null
+    - name: robot_site_mapping
+      configuration: null
   planning: null
 
 constraints: null

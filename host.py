@@ -8,9 +8,6 @@ import httpx
 import torch
 import yaml
 
-# from icecream import ic
-from prometheus_client import start_http_server
-
 from environment import *
 from human.constraints import *
 from human.context import *
@@ -24,6 +21,10 @@ from human.neuro_symbol.receipes import *
 from human.perceptors import *
 from intelligence.memory import Memory
 
+# from icecream import ic
+# from prometheus_client import start_http_server
+
+
 # from simulators import *
 
 CONFIG_DIR = "human_config"
@@ -33,7 +34,6 @@ EXPERIMENT_DIR = "experiments"
 
 class Host:
     Env: Dict[str, Environment] = {
-        # "isaac_sim": IsaacSimEnv,
         "mujoco": MujocoEnv,
         "real_world": NotImplementedError,
     }
@@ -55,6 +55,8 @@ class Host:
         "robot_geoms": RobotGeoms,
         "robot_body_geoms": RobotBodyGeoms,
         "robot_force": RobotForce,
+        "robot_sites": RobotSites,
+        "robot_site_mapping": RobotSiteMapping,
     }
     Perceptors: Dict[str, Perceptor] = {
         "photoreceptor": Photoreceptor,
