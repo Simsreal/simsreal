@@ -1,6 +1,8 @@
 # flake8: noqa: F403, E741, F405
+import asyncio
 import gc
 import os
+import platform
 import traceback
 from typing import Any, Dict, List, Tuple
 
@@ -24,6 +26,9 @@ from intelligence.memory import Memory
 # from icecream import ic
 # from prometheus_client import start_http_server
 
+
+if platform.system() == "Windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # from simulators import *
 
@@ -90,7 +95,8 @@ class Host:
     }
 
     def __init__(self):
-        self.client = httpx.Client()
+        # self.client = httpx.Client(timeout=10.0)
+        self.client = httpx.AsyncClient()
         self.config_file = os.environ["CONFIG_FILE"]
         self.config = yaml.safe_load(open(self.config_file))
 
@@ -248,14 +254,14 @@ class Host:
 
         self.human.manifest(self.env)
 
-    def start(self):
+    async def start(self):
         if os.environ["VERBOSE"] == "silent":
-            self.env.run_silent()
+            await self.env.run_silent()
         else:
-            self.env.run()
+            await self.env.run()
 
-    def stop(self):
-        self.human.executor.shutdown(wait=True)
+    async def stop(self):
+        await self.client.aclose()
         self.env.deactivate()
 
 
@@ -281,11 +287,11 @@ if __name__ == "__main__":
     os.makedirs(os.environ["EXPERIMENT_DIR"], exist_ok=True)
     host = Host()
     try:
-        host.start()
+        asyncio.run(host.start())
     except Exception as e:
         traceback.print_exc()
         print(e)
     finally:
-        host.stop()
-        host.client.close()
+        asyncio.run(host.stop())
+        # host.client.close()
         gc.collect()
