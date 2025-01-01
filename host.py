@@ -80,6 +80,7 @@ class Host:
         "suck_reflex": SuckReflex,
         "tonic_neck_reflex": TonicNeckReflex,
         "neck_righting_reflex": NeckRightingReflex,
+        "stepping_reflex": SteppingReflex,
     }
     PlanReceipes: Dict[Tuple[str, str], NeuralPDDLReceipe] = {
         ("yx", "guided_yx"): Grid2DMovementReceipe,
