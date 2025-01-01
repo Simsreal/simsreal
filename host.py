@@ -255,6 +255,7 @@ class Host:
             self.env.run()
 
     def stop(self):
+        self.human.executor.shutdown(wait=True)
         self.env.deactivate()
 
 
