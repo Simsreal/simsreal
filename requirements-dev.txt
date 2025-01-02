@@ -22,4 +22,4 @@ xlstm
 torch
 matplotlib
 torchvision
-opencv-pthon
+opencv-python

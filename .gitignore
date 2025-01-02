@@ -16,6 +16,7 @@ MJDATA.TXT
 MJMODEL.TXT
 snapshot*
 mujoco/
+.vscode/
 IsaacLab/
 
 # Byte-compiled / optimized / DLL files
