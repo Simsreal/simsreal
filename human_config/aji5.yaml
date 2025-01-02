@@ -1,83 +1,67 @@
-human:
-  name: aji5
-  perceptors:
-    - name: photoreceptor
-      configuration:
-        latent_dim: 64
-        vision_ctx: robot_vision_640x480
-    - name: imu_perceptor
-      configuration:
-        latent_dim: 16
-        imu_ctx: robot_imu
-    - name: joints_perceptor
-      configuration:
-        latent_dim: 32
-        n_joints: 25
-        joints_ctx: robot_joints
-        joint_mapping_ctx: robot_joint_mapping
-    - name: force_perceptor
-      configuration:
-        latent_dim: 32
-        force_ctx: robot_force
-        body_geoms_ctx: robot_body_geoms
-  instincts:
-    - name: rooting_reflex
-      configuration: null
-    - name: suck_reflex
-      configuration: null
-    - name: tonic_neck_reflex
-      configuration: null
-    - name: neck_righting_reflex
-      configuration: null
-    - name: stepping_reflex
-      configuration: null
-  memory:
-      cerebrum: lstm
-      amygdala: aji5emo
-      context_length: 100
-      hidden_size: 100
-      num_layers: 1
-      modules:
-        - name: joint_efforts
-          configuration:
-            output_size: 25
-        - name: emotion
-          configuration:
-            output_size: 3
-  context:
-    - name: robot_vision_640x480
-      configuration: null
-    - name: robot_depth_vision_640x480
-      configuration: null
-    - name: robot_joint_mapping
-      configuration: null
-    - name: robot_joints
-      configuration: null
-    - name: robot_qpos
-      configuration: null
-    - name: robot_qvel
-      configuration: null
-    - name: robot_imu
-      configuration: null
-    - name: robot_contact
-      configuration: null
-    - name: robot_force
-      configuration: null
-    - name: robot_efc_force
-      configuration: null
-    - name: robot_geom_mapping
-      configuration: null
-    - name: robot_geom_xmat
-      configuration: null
-    - name: robot_geoms
-      configuration: null
-    - name: robot_body_geoms
-      configuration: null
-    - name: robot_sites
-      configuration: null
-    - name: robot_site_mapping
-      configuration: null
-  planning: null
+name: aji5
+
+perceptors:
+  - name: photoreceptor
+    configuration:
+      latent_dim: 64
+      vision_ctx: robot_vision_640x480
+  - name: imu_perceptor
+    configuration:
+      latent_dim: 16
+      imu_ctx: robot_imu
+  - name: joints_perceptor
+    configuration:
+      latent_dim: 32
+      n_joints: 25
+      joints_ctx: robot_joints
+      joint_mapping_ctx: robot_joint_mapping
+  - name: force_perceptor
+    configuration:
+      latent_dim: 32
+      force_ctx: robot_force
+      body_geoms_ctx: robot_body_geoms
+instincts:
+  # - name: rooting_reflex
+  #   configuration: null
+  # - name: suck_reflex
+  #   configuration: null
+  # - name: tonic_neck_reflex
+  #   configuration: null
+  # - name: neck_righting_reflex
+  #   configuration: null
+  - name: stepping_reflex
+    configuration: null
+memory:
+    cerebrum: lstm
+    amygdala: aji5emo
+    context_length: 100
+    hidden_size: 100
+    num_layers: 1
+    modules:
+      - name: joint_efforts
+        configuration:
+          output_size: 25
+      - name: emotion
+        configuration:
+          output_size: 3
+context:
+  - vision
+  # - depth_vision_640x480
+  # - joint_mapping
+  # - joints
+  # - qpos
+  # - qvel
+  # - imu
+  # - name: contact
+  # - force
+  # - efc_force
+  # - geom_mapping
+  # - geom_xmat
+  # - geoms
+  # - body_geoms
+  # - sites
+  # - site_mapping
+planning: null
 
 constraints: null
 
