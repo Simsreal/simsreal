@@ -9,6 +9,7 @@ import yaml
 from torch import multiprocessing as mp
 
 from human.wrappers import ContextWrapper
+from human.wrappers.brain_wrapper import brain_proc
 from human.wrappers.perceive_wrapper import eye_proc
 
 if platform.system() == "Windows":
@@ -24,21 +25,65 @@ class Hostv2:
         self.cfg_file = cfg_file
         self.exp_dir = exp_dir
         os.makedirs(self.exp_dir, exist_ok=True)
-        self.cfg = yaml.safe_load(open(self.cfg_file))
 
-        vision_tensor = torch.zeros((480, 640, 3), dtype=torch.float32)
+        cfg = yaml.safe_load(open(self.cfg_file))
+        ctx_cfg = cfg["ctx"]
+        perceivers_cfg = cfg["perceivers"]
+
+        vision_ctx_cfg = ctx_cfg["vision"]
+        vision_perceptor_cfg = perceivers_cfg["vision"]
+
+        # shm
+        vision_tensor = torch.zeros(
+            (
+                vision_ctx_cfg["height"],
+                vision_ctx_cfg["width"],
+                3,
+            ),
+            dtype=torch.float32,
+        )
         vision_tensor.share_memory_()
 
-        self.ctx_wrapper = ContextWrapper(
-            cfg=self.cfg,
+        # slice
+        brain_slices = {
+            "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
+        }
+        aggregated_latent = torch.zeros(
+            (
+                1,
+                vision_perceptor_cfg["emb_dim"],
+            ),
+            dtype=torch.float32,
+        )
+
+        # proc
+        brain_cfg = cfg["brain"]
+
+        self.ctx_wrapper: mp.Process = ContextWrapper(
+            cfg=cfg,
             vision_tensor=vision_tensor,
         )
 
-        perceive_proc = mp.Process(target=eye_proc, args=(vision_tensor,))
+        perceive_proc0 = mp.Process(
+            target=eye_proc,
+            args=(
+                vision_tensor,
+                brain_slices,
+                aggregated_latent,
+            ),
+        )
 
+        brain_proc0 = mp.Process(
+            target=brain_proc,
+            args=(
+                aggregated_latent,
+                brain_cfg["ctx_len"],
+            ),
+        )
         self.wrappers = [
             self.ctx_wrapper,
-            perceive_proc,
+            perceive_proc0,
+            brain_proc0,
         ]
 
     def run(self):
