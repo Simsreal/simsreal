@@ -25,6 +25,7 @@ class Hostv2:
         self.cfg_file = cfg_file
         self.exp_dir = exp_dir
         os.makedirs(self.exp_dir, exist_ok=True)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         cfg = yaml.safe_load(open(self.cfg_file))
         ctx_cfg = cfg["ctx"]
@@ -32,6 +33,10 @@ class Hostv2:
 
         vision_ctx_cfg = ctx_cfg["vision"]
         vision_perceptor_cfg = perceivers_cfg["vision"]
+
+        # queues
+        # drives_q = mp.Queue()
+        # emotions_q = mp.Queue()
 
         # shm
         vision_tensor = torch.zeros(
@@ -42,6 +47,7 @@ class Hostv2:
             ),
             dtype=torch.float32,
         )
+
         vision_tensor.share_memory_()
 
         # slice
@@ -59,10 +65,12 @@ class Hostv2:
         # proc
         brain_cfg = cfg["brain"]
 
-        self.ctx_wrapper: mp.Process = ContextWrapper(
+        ctx_wrapper: mp.Process = ContextWrapper(
             cfg=cfg,
             vision_tensor=vision_tensor,
         )
+
+        # neural_gate = NeuralGate()
 
         perceive_proc0 = mp.Process(
             target=eye_proc,
@@ -70,6 +78,7 @@ class Hostv2:
                 vision_tensor,
                 brain_slices,
                 aggregated_latent,
+                self.device,
             ),
         )
 
@@ -78,10 +87,14 @@ class Hostv2:
             args=(
                 aggregated_latent,
                 brain_cfg["ctx_len"],
+                brain_cfg["emb_dim"],
+                brain_cfg["hidden_dim"],
+                brain_cfg["n_layers"],
+                self.device,
             ),
         )
         self.wrappers = [
-            self.ctx_wrapper,
+            ctx_wrapper,
             perceive_proc0,
             brain_proc0,
         ]
@@ -100,6 +113,7 @@ class Hostv2:
 
 if __name__ == "__main__":
     print("available start methods:", mp.get_all_start_methods())
+    print(f"available CPU cores: {mp.cpu_count()}")
     mp.set_start_method("spawn", force=True)
     from argparse import ArgumentParser
 

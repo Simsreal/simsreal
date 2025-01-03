@@ -11,3 +11,6 @@ perceivers:
 
 brain:
   ctx_len: 10
+  emb_dim: 64
+  hidden_dim: 128
+  n_layers: 1
