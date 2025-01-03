@@ -2,15 +2,25 @@ name: aji5
 
 ctx:
   vision:
-    height: 480
-    width: 640
+    h: 480
+    w: 640
+  qpos:
+    dim: 31
+  qvel:
+    dim: 30
+
 
 perceivers:
   vision:
     emb_dim: 64
+
+intrinsics:
+  - rooting_reflex
 
 brain:
   ctx_len: 10
   emb_dim: 64
   hidden_dim: 128
   n_layers: 1
+
+geom_mapping:

@@ -8,9 +8,10 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.wrappers import ContextWrapper
-from human.wrappers.brain_wrapper import brain_proc
-from human.wrappers.perceive_wrapper import eye_proc
+from human.process.brain_wrapper import brain_proc
+from human.process.ctx_wrapper import ContextWrapper
+from human.process.neural_gate import NeuralGateKeeper
+from human.process.perceive_wrapper import eye_proc
 
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -29,26 +30,46 @@ class Hostv2:
 
         cfg = yaml.safe_load(open(self.cfg_file))
         ctx_cfg = cfg["ctx"]
+        intrinsics_cfg = cfg["intrinsics"]
         perceivers_cfg = cfg["perceivers"]
 
-        vision_ctx_cfg = ctx_cfg["vision"]
         vision_perceptor_cfg = perceivers_cfg["vision"]
+        brain_cfg = cfg["brain"]
 
         # queues
         # drives_q = mp.Queue()
         # emotions_q = mp.Queue()
 
         # shm
+        state_manager = mp.Manager()
         vision_tensor = torch.zeros(
             (
-                vision_ctx_cfg["height"],
-                vision_ctx_cfg["width"],
+                ctx_cfg["vision"]["h"],
+                ctx_cfg["vision"]["w"],
                 3,
             ),
             dtype=torch.float32,
         )
 
+        qpos_tensor = torch.zeros(
+            ctx_cfg["qpos"]["dim"],
+            dtype=torch.float32,
+        )
+
+        qvel_tensor = torch.zeros(
+            ctx_cfg["qvel"]["dim"],
+            dtype=torch.float32,
+        )
+
+        neural_gate = torch.zeros(
+            len(intrinsics_cfg),
+            dtype=torch.float32,
+        )
+
         vision_tensor.share_memory_()
+        qpos_tensor.share_memory_()
+        qvel_tensor.share_memory_()
+        neural_gate.share_memory_()
 
         # slice
         brain_slices = {
@@ -63,14 +84,20 @@ class Hostv2:
         )
 
         # proc
-        brain_cfg = cfg["brain"]
-
-        ctx_wrapper: mp.Process = ContextWrapper(
+        ctx_wrapper0 = ContextWrapper(
             cfg=cfg,
             vision_tensor=vision_tensor,
+            qpos_tensor=qpos_tensor,
+            qvel_tensor=qvel_tensor,
+            device=self.device,
+            state_manager=state_manager,
         )
 
-        # neural_gate = NeuralGate()
+        neural_gate0 = NeuralGateKeeper(
+            cfg=cfg,
+            device=self.device,
+            neural_gate=neural_gate,
+        )
 
         perceive_proc0 = mp.Process(
             target=eye_proc,
@@ -93,10 +120,14 @@ class Hostv2:
                 self.device,
             ),
         )
+
+        # commander0 = mp.Process()
+
         self.wrappers = [
-            ctx_wrapper,
+            ctx_wrapper0,
             perceive_proc0,
             brain_proc0,
+            neural_gate0,
         ]
 
     def run(self):
