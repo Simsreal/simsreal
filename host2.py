@@ -6,11 +6,12 @@ import traceback
 
 import torch
 import yaml
+from tensordict import TensorDict
 from torch import multiprocessing as mp
 
 from human.process.brain_wrapper import brain_proc
-from human.process.ctx_wrapper import ContextWrapper
-from human.process.neural_gate import NeuralGateKeeper
+from human.process.ctx_wrapper import ctx_proc
+from human.process.neural_gate import neural_gate_proc
 from human.process.perceive_wrapper import eye_proc
 
 if platform.system() == "Windows":
@@ -36,12 +37,7 @@ class Hostv2:
         vision_perceptor_cfg = perceivers_cfg["vision"]
         brain_cfg = cfg["brain"]
 
-        # queues
-        # drives_q = mp.Queue()
-        # emotions_q = mp.Queue()
-
         # shm
-        state_manager = mp.Manager()
         vision_tensor = torch.zeros(
             (
                 ctx_cfg["vision"]["h"],
@@ -66,6 +62,7 @@ class Hostv2:
             dtype=torch.float32,
         )
 
+        ref = self.initialize_ref()
         vision_tensor.share_memory_()
         qpos_tensor.share_memory_()
         qvel_tensor.share_memory_()
@@ -84,19 +81,23 @@ class Hostv2:
         )
 
         # proc
-        ctx_wrapper0 = ContextWrapper(
-            cfg=cfg,
-            vision_tensor=vision_tensor,
-            qpos_tensor=qpos_tensor,
-            qvel_tensor=qvel_tensor,
-            device=self.device,
-            state_manager=state_manager,
+        ctx_proc0 = mp.Process(
+            target=ctx_proc,
+            args=(
+                cfg,
+                vision_tensor,
+                qpos_tensor,
+                qvel_tensor,
+            ),
         )
 
-        neural_gate0 = NeuralGateKeeper(
-            cfg=cfg,
-            device=self.device,
-            neural_gate=neural_gate,
+        neural_gate0 = mp.Process(
+            target=neural_gate_proc,
+            args=(
+                cfg,
+                neural_gate,
+                ref,
+            ),
         )
 
         perceive_proc0 = mp.Process(
@@ -121,14 +122,43 @@ class Hostv2:
             ),
         )
 
-        # commander0 = mp.Process()
-
         self.wrappers = [
-            ctx_wrapper0,
+            ctx_proc0,
             perceive_proc0,
             brain_proc0,
             neural_gate0,
         ]
+
+    def initialize_ref(
+        self,
+        max_string_len=100,
+    ):
+        def string_to_tensor(x):
+            return torch.tensor(
+                [ord(c) for c in x],
+                dtype=torch.uint8,
+            )
+
+        import zmq
+
+        zmq_tmp_ctx = zmq.Context()
+        sub = zmq_tmp_ctx.socket(zmq.SUB)
+        sub.connect("tcp://127.0.0.1:5556")
+        sub.setsockopt_string(zmq.SUBSCRIBE, "")
+        msg = sub.recv_pyobj()["aji6"]
+        sub.close()
+        zmq_tmp_ctx.term()
+
+        geom_id2name = TensorDict(
+            **{
+                str(geom_id): string_to_tensor(geom_name)
+                for geom_id, geom_name in msg["geom_mapping"]["geom_id_to_name"].items()
+            }
+        )
+        geom_id2name.share_memory_()
+        return {
+            "geom_id2name": geom_id2name,
+        }
 
     def run(self):
         for wrapper in self.wrappers:
