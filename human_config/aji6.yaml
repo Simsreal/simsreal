@@ -1,4 +1,4 @@
-name: aji5
+name: aji6
 
 ctx:
   vision:
@@ -8,7 +8,8 @@ ctx:
     dim: 31
   qvel:
     dim: 30
-
+  contact:
+    dim: 7
 
 perceivers:
   vision:

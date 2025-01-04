@@ -38,6 +38,7 @@ class Hostv2:
         brain_cfg = cfg["brain"]
 
         # shm
+        robot_info = self.initialize_robot_info()
         vision_tensor = torch.zeros(
             (
                 ctx_cfg["vision"]["h"],
@@ -57,22 +58,18 @@ class Hostv2:
             dtype=torch.float32,
         )
 
+        contact_tensor = torch.zeros(
+            (len(robot_info["n_body_geoms"]), ctx_cfg["contact"]["dim"])
+        )
+        print(contact_tensor)
+        exit()
+
         neural_gate = torch.zeros(
             len(intrinsics_cfg),
             dtype=torch.float32,
         )
 
-        ref = self.initialize_ref()
-        vision_tensor.share_memory_()
-        qpos_tensor.share_memory_()
-        qvel_tensor.share_memory_()
-        neural_gate.share_memory_()
-
-        # slice
-        brain_slices = {
-            "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
-        }
-        aggregated_latent = torch.zeros(
+        latent = torch.zeros(
             (
                 1,
                 vision_perceptor_cfg["emb_dim"],
@@ -80,32 +77,45 @@ class Hostv2:
             dtype=torch.float32,
         )
 
+        latent.share_memory_()
+        vision_tensor.share_memory_()
+        qpos_tensor.share_memory_()
+        qvel_tensor.share_memory_()
+        neural_gate.share_memory_()
+
+        shm = {
+            "vision": vision_tensor,
+            "qpos": qpos_tensor,
+            "qvel": qvel_tensor,
+            "neural_gate": neural_gate,
+            "latent": latent,
+            "robot_info": robot_info,
+        }
+
+        # slice
+        brain_slices = {
+            "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
+        }
+
         # proc
         ctx_proc0 = mp.Process(
             target=ctx_proc,
-            args=(
-                cfg,
-                vision_tensor,
-                qpos_tensor,
-                qvel_tensor,
-            ),
+            args=(cfg, shm),
         )
 
         neural_gate0 = mp.Process(
             target=neural_gate_proc,
             args=(
                 cfg,
-                neural_gate,
-                ref,
+                shm,
             ),
         )
 
         perceive_proc0 = mp.Process(
             target=eye_proc,
             args=(
-                vision_tensor,
+                shm,
                 brain_slices,
-                aggregated_latent,
                 self.device,
             ),
         )
@@ -113,11 +123,8 @@ class Hostv2:
         brain_proc0 = mp.Process(
             target=brain_proc,
             args=(
-                aggregated_latent,
-                brain_cfg["ctx_len"],
-                brain_cfg["emb_dim"],
-                brain_cfg["hidden_dim"],
-                brain_cfg["n_layers"],
+                shm,
+                brain_cfg,
                 self.device,
             ),
         )
@@ -129,7 +136,7 @@ class Hostv2:
             neural_gate0,
         ]
 
-    def initialize_ref(
+    def initialize_robot_info(
         self,
         max_string_len=100,
     ):
@@ -149,18 +156,30 @@ class Hostv2:
         sub.close()
         zmq_tmp_ctx.term()
 
+        robot_geoms = msg["body_geoms"]
+        # geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
+        geoms_name2id = msg["geom_mapping"]["geom_name_to_id"]
+
         geom_id2name = TensorDict(
             **{
-                str(geom_id): string_to_tensor(geom_name)
-                for geom_id, geom_name in msg["geom_mapping"]["geom_id_to_name"].items()
+                str(geoms_name2id[geom_name]): string_to_tensor(geom_name)
+                for geom_name in robot_geoms
             }
         )
-        geom_id2name.share_memory_()
+        geom_name2id = TensorDict(
+            **{
+                geom_name: torch.tensor([geoms_name2id[geom_name]], dtype=torch.uint8)
+                for geom_name in robot_geoms
+            }
+        )
         return {
             "geom_id2name": geom_id2name,
+            "geom_name2id": geom_name2id,
+            "n_body_geoms": len(robot_geoms),
         }
 
     def run(self):
+        print("starting")
         for wrapper in self.wrappers:
             wrapper.start()
 
@@ -179,7 +198,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="human_config/aji5.yaml")
+    parser.add_argument("--config", type=str, default="human_config/aji6.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
     parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
