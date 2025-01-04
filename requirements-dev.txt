@@ -23,4 +23,3 @@ torch
 matplotlib
 torchvision
 opencv-python
-tensordict

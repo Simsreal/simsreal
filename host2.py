@@ -6,7 +6,6 @@ import traceback
 
 import torch
 import yaml
-from tensordict import TensorDict
 from torch import multiprocessing as mp
 
 from human.process.brain_wrapper import brain_proc
@@ -27,19 +26,20 @@ class Hostv2:
         self.cfg_file = cfg_file
         self.exp_dir = exp_dir
         os.makedirs(self.exp_dir, exist_ok=True)
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
         cfg = yaml.safe_load(open(self.cfg_file))
         ctx_cfg = cfg["ctx"]
-        intrinsics_cfg = cfg["intrinsics"]
         perceivers_cfg = cfg["perceivers"]
+        intrinsics = cfg["intrinsics"]
+        intrinsics_map = {intrinsics[i]: i for i in range(len(intrinsics))}
 
         vision_perceptor_cfg = perceivers_cfg["vision"]
         brain_cfg = cfg["brain"]
 
         # shm
         robot_info = self.initialize_robot_info()
-        vision_tensor = torch.zeros(
+        vision = torch.zeros(
             (
                 ctx_cfg["vision"]["h"],
                 ctx_cfg["vision"]["w"],
@@ -48,24 +48,22 @@ class Hostv2:
             dtype=torch.float32,
         )
 
-        qpos_tensor = torch.zeros(
+        qpos = torch.zeros(
             ctx_cfg["qpos"]["dim"],
             dtype=torch.float32,
         )
 
-        qvel_tensor = torch.zeros(
+        qvel = torch.zeros(
             ctx_cfg["qvel"]["dim"],
             dtype=torch.float32,
         )
 
-        contact_tensor = torch.zeros(
-            (len(robot_info["n_body_geoms"]), ctx_cfg["contact"]["dim"])
+        contact = torch.zeros(
+            (robot_info["n_geoms"], ctx_cfg["contact"]["dim"]), dtype=torch.float32
         )
-        print(contact_tensor)
-        exit()
 
         neural_gate = torch.zeros(
-            len(intrinsics_cfg),
+            len(intrinsics),
             dtype=torch.float32,
         )
 
@@ -78,17 +76,20 @@ class Hostv2:
         )
 
         latent.share_memory_()
-        vision_tensor.share_memory_()
-        qpos_tensor.share_memory_()
-        qvel_tensor.share_memory_()
+        vision.share_memory_()
+        contact.share_memory_()
+        qpos.share_memory_()
+        qvel.share_memory_()
         neural_gate.share_memory_()
 
         shm = {
-            "vision": vision_tensor,
-            "qpos": qpos_tensor,
-            "qvel": qvel_tensor,
+            "vision": vision,
+            "qpos": qpos,
+            "qvel": qvel,
+            "contact": contact,
             "neural_gate": neural_gate,
             "latent": latent,
+            "intrinsics": intrinsics_map,
             "robot_info": robot_info,
         }
 
@@ -100,15 +101,12 @@ class Hostv2:
         # proc
         ctx_proc0 = mp.Process(
             target=ctx_proc,
-            args=(cfg, shm),
+            args=(shm, cfg),
         )
 
         neural_gate0 = mp.Process(
             target=neural_gate_proc,
-            args=(
-                cfg,
-                shm,
-            ),
+            args=(shm, cfg),
         )
 
         perceive_proc0 = mp.Process(
@@ -116,7 +114,7 @@ class Hostv2:
             args=(
                 shm,
                 brain_slices,
-                self.device,
+                device,
             ),
         )
 
@@ -125,7 +123,7 @@ class Hostv2:
             args=(
                 shm,
                 brain_cfg,
-                self.device,
+                device,
             ),
         )
 
@@ -157,25 +155,16 @@ class Hostv2:
         zmq_tmp_ctx.term()
 
         robot_geoms = msg["body_geoms"]
-        # geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
+        geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
         geoms_name2id = msg["geom_mapping"]["geom_name_to_id"]
+        n_geoms = len(geoms_name2id)
+        n_body_geoms = len(robot_geoms)
 
-        geom_id2name = TensorDict(
-            **{
-                str(geoms_name2id[geom_name]): string_to_tensor(geom_name)
-                for geom_name in robot_geoms
-            }
-        )
-        geom_name2id = TensorDict(
-            **{
-                geom_name: torch.tensor([geoms_name2id[geom_name]], dtype=torch.uint8)
-                for geom_name in robot_geoms
-            }
-        )
         return {
-            "geom_id2name": geom_id2name,
-            "geom_name2id": geom_name2id,
-            "n_body_geoms": len(robot_geoms),
+            "geom_id2name": geoms_id2name,
+            "geom_name2id": geoms_name2id,
+            "n_geoms": n_geoms,
+            "n_body_geoms": n_body_geoms,
         }
 
     def run(self):
