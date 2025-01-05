@@ -4,9 +4,6 @@
 [submodule "utilities"]
 	path = utilities
 	url = git@github.com:Simsreal/utilities.git
-[submodule "web"]
-	path = web
-	url = git@github.com:Simsreal/web.git
 [submodule "environment"]
 	path = environment
 	url = git@github.com:Simsreal/environment.git
