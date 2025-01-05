@@ -26,4 +26,8 @@ brain:
   n_xlstm_blocks: 4
   n_actuators: 24
 
+emotion:
+  module: mcts
+  pad_dim: 3
+
 geom_mapping:
