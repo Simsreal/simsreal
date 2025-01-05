@@ -1,20 +1,15 @@
-import asyncio
 import gc
 import os
-import platform
 import traceback
 
 import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.process.brain_wrapper import brain_proc
-from human.process.ctx_wrapper import ctx_proc
+from human.process.brain import brain_proc
+from human.process.ctx import ctx_proc
 from human.process.neural_gate import neural_gate_proc
-from human.process.perceive_wrapper import eye_proc
-
-if platform.system() == "Windows":
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+from human.process.perceive import eye_proc
 
 
 class Hostv2:
@@ -32,10 +27,18 @@ class Hostv2:
         ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
-        intrinsics_map = {intrinsics[i]: i for i in range(len(intrinsics))}
+        gate_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
 
         vision_perceptor_cfg = perceivers_cfg["vision"]
         brain_cfg = cfg["brain"]
+
+        # queues
+        drives_q = mp.Queue()
+
+        queues = {
+            "drives_q": drives_q,
+        }
+        queues
 
         # shm
         robot_info = self.initialize_robot_info()
@@ -75,12 +78,12 @@ class Hostv2:
             dtype=torch.float32,
         )
 
-        latent.share_memory_()
         vision.share_memory_()
         contact.share_memory_()
         qpos.share_memory_()
         qvel.share_memory_()
         neural_gate.share_memory_()
+        latent.share_memory_()
 
         shm = {
             "vision": vision,
@@ -89,7 +92,7 @@ class Hostv2:
             "contact": contact,
             "neural_gate": neural_gate,
             "latent": latent,
-            "intrinsics": intrinsics_map,
+            "gate_indices": gate_indices,
             "robot_info": robot_info,
         }
 
@@ -127,25 +130,17 @@ class Hostv2:
             ),
         )
 
-        self.wrappers = [
+        self.processes = [
             ctx_proc0,
             perceive_proc0,
             brain_proc0,
             neural_gate0,
         ]
 
-    def initialize_robot_info(
-        self,
-        max_string_len=100,
-    ):
-        def string_to_tensor(x):
-            return torch.tensor(
-                [ord(c) for c in x],
-                dtype=torch.uint8,
-            )
-
+    def initialize_robot_info(self):
         import zmq
 
+        print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         sub.connect("tcp://127.0.0.1:5556")
@@ -169,11 +164,11 @@ class Hostv2:
 
     def run(self):
         print("starting")
-        for wrapper in self.wrappers:
+        for wrapper in self.processes:
             wrapper.start()
 
     def stop(self):
-        for wrapper in self.wrappers:
+        for wrapper in self.processes:
             wrapper.join()
 
         gc.collect()

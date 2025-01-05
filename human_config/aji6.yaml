@@ -23,5 +23,6 @@ brain:
   emb_dim: 64
   hidden_dim: 128
   n_layers: 1
+  n_actuators: 24
 
 geom_mapping:
