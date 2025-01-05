@@ -27,18 +27,19 @@ class Hostv2:
         ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
+        emotion_cfg = cfg["emotion"]
         gate_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
 
         vision_perceptor_cfg = perceivers_cfg["vision"]
         brain_cfg = cfg["brain"]
 
         # queues
-        drives_q = mp.Queue()
+        # drives_q = mp.Queue()
 
-        queues = {
-            "drives_q": drives_q,
-        }
-        queues
+        # queues = {
+        #     "drives_q": drives_q,
+        # }
+        # queues
 
         # shm
         robot_info = self.initialize_robot_info()
@@ -78,12 +79,18 @@ class Hostv2:
             dtype=torch.float32,
         )
 
+        torques = torch.zeros((1, brain_cfg["n_actuators"]), dtype=torch.float32)
+
+        emotions = torch.zeros((1, emotion_cfg["pad_dim"]), dtype=torch.float32)
+
         vision.share_memory_()
         contact.share_memory_()
         qpos.share_memory_()
         qvel.share_memory_()
         neural_gate.share_memory_()
         latent.share_memory_()
+        torques.share_memory_()
+        emotions.share_memory_()
 
         shm = {
             "vision": vision,
@@ -92,6 +99,7 @@ class Hostv2:
             "contact": contact,
             "neural_gate": neural_gate,
             "latent": latent,
+            "torques": torques,
             "gate_indices": gate_indices,
             "robot_info": robot_info,
         }
