@@ -67,7 +67,10 @@ class Hostv2:
         )
 
         neural_gate = torch.zeros(
-            len(intrinsics),
+            (
+                2,
+                len(intrinsics),
+            ),
             dtype=torch.float32,
         )
 
@@ -100,6 +103,7 @@ class Hostv2:
             "neural_gate": neural_gate,
             "latent": latent,
             "torques": torques,
+            "emotions": emotions,
             "gate_indices": gate_indices,
             "robot_info": robot_info,
         }
@@ -119,7 +123,11 @@ class Hostv2:
 
         neural_gate0 = mp.Process(
             target=neural_gate_proc,
-            args=(shm, cfg),
+            args=(
+                shm,
+                cfg,
+                device,
+            ),
         )
 
         perceive_proc0 = mp.Process(
