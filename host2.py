@@ -102,6 +102,8 @@ class Hostv2:
         }
 
         # proc
+        brain_cfg["latent_size"] = latent.shape[-1]
+
         ctx_proc0 = mp.Process(
             target=ctx_proc,
             args=(shm, cfg),
