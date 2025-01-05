@@ -6,6 +6,7 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
+from human.memory.perceive.retina import Retina
 from human.process.brain import brain_proc
 from human.process.ctx import ctx_proc
 from human.process.neural_gate import neural_gate_proc
@@ -42,6 +43,11 @@ class Hostv2:
         # queues
 
         # memory
+        retina = Retina(emb_dim=perceivers_cfg["vision"]["emb_dim"]).to(device)
+
+        retina.share_memory()
+
+        memory = {"retina": retina}
 
         # shm
         robot_info = self.initialize_robot_info()
@@ -136,7 +142,7 @@ class Hostv2:
             target=perceive_proc,
             args=(
                 shm,
-                perceivers_cfg,
+                memory,
             ),
         )
 
