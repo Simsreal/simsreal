@@ -9,7 +9,7 @@ from torch import multiprocessing as mp
 from human.process.brain import brain_proc
 from human.process.ctx import ctx_proc
 from human.process.neural_gate import neural_gate_proc
-from human.process.perceive import eye_proc
+from human.process.perceive import perceive_proc
 
 
 class Hostv2:
@@ -41,8 +41,14 @@ class Hostv2:
         # }
         # queues
 
+        # memory
+
         # shm
         robot_info = self.initialize_robot_info()
+        brain_slices = {
+            "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
+        }
+
         vision = torch.zeros(
             (
                 ctx_cfg["vision"]["h"],
@@ -106,11 +112,8 @@ class Hostv2:
             "emotions": emotions,
             "gate_indices": gate_indices,
             "robot_info": robot_info,
-        }
-
-        # slice
-        brain_slices = {
-            "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
+            "brain_slices": brain_slices,
+            "device": device,
         }
 
         # proc
@@ -126,16 +129,14 @@ class Hostv2:
             args=(
                 shm,
                 cfg,
-                device,
             ),
         )
 
         perceive_proc0 = mp.Process(
-            target=eye_proc,
+            target=perceive_proc,
             args=(
                 shm,
-                brain_slices,
-                device,
+                perceivers_cfg,
             ),
         )
 
@@ -144,7 +145,6 @@ class Hostv2:
             args=(
                 shm,
                 brain_cfg,
-                device,
             ),
         )
 

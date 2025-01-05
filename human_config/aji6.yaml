@@ -29,5 +29,3 @@ brain:
 emotion:
   module: mcts
   pad_dim: 3
-
-geom_mapping:
