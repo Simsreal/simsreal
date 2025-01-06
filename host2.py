@@ -9,6 +9,7 @@ from torch import multiprocessing as mp
 from human.memory.brain.lstm import LSTM
 from human.memory.perceive.retina import Retina
 from human.process.brain import brain_proc
+from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
 from human.process.neural_gate import neural_gate_proc
 from human.process.perceive import perceive_proc
@@ -26,6 +27,8 @@ class Hostv2:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         cfg = yaml.safe_load(open(self.cfg_file))
+        self.cfg = cfg
+        robot_cfg = cfg["robot"]
         ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
@@ -41,10 +44,9 @@ class Hostv2:
         # queues = {
         #     "drives_q": drives_q,
         # }
-        # queues
 
         # shm
-        robot_info = self.initialize_robot_info()
+        robot_info = self.initialize_robot_info(robot_cfg)
         brain_slices = {
             "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
         }
@@ -73,10 +75,7 @@ class Hostv2:
         )
 
         neural_gate = torch.zeros(
-            (
-                2,
-                len(intrinsics),
-            ),
+            (len(intrinsics),),
             dtype=torch.float32,
         )
 
@@ -164,22 +163,34 @@ class Hostv2:
             ),
         )
 
+        commander_proc0 = mp.Process(
+            target=commander_proc,
+            args=(
+                shm,
+                cfg,
+            ),
+        )
+
         self.processes = [
             ctx_proc0,
             perceive_proc0,
             brain_proc0,
             neural_gate0,
+            commander_proc0,
         ]
 
-    def initialize_robot_info(self):
+    def initialize_robot_info(self, robot_cfg):
         import zmq
 
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
-        sub.connect("tcp://127.0.0.1:5556")
+        robot_sub_cfg = robot_cfg["sub"]
+        sub.connect(
+            f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
+        )
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        msg = sub.recv_pyobj()["aji6"]
+        msg = sub.recv_pyobj()[self.cfg["name"]]
         sub.close()
         zmq_tmp_ctx.term()
 

@@ -1,5 +1,15 @@
 name: aji6
 
+robot:
+  sub:
+    protocol: tcp
+    ip: 127.0.0.1
+    port: 5556
+  pub:
+    protocol: tcp
+    ip: 127.0.0.1
+    port: 5557
+
 ctx:
   vision:
     h: 480
@@ -29,3 +39,8 @@ brain:
 emotion:
   module: mcts
   pad_dim: 3
+  decay_rate: 0.9
+  max_visits: 10000
+  min_visits: 1000
+  decay_period: 6000
+  prune_period: 6000
