@@ -11,6 +11,7 @@ from human.memory.perceive.retina import Retina
 from human.process.brain import brain_proc
 from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
+from human.process.motivator import motivator_proc
 from human.process.neural_gate import neural_gate_proc
 from human.process.perceive import perceive_proc
 
@@ -39,11 +40,13 @@ class Hostv2:
         brain_cfg = cfg["brain"]
 
         # queues
-        # drives_q = mp.Queue()
+        drives_q = mp.Queue()
+        emotions_q = mp.Queue()
 
-        # queues = {
-        #     "drives_q": drives_q,
-        # }
+        queues = {
+            "drives_q": drives_q,
+            "emotions_q": emotions_q,
+        }
 
         # shm
         robot_info = self.initialize_robot_info(robot_cfg)
@@ -154,11 +157,21 @@ class Hostv2:
             ),
         )
 
+        motivator_proc0 = mp.Process(
+            target=motivator_proc,
+            args=(
+                shm,
+                queues,
+                cfg,
+            ),
+        )
+
         brain_proc0 = mp.Process(
             target=brain_proc,
             args=(
                 shm,
                 memory,
+                queues,
                 brain_cfg,
             ),
         )
@@ -174,6 +187,7 @@ class Hostv2:
         self.processes = [
             ctx_proc0,
             perceive_proc0,
+            motivator_proc0,
             brain_proc0,
             neural_gate0,
             commander_proc0,
@@ -197,6 +211,8 @@ class Hostv2:
         robot_geoms = msg["body_geoms"]
         geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
         geoms_name2id = msg["geom_mapping"]["geom_name_to_id"]
+        joints_id2name = msg["joint_mapping"]["joint_id_to_name"]
+        joints_name2id = msg["joint_mapping"]["joint_name_to_id"]
         n_geoms = len(geoms_name2id)
         n_body_geoms = len(robot_geoms)
 
@@ -205,6 +221,8 @@ class Hostv2:
             "geom_name2id": geoms_name2id,
             "n_geoms": n_geoms,
             "n_body_geoms": n_body_geoms,
+            "joint_id2name": joints_id2name,
+            "joint_name2id": joints_name2id,
         }
 
     def run(self):
