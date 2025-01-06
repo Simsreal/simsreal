@@ -216,7 +216,7 @@ class Hostv2:
         n_geoms = len(geoms_name2id)
         n_body_geoms = len(robot_geoms)
 
-        return {
+        robot_info = {
             "geom_id2name": geoms_id2name,
             "geom_name2id": geoms_name2id,
             "n_geoms": n_geoms,
@@ -224,6 +224,8 @@ class Hostv2:
             "joint_id2name": joints_id2name,
             "joint_name2id": joints_name2id,
         }
+
+        return robot_info
 
     def run(self):
         print("starting")

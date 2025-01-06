@@ -9,6 +9,7 @@ robot:
     protocol: tcp
     ip: 127.0.0.1
     port: 5557
+  xml_path: simulators/robot_models/aji6/humanoid.xml
 
 ctx:
   vision:
