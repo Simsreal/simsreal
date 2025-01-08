@@ -24,7 +24,7 @@ ctx:
 
 perceivers:
   vision:
-    emb_dim: 64
+    emb_dim: 16
 
 intrinsics:
   - pain_avoidance
@@ -39,6 +39,9 @@ brain:
 
 emotion:
   pad_dim: 3
+
+episodic_memory:
+  mem_hz: 5
 
 mcts:
   decay_rate: 0.9
