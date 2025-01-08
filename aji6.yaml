@@ -41,7 +41,9 @@ emotion:
   pad_dim: 3
 
 episodic_memory:
-  mem_hz: 5
+  live_mem:
+    hz: 5
+
 
 mcts:
   decay_rate: 0.9

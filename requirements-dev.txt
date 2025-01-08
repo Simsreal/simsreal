@@ -24,3 +24,4 @@ matplotlib
 torchvision
 opencv-python
 qdrant-client
+qdrant-client[fastembed-gpu]
