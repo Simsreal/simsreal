@@ -12,7 +12,8 @@ from human.process.brain import brain_proc
 from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
 from human.process.motivator import motivator_proc
-from human.process.neural_gate import neural_gate_proc
+
+# from human.process.neural_gate import neural_gate_proc
 from human.process.perceive import perceive_proc
 
 
@@ -33,7 +34,7 @@ class Hostv2:
         ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
-        emotion_cfg = cfg["emotion"]
+        # emotion_cfg = cfg["emotion"]
         gate_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
 
         vision_perceptor_cfg = perceivers_cfg["vision"]
@@ -77,10 +78,10 @@ class Hostv2:
             (robot_info["n_geoms"], ctx_cfg["contact"]["dim"]), dtype=torch.float32
         )
 
-        neural_gate = torch.zeros(
-            (len(intrinsics),),
-            dtype=torch.float32,
-        )
+        # neural_gate = torch.zeros(
+        #     (len(intrinsics),),
+        #     dtype=torch.float32,
+        # )
 
         latent = torch.zeros(
             (
@@ -90,15 +91,17 @@ class Hostv2:
             dtype=torch.float32,
         )
 
-        torques = torch.zeros((1, brain_cfg["n_actuators"]), dtype=torch.float32)
+        torques = torch.zeros(
+            (1, brain_cfg["lstm"]["n_actuators"]), dtype=torch.float32
+        )
 
-        emotions = torch.zeros((1, emotion_cfg["pad_dim"]), dtype=torch.float32)
+        emotions = torch.zeros((1, cfg["emotion"]["pad_dim"]), dtype=torch.float32)
 
         vision.share_memory_()
         contact.share_memory_()
         qpos.share_memory_()
         qvel.share_memory_()
-        neural_gate.share_memory_()
+        # neural_gate.share_memory_()
         latent.share_memory_()
         torques.share_memory_()
         emotions.share_memory_()
@@ -108,7 +111,7 @@ class Hostv2:
             "qpos": qpos,
             "qvel": qvel,
             "contact": contact,
-            "neural_gate": neural_gate,
+            # "neural_gate": neural_gate,
             "latent": latent,
             "torques": torques,
             "emotions": emotions,
@@ -119,15 +122,15 @@ class Hostv2:
         }
 
         # memory
-        brain_cfg["latent_size"] = latent.shape[-1]
+        brain_cfg["lstm"]["latent_size"] = latent.shape[-1]
         retina = Retina(emb_dim=perceivers_cfg["vision"]["emb_dim"]).to(device)
         lstm = LSTM(
-            brain_cfg["latent_size"],
-            brain_cfg["hidden_dim"],
-            brain_cfg["n_layers"],
+            brain_cfg["lstm"]["latent_size"],
+            brain_cfg["lstm"]["hidden_dim"],
+            brain_cfg["lstm"]["n_layers"],
             device,
             1,
-            brain_cfg["n_actuators"],
+            brain_cfg["lstm"]["n_actuators"],
         ).to(device)
 
         retina.share_memory()
@@ -141,13 +144,13 @@ class Hostv2:
             args=(shm, cfg),
         )
 
-        neural_gate0 = mp.Process(
-            target=neural_gate_proc,
-            args=(
-                shm,
-                cfg,
-            ),
-        )
+        # neural_gate0 = mp.Process(
+        #     target=neural_gate_proc,
+        #     args=(
+        #         shm,
+        #         cfg,
+        #     ),
+        # )
 
         perceive_proc0 = mp.Process(
             target=perceive_proc,
@@ -189,7 +192,7 @@ class Hostv2:
             perceive_proc0,
             motivator_proc0,
             brain_proc0,
-            neural_gate0,
+            # neural_gate0,
             commander_proc0,
         ]
 

@@ -30,16 +30,17 @@ intrinsics:
   - rooting_reflex
 
 brain:
-  module: lstm
-  ctx_len: 10
-  hidden_dim: 128
-  n_layers: 1
-  n_xlstm_blocks: 4
-  n_actuators: 24
+  lstm:
+    ctx_len: 10
+    hidden_dim: 128
+    n_layers: 1
+    n_xlstm_blocks: 4
+    n_actuators: 24
 
 emotion:
-  module: mcts
   pad_dim: 3
+
+mcts:
   decay_rate: 0.9
   max_visits: 10000
   min_visits: 1000
