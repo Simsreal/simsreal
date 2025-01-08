@@ -7,9 +7,6 @@
 [submodule "environment"]
 	path = environment
 	url = git@github.com:Simsreal/environment.git
-[submodule "neuro_symbol"]
-	path = neuro_symbol
-	url = git@github.com:Simsreal/neuro_symbol.git
 [submodule "simulators"]
 	path = simulators
 	url = git@github.com:Simsreal/simulators.git

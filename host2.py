@@ -12,8 +12,7 @@ from human.process.brain import brain_proc
 from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
 from human.process.motivator import motivator_proc
-
-# from human.process.neural_gate import neural_gate_proc
+from human.process.neural_gate import neural_gate_proc
 from human.process.perceive import perceive_proc
 
 
@@ -78,10 +77,10 @@ class Hostv2:
             (robot_info["n_geoms"], ctx_cfg["contact"]["dim"]), dtype=torch.float32
         )
 
-        # neural_gate = torch.zeros(
-        #     (len(intrinsics),),
-        #     dtype=torch.float32,
-        # )
+        neural_gate = torch.zeros(
+            (len(intrinsics),),
+            dtype=torch.float32,
+        )
 
         latent = torch.zeros(
             (
@@ -101,7 +100,7 @@ class Hostv2:
         contact.share_memory_()
         qpos.share_memory_()
         qvel.share_memory_()
-        # neural_gate.share_memory_()
+        neural_gate.share_memory_()
         latent.share_memory_()
         torques.share_memory_()
         emotions.share_memory_()
@@ -111,7 +110,7 @@ class Hostv2:
             "qpos": qpos,
             "qvel": qvel,
             "contact": contact,
-            # "neural_gate": neural_gate,
+            "neural_gate": neural_gate,
             "latent": latent,
             "torques": torques,
             "emotions": emotions,
@@ -144,13 +143,13 @@ class Hostv2:
             args=(shm, cfg),
         )
 
-        # neural_gate0 = mp.Process(
-        #     target=neural_gate_proc,
-        #     args=(
-        #         shm,
-        #         cfg,
-        #     ),
-        # )
+        neural_gate0 = mp.Process(
+            target=neural_gate_proc,
+            args=(
+                shm,
+                cfg,
+            ),
+        )
 
         perceive_proc0 = mp.Process(
             target=perceive_proc,
@@ -192,7 +191,7 @@ class Hostv2:
             perceive_proc0,
             motivator_proc0,
             brain_proc0,
-            # neural_gate0,
+            neural_gate0,
             commander_proc0,
         ]
 
