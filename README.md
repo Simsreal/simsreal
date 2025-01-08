@@ -46,25 +46,22 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-**Important** Please make sure you are running `aji5` or any humanoids following the orientation system of `aji5`.
+**Important** Please make sure you are running `aji6` or any humanoids following the orientation system of `aji6`.
 
 ### Compute Server
-You must run compute server before next steps if you want to enable *consciousness*.
 ```bash
 uvicorn compute_server.app:app --host 0.0.0.0 --port 8301 --workers 4
 ```
 
 ### Simulator
-You must run simulator if you want to enable *consciousness*.
 ```bash
-python simulators/simulators/aji5_simulator.py
+python simulators/simulators/aji6_simulator.py
 ```
 **Notice: migrating to Unity**
 
 ### Simsreal
 ```bash
-python host.py --config adji5 # simulation
-python host.py -uc -s # silent, unconscious (no physics step)
+python host2.py
 ```
 
 To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).

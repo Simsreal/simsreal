@@ -249,7 +249,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="human_config/aji6.yaml")
+    parser.add_argument("--config", type=str, default="aji6.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
     parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
