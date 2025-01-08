@@ -27,7 +27,7 @@ perceivers:
     emb_dim: 64
 
 intrinsics:
-  - rooting_reflex
+  - pain_avoidance
 
 brain:
   lstm:
