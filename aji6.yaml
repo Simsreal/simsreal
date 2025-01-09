@@ -42,7 +42,7 @@ emotion:
 
 episodic_memory:
   live_mem:
-    hz: 5
+    hz: 1
 
 
 mcts:
