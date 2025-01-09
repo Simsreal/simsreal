@@ -46,13 +46,6 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-**Important** Please make sure you are running `aji6` or any humanoids following the orientation system of `aji6`.
-
-### Compute Server
-```bash
-uvicorn compute_server.app:app --host 0.0.0.0 --port 8301 --workers 4
-```
-
 ### Simulator
 ```bash
 python simulators/simulators/aji6_simulator.py
