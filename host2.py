@@ -11,7 +11,7 @@ from human.memory.perceive.retina import Retina
 from human.process.brain import brain_proc
 from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
-from human.process.memorizer import memorizer_proc
+from human.process.memorizer import memory_manager_proc
 from human.process.motivator import motivator_proc
 from human.process.neural_gate import neural_gate_proc
 from human.process.perceive import perceive_proc
@@ -160,9 +160,9 @@ class Hostv2:
             ),
         )
 
-        memorizer_proc0 = mp.Process(
-            target=memorizer_proc,
-            args=(shm,),
+        memory_manager_proc0 = mp.Process(
+            target=memory_manager_proc,
+            args=(shm, cfg),
         )
 
         motivator_proc0 = mp.Process(
@@ -195,7 +195,7 @@ class Hostv2:
         self.processes = [
             ctx_proc0,
             perceive_proc0,
-            memorizer_proc0,
+            memory_manager_proc0,
             motivator_proc0,
             brain_proc0,
             neural_gate0,
