@@ -32,7 +32,7 @@ intrinsics:
 brain:
   lstm:
     ctx_len: 10
-    hidden_dim: 128
+    hidden_dim: 32
     n_layers: 1
     n_xlstm_blocks: 4
     n_actuators: 24

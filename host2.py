@@ -6,8 +6,6 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.memory.brain.lstm import LSTM
-from human.memory.perceive.retina import Retina
 from human.process.brain import brain_proc
 from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
@@ -121,23 +119,6 @@ class Hostv2:
             "device": device,
         }
 
-        # memory
-        brain_cfg["lstm"]["latent_size"] = latent.shape[-1]
-        retina = Retina(emb_dim=perceivers_cfg["vision"]["emb_dim"]).to(device)
-        lstm = LSTM(
-            brain_cfg["lstm"]["latent_size"],
-            brain_cfg["lstm"]["hidden_dim"],
-            brain_cfg["lstm"]["n_layers"],
-            device,
-            1,
-            brain_cfg["lstm"]["n_actuators"],
-        ).to(device)
-
-        retina.share_memory()
-        lstm.share_memory()
-
-        memory = {"retina": retina, "lstm": lstm}
-
         # proc
         ctx_proc0 = mp.Process(
             target=ctx_proc,
@@ -156,7 +137,7 @@ class Hostv2:
             target=perceive_proc,
             args=(
                 shm,
-                memory,
+                perceivers_cfg,
             ),
         )
 
@@ -191,7 +172,6 @@ class Hostv2:
             target=brain_proc,
             args=(
                 shm,
-                memory,
                 queues,
                 brain_cfg,
             ),

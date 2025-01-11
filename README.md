@@ -31,6 +31,10 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
 ### Install Unity
 *Optional* In progress of migration to Unity. Stay Tuned~!
 
