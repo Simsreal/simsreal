@@ -137,6 +137,7 @@ class Hostv2:
             target=perceive_proc,
             args=(
                 shm,
+                "vision",
                 perceivers_cfg,
             ),
         )
