@@ -46,6 +46,18 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
+### Memory
+```bash
+# windows
+docker run --gpus all -p 6333:6333 `
+    -v ${PWD}/qdrant_storage:/qdrant/storage `
+    qdrant/qdrant:gpu-amd-latest
+
+# linux
+docker run -p 6333:6333 \
+    -v $(pwd)/qdrant_storage:/qdrant/storage:z \
+    qdrant/qdrant
+```
 ### Simulator
 ```bash
 python simulators/simulators/aji6_simulator.py

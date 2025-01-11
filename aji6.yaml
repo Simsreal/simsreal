@@ -40,10 +40,20 @@ brain:
 emotion:
   pad_dim: 3
 
-episodic_memory:
-  live_mem:
+memory_management:
+  live_memory:
+    hz: 240
+    capacity: null
+    retain_time: 5
+    collection: iconic3
+    host: localhost
+    port: 6333
+  episodic_memory:
     hz: 1
-
+    capacity: 3600
+    collection: episodic
+    host: localhost
+    port: 6333
 
 mcts:
   decay_rate: 0.9
