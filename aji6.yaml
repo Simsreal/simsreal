@@ -42,21 +42,23 @@ emotion:
 
 memory_management:
   live_memory:
-    hz: 240
+    hz: 20
     capacity: null
     retain_time: 5
     collection: iconic
     host: localhost
     port: 6333
     decay_every: 5
+    reset: true
   episodic_memory:
     hz: 1
-    capacity: 3600
+    capacity: 5
     retain_time: null
     collection: episodic
     host: localhost
     port: 6333
-    decay_every: 3600
+    decay_every: 10
+    reset: true
 
 mcts:
   decay_rate: 0.9

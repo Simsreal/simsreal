@@ -162,7 +162,20 @@ class Hostv2:
 
         memory_manager_proc0 = mp.Process(
             target=memory_manager_proc,
-            args=(shm, cfg),
+            args=(
+                shm,
+                "live_memory",
+                cfg,
+            ),
+        )
+
+        memory_manager_proc1 = mp.Process(
+            target=memory_manager_proc,
+            args=(
+                shm,
+                "episodic_memory",
+                cfg,
+            ),
         )
 
         motivator_proc0 = mp.Process(
@@ -196,6 +209,7 @@ class Hostv2:
             ctx_proc0,
             perceive_proc0,
             memory_manager_proc0,
+            memory_manager_proc1,
             motivator_proc0,
             brain_proc0,
             neural_gate0,
