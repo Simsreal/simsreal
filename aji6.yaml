@@ -27,7 +27,8 @@ perceivers:
     emb_dim: 16
 
 intrinsics:
-  - pain_avoidance
+  - fear_of_pain
+  - mere_exposure
 
 brain:
   lstm:
