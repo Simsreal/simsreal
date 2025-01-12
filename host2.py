@@ -1,6 +1,5 @@
 import gc
 import os
-import traceback
 
 import torch
 import yaml
@@ -186,16 +185,23 @@ class Hostv2:
             ),
         )
 
-        self.processes = [
-            ctx_proc0,
-            perceive_proc0,
-            memory_manager_proc0,
-            memory_manager_proc1,
-            motivator_proc0,
-            brain_proc0,
-            neural_gate0,
-            commander_proc0,
-        ]
+        ctx_proc0.start()
+        perceive_proc0.start()
+        memory_manager_proc0.start()
+        memory_manager_proc1.start()
+        motivator_proc0.start()
+        brain_proc0.start()
+        neural_gate0.start()
+        commander_proc0.start()
+
+        brain_proc0.join()
+        ctx_proc0.join()
+        perceive_proc0.join()
+        memory_manager_proc0.join()
+        memory_manager_proc1.join()
+        motivator_proc0.join()
+        neural_gate0.join()
+        commander_proc0.join()
 
     def initialize_robot_info(self, robot_cfg):
         import zmq
@@ -211,6 +217,7 @@ class Hostv2:
         msg = sub.recv_pyobj()[self.cfg["name"]]
         sub.close()
         zmq_tmp_ctx.term()
+        print("connected")
 
         robot_geoms = msg["body_geoms"]
         geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
@@ -231,23 +238,11 @@ class Hostv2:
 
         return robot_info
 
-    def run(self):
-        print("starting")
-        for wrapper in self.processes:
-            wrapper.start()
-
-    def stop(self):
-        for wrapper in self.processes:
-            wrapper.join()
-
-        gc.collect()
-        torch.cuda.empty_cache()
-
 
 if __name__ == "__main__":
+    mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
     print(f"available CPU cores: {mp.cpu_count()}")
-    mp.set_start_method("spawn", force=True)
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
@@ -259,7 +254,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
-    os.environ["CUDA_HOME"] = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1"
     os.environ["UNCONSCIOUS"] = str(args.unconsciousness)
     os.environ["VERBOSE"] = "silent" if args.silent else "verbose"
     os.environ["DEBUG"] = str(args.debug)
@@ -268,10 +262,5 @@ if __name__ == "__main__":
         cfg_file=args.config,
         exp_dir=args.exp_dir,
     )
-    try:
-        host.run()
-    except KeyboardInterrupt:
-        host.stop()
-    except Exception:
-        traceback.print_exc()
-        host.stop()
+    gc.collect()
+    torch.cuda.empty_cache()

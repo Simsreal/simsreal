@@ -64,7 +64,7 @@ docker run --gpus all -p 6333:6333 `
 
 # linux
 docker run -p 6333:6333 \
-    -v $(pwd)/qdrant_storage:/qdrant/storage: \
+    -v $(pwd)/qdrant_storage:/qdrant/storage \
     qdrant/qdrant
 ```
 ### Simulator
