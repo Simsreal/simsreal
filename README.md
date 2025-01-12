@@ -50,6 +50,12 @@ Go to `Edit the system environment variables` and add `PYTHON_IS` and append Sim
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
+### CUDA MPS
+```bash
+# only available on Linux
+export CUDA_VISIBLE_DEVICES=0
+```
+
 ### Memory
 ```bash
 # windows

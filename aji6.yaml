@@ -29,6 +29,7 @@ perceivers:
 intrinsics:
   - fear_of_pain
   - mere_exposure
+  - fear_of_unknown
 
 brain:
   lstm:
@@ -53,7 +54,7 @@ memory_management:
     reset: true
   episodic_memory:
     hz: 1
-    capacity: 5
+    capacity: 1600
     retain_time: null
     collection: episodic
     host: localhost
