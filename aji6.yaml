@@ -1,5 +1,8 @@
 name: aji6
 
+birth: 2025-01-01
+timelapse_multiplier: 1
+
 robot:
   sub:
     protocol: tcp
