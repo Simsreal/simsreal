@@ -53,7 +53,6 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 ### CUDA MPS
 ```bash
 # only available on Linux
-export CUDA_VISIBLE_DEVICES=0
 ```
 
 ### Memory
@@ -65,7 +64,7 @@ docker run --gpus all -p 6333:6333 `
 
 # linux
 docker run -p 6333:6333 \
-    -v $(pwd)/qdrant_storage:/qdrant/storage:z \
+    -v $(pwd)/qdrant_storage:/qdrant/storage: \
     qdrant/qdrant
 ```
 ### Simulator

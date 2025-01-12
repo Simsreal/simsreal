@@ -19,9 +19,7 @@ mlagents_envs
 httpx
 pyzmq
 xlstm
-torch
 matplotlib
-torchvision
 opencv-python
 qdrant-client
 qdrant-client[fastembed-gpu]
