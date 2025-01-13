@@ -31,9 +31,7 @@ class Hostv2:
         ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
-        # emotion_cfg = cfg["emotion"]
         gate_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-
         vision_perceptor_cfg = perceivers_cfg["vision"]
         brain_cfg = cfg["brain"]
 
@@ -48,9 +46,14 @@ class Hostv2:
 
         # shm
         robot_info = self.initialize_robot_info(robot_cfg)
-        brain_slices = {
+        latent_slices = {
             "vision": slice(0, vision_perceptor_cfg["emb_dim"]),
         }
+
+        human_state = torch.zeros(
+            10,  # max. number of human states
+            dtype=torch.float64,
+        )
 
         vision = torch.zeros(
             (
@@ -94,6 +97,7 @@ class Hostv2:
 
         emotions = torch.zeros((1, cfg["emotion"]["pad_dim"]), dtype=torch.float32)
 
+        human_state.share_memory_()
         vision.share_memory_()
         contact.share_memory_()
         qpos.share_memory_()
@@ -104,6 +108,7 @@ class Hostv2:
         emotions.share_memory_()
 
         shm = {
+            "human_state": human_state,
             "vision": vision,
             "qpos": qpos,
             "qvel": qvel,
@@ -114,7 +119,7 @@ class Hostv2:
             "emotions": emotions,
             "gate_indices": gate_indices,
             "robot_info": robot_info,
-            "brain_slices": brain_slices,
+            "latent_slices": latent_slices,
             "device": device,
         }
 

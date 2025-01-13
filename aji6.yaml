@@ -1,7 +1,15 @@
 name: aji6
 
-birth: 2025-01-01
-timelapse_multiplier: 1
+birth: "2025-01-13-00-00-00"
+timelapse_multiplier: 2000
+
+# timelapse_multiplier: 1000    # 1 real day = 2.74 years
+# timelapse_multiplier: 2000    # 1 real day = 5.48 years
+# timelapse_multiplier: 5000    # 1 real day = 13.7 years
+# timelapse_multiplier: 10000   # 1 real day = 27.4 years
+# timelapse_multiplier: 20000   # 1 real day = 54.8 years
+# timelapse_multiplier: 50000   # 1 real day = 137 years
+# timelapse_multiplier: 100000  # 1 real day = 274 years
 
 robot:
   sub:
@@ -34,6 +42,7 @@ intrinsics:
   - fear_of_pain
   - mere_exposure
   - fear_of_unknown
+  - appetite
 
 brain:
   lstm:
