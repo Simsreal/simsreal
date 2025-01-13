@@ -45,6 +45,7 @@ intrinsics:
   - appetite
 
 brain:
+  module: xlstm
   lstm:
     ctx_len: 10
     hidden_dim: 32
