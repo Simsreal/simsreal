@@ -43,6 +43,7 @@ intrinsics:
   - mere_exposure
   - fear_of_unknown
   - appetite
+  - cognitive_dissonance
 
 brain:
   module: xlstm
@@ -52,6 +53,10 @@ brain:
     n_layers: 1
     n_xlstm_blocks: 4
     n_actuators: 24
+    n_lstm_heads: 4
+    convid_kernel_size: 4
+    qkv_proj_blocksize: 4
+    proj_factor: 1.3
 
 emotion:
   pad_dim: 3

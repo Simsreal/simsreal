@@ -24,3 +24,4 @@ opencv-python
 qdrant-client
 qdrant-client[fastembed-gpu]
 ninja
+cupy-cuda12x

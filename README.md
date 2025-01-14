@@ -33,16 +33,14 @@ chmod +x setup.sh
 
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
+pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
 ### Install Unity
 *Optional* In progress of migration to Unity. Stay Tuned~!
 
 ### Environment Variables
-#### Windows
-Go to `Edit the system environment variables` and add `PYTHON_IS` and append Simsreal repository path to `PATH`
-
-* `PYTHON_IS` = `C:\Users\<USERNAME>\AppData\Local\ov\pkg\isaac-sim-4.2.0\python.bat`
 
 <!-- #### Linux -->
 
@@ -53,6 +51,10 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 ### CUDA MPS
 ```bash
 # only available on Linux
+export CUDA_VISIBLE_DEVICES=0
+export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps
+export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log
+nvidia-cuda-mps-control -f
 ```
 
 ### Memory
@@ -63,9 +65,7 @@ docker run --gpus all -p 6333:6333 `
     qdrant/qdrant:gpu-amd-latest
 
 # linux
-docker run -p 6333:6333 \
-    -v $(pwd)/qdrant_storage:/qdrant/storage \
-    qdrant/qdrant
+docker run --rm -d -p 6333:6333     -v $(pwd)/qdrant_storage:/qdrant/storage     qdrant/qdrant
 ```
 ### Simulator
 ```bash
@@ -77,5 +77,3 @@ python simulators/simulators/aji6_simulator.py
 ```bash
 python host2.py
 ```
-
-To understand the flow of consciousness emergence, you can have a look at [high-level flowchart](https://github.com/Simsreal/human/blob/main/src/images/flow_draft_2.png).
