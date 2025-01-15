@@ -178,7 +178,7 @@ class Hostv2:
             args=(
                 shm,
                 queues,
-                brain_cfg,
+                cfg,
             ),
         )
 

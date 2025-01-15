@@ -48,7 +48,7 @@ intrinsics:
 brain:
   module: xlstm
   lstm:
-    ctx_len: 10
+    ctx_len: 100
     hidden_dim: 32
     n_layers: 1
     n_xlstm_blocks: 4

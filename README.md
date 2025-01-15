@@ -49,8 +49,8 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 
 ## Launch Simsreal
 ### CUDA MPS
+Enable it to enhance multi-processing performance on GPU (Only Linux).
 ```bash
-# only available on Linux
 export CUDA_VISIBLE_DEVICES=0
 export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps
 export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log
