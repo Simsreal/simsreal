@@ -1,0 +1,11 @@
+{
+	"include": [
+		"./human",
+		"./simulators",
+		"./utilities"
+	],
+	"extraPaths": [
+		"."
+	],
+	"typeCheckingMode": "basic"
+}
