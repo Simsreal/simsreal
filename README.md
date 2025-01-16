@@ -75,5 +75,5 @@ python simulators/simulators/aji6_simulator.py
 
 ### Simsreal
 ```bash
-python host2.py
+python main.py
 ```
