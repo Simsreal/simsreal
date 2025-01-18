@@ -12,15 +12,16 @@
 
 ## Prerequisites
 
+### Requirements
+* Python >= 3.10
+* Docker
+
 ### Clone the repository
 The easiest way to clone the repository is to create a ssh key and use it to clone the repository through ssh.
 ```bash
-export SSHKEY=~/.ssh/id_ed25519_second
-export GIT_SSH_COMMAND="ssh -i $SSHKEY"
 git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
 git submodule update --init --recursive
-git pull --recurse-submodules
 ```
 To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md).
 
@@ -40,18 +41,49 @@ pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ### Install Unity
 *Optional* In progress of migration to Unity. Stay Tuned~!
 
-### Environment Variables
+### Environment Variables (for Intellisense)
+#### Windows
 
-<!-- #### Linux -->
+#### Linux
+```bash
+export PYTHONPATH=$PYTHONPATH:/home/spoonbobo/gitrepo/simsreal
+```
 
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-### CUDA MPS
+### CUDA MPS (Only on Linux)
 Enable it to enhance multi-processing performance on GPU (Only Linux).
 ```bash
 bash start_mps.sh
+```
+
+```shell
+# upon MPS launch, you should see nvidia-cuda-mps-server in processes.
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 550.120                Driver Version: 550.120        CUDA Version: 12.4     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4090 ...    Off |   00000000:01:00.0 Off |                  N/A |
+| N/A   64C    P0             55W /  115W |    1097MiB /  16376MiB |     40%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A      2628      G   /usr/lib/xorg/Xorg                              4MiB |
+|    0   N/A  N/A     10925      C   nvidia-cuda-mps-server                         28MiB |
+|    0   N/A  N/A     67657    M+C   /usr/bin/python                               350MiB |
+|    0   N/A  N/A     67661    M+C   /usr/bin/python                               368MiB |
+|    0   N/A  N/A     67662    M+C   /usr/bin/python                               334MiB |
++-----------------------------------------------------------------------------------------+
 ```
 
 ### Memory
@@ -62,7 +94,7 @@ docker run --gpus all -p 6333:6333 `
     qdrant/qdrant:gpu-amd-latest
 
 # linux
-docker run --rm -d -p 6333:6333     -v $(pwd)/qdrant_storage:/qdrant/storage     qdrant/qdrant
+docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
 ```
 ### Simulator
 ```bash
