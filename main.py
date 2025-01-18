@@ -8,9 +8,9 @@ from torch import multiprocessing as mp
 from human.process.brain import brain_proc
 from human.process.commander import commander_proc
 from human.process.ctx import ctx_proc
+from human.process.governor import governor_proc
 from human.process.memorizer import memory_manager_proc
 from human.process.motivator import motivator_proc
-from human.process.neural_gate import neural_gate_proc
 from human.process.perceive import perceive_proc
 
 
@@ -31,8 +31,7 @@ class Hostv2:
         ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
-        gate_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        vision_perceptor_cfg = perceivers_cfg["vision"]
+        intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
         brain_cfg = cfg["brain"]
 
         # queues
@@ -44,14 +43,13 @@ class Hostv2:
             "emotions_q": emotions_q,
         }
 
-
         robot_info = self.initialize_robot_info(robot_cfg)
         # shm
         latent_offset = 0
         latent_slices = {}
 
         for name, params in perceivers_cfg.items():
-            emb_dim = params.get('emb_dim', 0)
+            emb_dim = params.get("emb_dim", 0)
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
             latent_offset += emb_dim
 
@@ -83,7 +81,7 @@ class Hostv2:
             (robot_info["n_geoms"], ctx_cfg["contact"]["dim"]), dtype=torch.float32
         )
 
-        neural_gate = torch.zeros(
+        governance = torch.zeros(
             (len(intrinsics),),
             dtype=torch.float32,
         )
@@ -107,7 +105,7 @@ class Hostv2:
         contact.share_memory_()
         qpos.share_memory_()
         qvel.share_memory_()
-        neural_gate.share_memory_()
+        governance.share_memory_()
         latent.share_memory_()
         torques.share_memory_()
         emotions.share_memory_()
@@ -118,11 +116,11 @@ class Hostv2:
             "qpos": qpos,
             "qvel": qvel,
             "contact": contact,
-            "neural_gate": neural_gate,
+            "governance": governance,
             "latent": latent,
             "torques": torques,
             "emotions": emotions,
-            "gate_indices": gate_indices,
+            "intrinsic_indices": intrinsic_indices,
             "robot_info": robot_info,
             "latent_slices": latent_slices,
             "device": device,
@@ -134,8 +132,8 @@ class Hostv2:
             args=(shm, cfg),
         )
 
-        neural_gate0 = mp.Process(
-            target=neural_gate_proc,
+        governor_proc0 = mp.Process(
+            target=governor_proc,
             args=(
                 shm,
                 cfg,
@@ -201,7 +199,7 @@ class Hostv2:
         memory_manager_proc1.start()
         motivator_proc0.start()
         brain_proc0.start()
-        neural_gate0.start()
+        governor_proc0.start()
         commander_proc0.start()
 
         brain_proc0.join()
@@ -210,7 +208,7 @@ class Hostv2:
         memory_manager_proc0.join()
         memory_manager_proc1.join()
         motivator_proc0.join()
-        neural_gate0.join()
+        governor_proc0.join()
         commander_proc0.join()
 
     def initialize_robot_info(self, robot_cfg):
