@@ -103,9 +103,12 @@ docker run --gpus all -p 6333:6333 `
 docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
 ```
 ### Simulator
+#### Gym-like environment
 ```bash
 python simulators/simulators/aji6_simulator.py
 ```
+
+#### Unity
 **Notice: migrating to Unity**
 
 ### Simsreal
