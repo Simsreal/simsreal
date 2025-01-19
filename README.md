@@ -28,10 +28,8 @@ To understand more about the submodules, have a look at [docs/submodules_overvie
 ### Install development packages
 ```bash
 pip install -r requirements-dev.txt
-chmod +x setup.sh
-./setup.sh
 ```
-
+Pytorch
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
