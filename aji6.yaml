@@ -39,7 +39,7 @@ intrinsics:
   - cognitive_dissonance
 
 brain:
-  module: xlstm
+  module: lstm
   lstm:
     ctx_len: 100
     hidden_dim: 32

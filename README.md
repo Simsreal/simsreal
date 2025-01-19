@@ -39,15 +39,19 @@ pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
 ### Install Unity
-*Optional* In progress of migration to Unity. Stay Tuned~!
+*Optional* In progress of migration to Unity.
 
 ### Environment Variables (for Intellisense)
 #### Windows
+To be added
 
 #### Linux
 ```bash
 export PYTHONPATH=$PYTHONPATH:/home/spoonbobo/gitrepo/simsreal
 ```
+
+### Optional
+* if you are using `nvim` or `vscode`/`cursor`, you can consider downloading `pyright` extension to get better intellisense.
 
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
