@@ -48,7 +48,7 @@ To be added
 
 #### Linux
 ```bash
-export PYTHONPATH=$PYTHONPATH:/home/spoonbobo/gitrepo/simsreal
+export PYTHONPATH=$PYTHONPATH:/home/$USER/gitrepo/simsreal
 ```
 
 ### Optional
@@ -100,7 +100,7 @@ bash start_mps.sh
 # windows
 docker run --gpus all -p 6333:6333 `
     -v ${PWD}/qdrant_storage:/qdrant/storage `
-    qdrant/qdrant:gpu-amd-latest
+    qdrant/qdrant
 
 # linux
 docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
