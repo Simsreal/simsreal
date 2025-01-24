@@ -98,9 +98,7 @@ bash start_mps.sh
 ### Memory
 ```bash
 # windows
-docker run --gpus all -p 6333:6333 `
-    -v ${PWD}/qdrant_storage:/qdrant/storage `
-    qdrant/qdrant
+docker run --rm -p 6333:6333 -v ${PWD}/qdrant_storage:/qdrant/storage qdrant/qdrant
 
 # linux
 docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
