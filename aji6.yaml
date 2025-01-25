@@ -37,6 +37,7 @@ intrinsics:
   - fear_of_unknown
   - appetite
   - cognitive_dissonance
+  - boredom
 
 brain:
   module: lstm
