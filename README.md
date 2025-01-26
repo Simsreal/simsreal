@@ -9,7 +9,7 @@
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
   - [Install development packages](#install-development-packages)
-  - [Install Unity](#install-unity)
+  - [Simulator setup](#simulator-setup)
 - [Contribution](#contribution)
 - [Launch Simsreal](#launch-simsreal)
 
