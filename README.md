@@ -39,8 +39,8 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
-### Install Unity
-*Optional* In progress of migration to Unity.
+### Simulator setup
+Follow [Simulator Prerequisites](https://github.com/Simsreal/simulator?tab=readme-ov-file#prerequisites) to setup the simulator.
 
 ### Environment Variables (for Intellisense)
 #### Windows
@@ -110,8 +110,7 @@ python simulators/simulators/aji6_simulator.py
 ```
 
 #### Unity
-**Notice: migrating to Unity**
-
+Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 ### Simsreal
 ```bash
 python main.py
