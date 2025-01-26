@@ -98,19 +98,20 @@ bash start_mps.sh
 ### Memory
 ```bash
 # windows
-docker run --rm -p 6333:6333 -v ${PWD}/qdrant_storage:/qdrant/storage qdrant/qdrant
+docker run --rm -d -p 6333:6333 -v ${PWD}/qdrant_storage:/qdrant/storage qdrant/qdrant
 
 # linux
 docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
 ```
 ### Simulator
-#### Gym-like environment
+#### Unity
+Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
+
+#### Gym-like environment (Deprecated soon)
 ```bash
 python simulators/simulators/aji6_simulator.py
 ```
 
-#### Unity
-Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 ### Simsreal
 ```bash
 python main.py
