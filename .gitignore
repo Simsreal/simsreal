@@ -19,6 +19,7 @@ mujoco/
 .vscode/
 IsaacLab/
 qdrant_storage/
+*.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
