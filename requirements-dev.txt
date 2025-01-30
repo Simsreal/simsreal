@@ -11,7 +11,7 @@ pddl
 streamlit
 loguru
 rich
-mujoco
+mujoco==3.2.7
 dm_control
 uvicorn[standard]
 mlagents

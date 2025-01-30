@@ -218,14 +218,16 @@ class Hostv2:
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
-        sub.connect(
-            f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
-        )
+        url = f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
+        print(url)
+        sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        msg = sub.recv_pyobj()[self.cfg["name"]]
+        msg = sub.recv_json()
         sub.close()
         zmq_tmp_ctx.term()
+        print(msg)
         print("connected")
+        exit()
 
         robot_geoms = msg["body_geoms"]
         geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
