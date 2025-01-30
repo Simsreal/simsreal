@@ -107,6 +107,11 @@ docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant
 #### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
+#### Gym-like Env
+```bash
+python simulators/simulators/aji6_simulator.py --capture
+```
+
 ### Simsreal
 ```bash
 python main.py
