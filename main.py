@@ -222,12 +222,13 @@ class Hostv2:
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        msg = sub.recv_json()
+        # msg = sub.recv_json()
+        msg = sub.recv_pyobj()[self.cfg["name"]]
         sub.close()
         zmq_tmp_ctx.term()
-        print(msg)
+        # print(msg)
         print("connected")
-        exit()
+        # exit()
 
         robot_geoms = msg["body_geoms"]
         geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
