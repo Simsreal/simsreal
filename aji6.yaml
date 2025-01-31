@@ -16,17 +16,6 @@ robot:
   xml_path: /home/spoonbobo/simulator/Assets/MJCF/humanoid.xml
   pose: arm_stretch
 
-ctx:
-  vision:
-    h: 480
-    w: 640
-  qpos:
-    dim: 31
-  qvel:
-    dim: 30
-  contact:
-    dim: 7
-
 perceivers:
   vision:
     emb_dim: 16

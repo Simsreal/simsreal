@@ -29,7 +29,6 @@ class Hostv2:
         cfg = yaml.safe_load(open(self.cfg_file))
         self.cfg = cfg
         robot_cfg = cfg["robot"]
-        ctx_cfg = cfg["ctx"]
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
@@ -61,26 +60,24 @@ class Hostv2:
 
         vision = torch.zeros(
             (
-                ctx_cfg["vision"]["h"],
-                ctx_cfg["vision"]["w"],
                 3,
+                robot_info["egocentric_view_height"],
+                robot_info["egocentric_view_width"],
             ),
             dtype=torch.float32,
         )
 
         qpos = torch.zeros(
-            ctx_cfg["qpos"]["dim"],
+            robot_info["nq"],
             dtype=torch.float32,
         )
 
         qvel = torch.zeros(
-            ctx_cfg["qvel"]["dim"],
+            robot_info["nv"],
             dtype=torch.float32,
         )
 
-        contact = torch.zeros(
-            (robot_info["n_geoms"], ctx_cfg["contact"]["dim"]), dtype=torch.float32
-        )
+        contact = torch.zeros((robot_info["n_geoms"], 7), dtype=torch.float32)
 
         governance = torch.zeros(
             (len(intrinsics),),
@@ -215,6 +212,8 @@ class Hostv2:
     def initialize_robot_info(self, robot_cfg):
         import zmq
 
+        from human.process.ctx import vision_parser
+
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
@@ -232,6 +231,7 @@ class Hostv2:
         joint_mapping = robot_state["robot_joint_mapping"]["joint_name_id_mapping"]
         geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
         joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
+        egocentric_view = vision_parser(msg)
 
         robot_info = {
             "geom_id2name": geom_mapping_rev,
@@ -240,6 +240,10 @@ class Hostv2:
             "n_body_geoms": len(geom_mapping),
             "joint_id2name": joint_mapping_rev,
             "joint_name2id": joint_mapping,
+            "egocentric_view_width": egocentric_view.shape[2],
+            "egocentric_view_height": egocentric_view.shape[1],
+            "nq": len(robot_state["qpos"]),
+            "nv": len(robot_state["qvel"]),
         }
 
         return robot_info
