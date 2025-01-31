@@ -9,7 +9,7 @@
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
   - [Install development packages](#install-development-packages)
-  - [Simulator setup](#simulator-setup)
+  - [Unity Simulator setup](#unity-simulator-setup)
 - [Contribution](#contribution)
 - [Launch Simsreal](#launch-simsreal)
 
@@ -39,7 +39,7 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
-### Simulator setup
+### Unity Simulator setup
 Follow [Simulator Prerequisites](https://github.com/Simsreal/simulator?tab=readme-ov-file#prerequisites) to setup the simulator.
 
 ### Environment Variables (for Intellisense)
@@ -106,11 +106,6 @@ docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant
 ### Simulator
 #### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
-
-#### Gym-like Env
-```bash
-python simulators/simulators/aji6_simulator.py --capture
-```
 
 ### Simsreal
 ```bash
