@@ -1,4 +1,5 @@
 import gc
+import json
 import os
 
 import torch
@@ -222,29 +223,23 @@ class Hostv2:
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        # msg = sub.recv_json()
-        msg = sub.recv_pyobj()[self.cfg["name"]]
+        msg: dict = sub.recv_json()  # type: ignore
         sub.close()
         zmq_tmp_ctx.term()
-        # print(msg)
-        print("connected")
-        # exit()
 
-        robot_geoms = msg["body_geoms"]
-        geoms_id2name = msg["geom_mapping"]["geom_id_to_name"]
-        geoms_name2id = msg["geom_mapping"]["geom_name_to_id"]
-        joints_id2name = msg["joint_mapping"]["joint_id_to_name"]
-        joints_name2id = msg["joint_mapping"]["joint_name_to_id"]
-        n_geoms = len(geoms_name2id)
-        n_body_geoms = len(robot_geoms)
+        robot_state = json.loads(msg["robot_state"])
+        geom_mapping = robot_state["robot_geom_mapping"]["geom_name_id_mapping"]
+        joint_mapping = robot_state["robot_joint_mapping"]["joint_name_id_mapping"]
+        geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
+        joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
 
         robot_info = {
-            "geom_id2name": geoms_id2name,
-            "geom_name2id": geoms_name2id,
-            "n_geoms": n_geoms,
-            "n_body_geoms": n_body_geoms,
-            "joint_id2name": joints_id2name,
-            "joint_name2id": joints_name2id,
+            "geom_id2name": geom_mapping_rev,
+            "geom_name2id": geom_mapping,
+            "n_geoms": len(geom_mapping),
+            "n_body_geoms": len(geom_mapping),
+            "joint_id2name": joint_mapping_rev,
+            "joint_name2id": joint_mapping,
         }
 
         return robot_info
