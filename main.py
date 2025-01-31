@@ -77,8 +77,6 @@ class Hostv2:
             dtype=torch.float32,
         )
 
-        contact = torch.zeros((robot_info["n_geoms"], 7), dtype=torch.float32)
-
         governance = torch.zeros(
             (len(intrinsics),),
             dtype=torch.float32,
@@ -100,7 +98,6 @@ class Hostv2:
 
         human_state.share_memory_()
         vision.share_memory_()
-        contact.share_memory_()
         qpos.share_memory_()
         qvel.share_memory_()
         governance.share_memory_()
@@ -113,7 +110,6 @@ class Hostv2:
             "vision": vision,
             "qpos": qpos,
             "qvel": qvel,
-            "contact": contact,
             "governance": governance,
             "latent": latent,
             "torques": torques,

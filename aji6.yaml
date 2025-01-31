@@ -21,10 +21,9 @@ perceivers:
     emb_dim: 16
 
 intrinsics:
-  - fear_of_pain
+  # - fear_of_pain
   - mere_exposure
   - fear_of_unknown
-  - appetite
   - cognitive_dissonance
   - boredom
 
