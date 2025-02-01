@@ -1,23 +1,48 @@
 import gc
 import json
 import os
+from typing import Any, Dict, Tuple
 
 import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.process import (
-    brain_proc,
-    commander_proc,
+from human.process import (  # brain_proc,; commander_proc,; governor_proc,; motivator_proc,
     ctx_proc,
-    governor_proc,
     memory_manager_proc,
-    motivator_proc,
     perceive_proc,
 )
 from utilities.mj.mjcf import get_humanoid_geoms
 
-# class SHMManager:
+
+class RuntimeEngine:
+    def __init__(self):
+        self.shared_queues: Dict[str, mp.Queue] = {}
+        self.shared_memory: Dict[str, torch.Tensor] = {}
+        self.metadata: Dict[str, Any] = {}
+
+    def add_queue(self, name: str, queue: mp.Queue):
+        self.shared_queues[name] = queue
+
+    def get_queue(self, name: str) -> mp.Queue:
+        return self.shared_queues[name]
+
+    def add_shm(self, name: str, shape: Tuple[int, ...], dtype: torch.dtype):
+        shm = torch.zeros(shape, dtype=dtype)
+        self.shared_memory[name] = shm
+        shm.share_memory_()
+
+    def update_shm(self, name: str, tensor: torch.Tensor):
+        self.shared_memory[name].copy_(tensor, non_blocking=True)
+
+    def get_shm(self, name: str) -> torch.Tensor:
+        return self.shared_memory[name]
+
+    def add_metadata(self, name: str, metadata: Any):
+        self.metadata[name] = metadata
+
+    def get_metadata(self, name: str) -> Any:
+        return self.metadata[name]
 
 
 class Host:
@@ -26,6 +51,7 @@ class Host:
         cfg_file,
         exp_dir,
     ):
+        runtime_engine = RuntimeEngine()
         self.cfg_file = cfg_file
         self.exp_dir = exp_dir
         os.makedirs(self.exp_dir, exist_ok=True)
@@ -37,17 +63,16 @@ class Host:
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-
-        # queues
-        drives_q = mp.Queue()
-        emotions_q = mp.Queue()
-
-        queues = {
-            "drives_q": drives_q,
-            "emotions_q": emotions_q,
-        }
-
         robot_info = self.initialize_robot_info(robot_cfg)
+
+        runtime_engine.add_metadata("robot_info", robot_info)
+        runtime_engine.add_metadata("config", cfg)
+        runtime_engine.add_metadata("device", device)
+        runtime_engine.add_metadata("intrinsics", intrinsics)
+        runtime_engine.add_metadata("intrinsic_indices", intrinsic_indices)
+        # runtime_engine.add_queue("drives_q", drives_q)
+        # runtime_engine.add_queue("emotions_q", emotions_q)
+
         # shm
         latent_offset = 0
         latent_slices = {}
@@ -57,159 +82,156 @@ class Host:
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
             latent_offset += emb_dim
 
-        human_state = torch.zeros(
-            10,  # max. number of human states
-            dtype=torch.float64,
-        )
+        runtime_engine.add_metadata("latent_slices", latent_slices)
 
-        vision = torch.zeros(
+        # queues
+        # drives_q = mp.Queue()
+        # emotions_q = mp.Queue()
+
+        # queues = {
+        #     "drives_q": drives_q,
+        #     "emotions_q": emotions_q,
+        # }
+
+        # human_state = torch.zeros(
+        #     10,  # max. number of human states
+        #     dtype=torch.float64,
+        # )
+
+        # governance = torch.zeros(
+        #     (len(intrinsics),),
+        #     dtype=torch.float32,
+        # )
+
+        # latent = torch.zeros(
+        #     (
+        #         1,
+        #         latent_offset,
+        #     ),
+        #     dtype=torch.float32,
+        # )
+
+        # torques = torch.zeros((1, robot_info["n_actuators"]), dtype=torch.float32)
+
+        runtime_engine.add_shm(
+            "vision",
             (
                 3,
                 robot_info["egocentric_view_height"],
                 robot_info["egocentric_view_width"],
             ),
-            dtype=torch.float32,
+            torch.float32,
+        )
+        runtime_engine.add_shm(
+            "qpos",
+            (robot_info["nq"],),
+            torch.float32,
+        )
+        runtime_engine.add_shm(
+            "qvel",
+            (robot_info["nv"],),
+            torch.float32,
+        )
+        runtime_engine.add_shm(
+            "force_on_geoms",
+            (robot_info["n_geoms"],),
+            torch.float32,
         )
 
-        qpos = torch.zeros(
-            robot_info["nq"],
-            dtype=torch.float32,
+        runtime_engine.add_shm(
+            "latent",
+            (1, latent_offset),
+            torch.float32,
+        )
+        runtime_engine.add_shm(
+            "emotions",
+            (1, cfg["emotion"]["pad_dim"]),
+            torch.float32,
         )
 
-        qvel = torch.zeros(
-            robot_info["nv"],
-            dtype=torch.float32,
+        runtime_engine.add_shm(
+            "torques",
+            (1, robot_info["n_actuators"]),
+            torch.float32,
         )
-
-        governance = torch.zeros(
-            (len(intrinsics),),
-            dtype=torch.float32,
-        )
-
-        latent = torch.zeros(
-            (
-                1,
-                latent_offset,
-            ),
-            dtype=torch.float32,
-        )
-
-        torques = torch.zeros((1, robot_info["n_actuators"]), dtype=torch.float32)
-
-        emotions = torch.zeros((1, cfg["emotion"]["pad_dim"]), dtype=torch.float32)
-
-        force_on_geoms = torch.zeros(robot_info["n_geoms"], dtype=torch.float32)
-
-        force_on_geoms.share_memory_()
-        human_state.share_memory_()
-        vision.share_memory_()
-        qpos.share_memory_()
-        qvel.share_memory_()
-        governance.share_memory_()
-        latent.share_memory_()
-        torques.share_memory_()
-        emotions.share_memory_()
-
-        shm = {
-            "human_state": human_state,
-            "vision": vision,
-            "qpos": qpos,
-            "qvel": qvel,
-            "force_on_geoms": force_on_geoms,
-            "governance": governance,
-            "latent": latent,
-            "torques": torques,
-            "emotions": emotions,
-            "intrinsic_indices": intrinsic_indices,
-            "robot_info": robot_info,
-            "latent_slices": latent_slices,
-            "device": device,
-        }
 
         # proc
         ctx_proc0 = mp.Process(
             target=ctx_proc,
-            args=(shm, cfg),
-        )
-
-        governor_proc0 = mp.Process(
-            target=governor_proc,
-            args=(
-                shm,
-                cfg,
-            ),
+            args=(runtime_engine,),
         )
 
         perceive_proc0 = mp.Process(
             target=perceive_proc,
             args=(
-                shm,
+                runtime_engine,
                 "vision",
-                perceivers_cfg,
             ),
         )
 
         memory_manager_proc0 = mp.Process(
             target=memory_manager_proc,
             args=(
-                shm,
+                runtime_engine,
                 "live_memory",
-                cfg,
             ),
         )
 
         memory_manager_proc1 = mp.Process(
             target=memory_manager_proc,
             args=(
-                shm,
+                runtime_engine,
                 "episodic_memory",
-                cfg,
             ),
         )
 
-        motivator_proc0 = mp.Process(
-            target=motivator_proc,
-            args=(
-                shm,
-                queues,
-                cfg,
-            ),
-        )
+        # governor_proc0 = mp.Process(
+        #     target=governor_proc,
+        #     args=(
+        #         shm,
+        #         cfg,
+        #     ),
+        # )
 
-        brain_proc0 = mp.Process(
-            target=brain_proc,
-            args=(
-                shm,
-                queues,
-                cfg,
-            ),
-        )
+        # motivator_proc0 = mp.Process(
+        #     target=motivator_proc,
+        #     args=(
+        #         shm,
+        #         queues,
+        #         cfg,
+        #     ),
+        # )
 
-        commander_proc0 = mp.Process(
-            target=commander_proc,
-            args=(
-                shm,
-                cfg,
-            ),
-        )
+        # brain_proc0 = mp.Process(
+        #     target=brain_proc,
+        #     args=(
+        #         shm,
+        #         queues,
+        #         cfg,
+        #     ),
+        # )
+
+        # commander_proc0 = mp.Process(
+        #     target=commander_proc,
+        #     args=(
+        #         shm,
+        #         cfg,
+        #     ),
+        # )
 
         ctx_proc0.start()
         perceive_proc0.start()
         memory_manager_proc0.start()
         memory_manager_proc1.start()
-        motivator_proc0.start()
-        brain_proc0.start()
-        governor_proc0.start()
-        commander_proc0.start()
+        # motivator_proc0.start()
+        # brain_proc0.start()
+        # governor_proc0.start()
+        # commander_proc0.start()
 
-        brain_proc0.join()
         ctx_proc0.join()
         perceive_proc0.join()
         memory_manager_proc0.join()
         memory_manager_proc1.join()
-        motivator_proc0.join()
-        governor_proc0.join()
-        commander_proc0.join()
 
     def initialize_robot_info(self, robot_cfg):
         import zmq
@@ -259,6 +281,7 @@ class Host:
             "n_geoms": len(geom_mapping),
             "n_body_geoms": len(geom_mapping),
             "n_humanoid_geoms": len(humanoid_geom_mapping),
+            "n_actuators": len(actuator_mapping),
             "humanoid_geom_indices": humanoid_indices,
             "joint_id2name": joint_mapping_rev,
             "joint_name2id": joint_mapping,
