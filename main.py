@@ -15,9 +15,12 @@ from human.process import (
     motivator_proc,
     perceive_proc,
 )
+from utilities.mj.mjcf import get_humanoid_geoms
+
+# class SHMManager:
 
 
-class Hostv2:
+class Host:
     def __init__(
         self,
         cfg_file,
@@ -34,7 +37,6 @@ class Hostv2:
         perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        brain_cfg = cfg["brain"]
 
         # queues
         drives_q = mp.Queue()
@@ -92,12 +94,13 @@ class Hostv2:
             dtype=torch.float32,
         )
 
-        torques = torch.zeros(
-            (1, brain_cfg["lstm"]["n_actuators"]), dtype=torch.float32
-        )
+        torques = torch.zeros((1, robot_info["n_actuators"]), dtype=torch.float32)
 
         emotions = torch.zeros((1, cfg["emotion"]["pad_dim"]), dtype=torch.float32)
 
+        force_on_geoms = torch.zeros(robot_info["n_geoms"], dtype=torch.float32)
+
+        force_on_geoms.share_memory_()
         human_state.share_memory_()
         vision.share_memory_()
         qpos.share_memory_()
@@ -112,6 +115,7 @@ class Hostv2:
             "vision": vision,
             "qpos": qpos,
             "qvel": qvel,
+            "force_on_geoms": force_on_geoms,
             "governance": governance,
             "latent": latent,
             "torques": torques,
@@ -224,20 +228,42 @@ class Hostv2:
         sub.close()
         zmq_tmp_ctx.term()
 
+        humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
         geom_mapping = robot_state["geom_mapping"]["geom_name_id_mapping"]
+        humanoid_geom_mapping = {
+            k: v
+            for k, v in geom_mapping.items()
+            if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
+        }
+        humanoid_geom_mapping_rev = {v: k for k, v in humanoid_geom_mapping.items()}
+        humanoid_indices = [
+            v
+            for k, v in geom_mapping.items()
+            if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
+        ]
         joint_mapping = robot_state["joint_mapping"]["joint_name_id_mapping"]
         geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
         joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
+
+        actuator_mapping = robot_state["actuator_mapping"]["actuator_name_id_mapping"]
+        actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
+
         egocentric_view = vision_parser(frame)
 
         robot_info = {
             "geom_id2name": geom_mapping_rev,
             "geom_name2id": geom_mapping,
+            "humanoid_geom_name2id": humanoid_geom_mapping,
+            "humanoid_geom_id2name": humanoid_geom_mapping_rev,
             "n_geoms": len(geom_mapping),
             "n_body_geoms": len(geom_mapping),
+            "n_humanoid_geoms": len(humanoid_geom_mapping),
+            "humanoid_geom_indices": humanoid_indices,
             "joint_id2name": joint_mapping_rev,
             "joint_name2id": joint_mapping,
+            "actuator_id2name": actuator_mapping_rev,
+            "actuator_name2id": actuator_mapping,
             "egocentric_view_width": egocentric_view.shape[2],
             "egocentric_view_height": egocentric_view.shape[1],
             "nq": len(robot_state["qpos"]),
@@ -254,7 +280,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="aji6.yaml")
+    parser.add_argument("--config", type=str, default="config.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
     parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
@@ -266,7 +292,7 @@ if __name__ == "__main__":
     os.environ["VERBOSE"] = "silent" if args.silent else "verbose"
     os.environ["DEBUG"] = str(args.debug)
 
-    host = Hostv2(
+    host = Host(
         cfg_file=args.config,
         exp_dir=args.exp_dir,
     )
