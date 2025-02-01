@@ -17,6 +17,7 @@ from human.process import (
     perceive_proc,
 )
 from utilities.mj.mjcf import get_humanoid_geoms
+from utilities.tools.retry import retry
 
 
 class RuntimeEngine:
@@ -36,10 +37,16 @@ class RuntimeEngine:
         self.shared_memory[name] = shm
         shm.share_memory_()
 
-    def update_shm(self, name: str, tensor: torch.Tensor):
+    def update_shm(self, name: str, tensor: torch.Tensor) -> None:
+        if torch.any(torch.isnan(tensor)):
+            print(f"writing nan to {name}. skipping.")
+            return
         self.shared_memory[name].copy_(tensor, non_blocking=True)
 
-    def get_shm(self, name: str) -> torch.Tensor:
+    def get_shm(self, name: str) -> torch.Tensor | None:
+        if torch.any(torch.isnan(self.shared_memory[name])):
+            print(f"reading nan from {name}. skipping.")
+            return None
         return self.shared_memory[name]
 
     def add_metadata(self, name: str, metadata: Any):
@@ -213,6 +220,7 @@ class Host:
         governor_proc0.join()
         commander_proc0.join()
 
+    @retry
     def initialize_robot_info(self, robot_cfg):
         import zmq
 
