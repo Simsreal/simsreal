@@ -7,9 +7,13 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.process import (  # brain_proc,; commander_proc,; governor_proc,; motivator_proc,
+from human.process import (
+    brain_proc,
+    commander_proc,
     ctx_proc,
+    governor_proc,
     memory_manager_proc,
+    motivator_proc,
     perceive_proc,
 )
 from utilities.mj.mjcf import get_humanoid_geoms
@@ -70,8 +74,6 @@ class Host:
         runtime_engine.add_metadata("device", device)
         runtime_engine.add_metadata("intrinsics", intrinsics)
         runtime_engine.add_metadata("intrinsic_indices", intrinsic_indices)
-        # runtime_engine.add_queue("drives_q", drives_q)
-        # runtime_engine.add_queue("emotions_q", emotions_q)
 
         # shm
         latent_offset = 0
@@ -85,33 +87,16 @@ class Host:
         runtime_engine.add_metadata("latent_slices", latent_slices)
 
         # queues
-        # drives_q = mp.Queue()
-        # emotions_q = mp.Queue()
+        drives_q = mp.Queue()
+        emotions_q = mp.Queue()
+        runtime_engine.add_queue("drives_q", drives_q)
+        runtime_engine.add_queue("emotions_q", emotions_q)
 
-        # queues = {
-        #     "drives_q": drives_q,
-        #     "emotions_q": emotions_q,
-        # }
-
-        # human_state = torch.zeros(
-        #     10,  # max. number of human states
-        #     dtype=torch.float64,
-        # )
-
-        # governance = torch.zeros(
-        #     (len(intrinsics),),
-        #     dtype=torch.float32,
-        # )
-
-        # latent = torch.zeros(
-        #     (
-        #         1,
-        #         latent_offset,
-        #     ),
-        #     dtype=torch.float32,
-        # )
-
-        # torques = torch.zeros((1, robot_info["n_actuators"]), dtype=torch.float32)
+        runtime_engine.add_shm(
+            "human_state",
+            (10,),
+            torch.float64,
+        )
 
         runtime_engine.add_shm(
             "vision",
@@ -155,7 +140,12 @@ class Host:
             torch.float32,
         )
 
-        # proc
+        runtime_engine.add_shm(
+            "governance",
+            (len(intrinsics),),
+            torch.float32,
+        )
+
         ctx_proc0 = mp.Process(
             target=ctx_proc,
             args=(runtime_engine,),
@@ -185,53 +175,43 @@ class Host:
             ),
         )
 
-        # governor_proc0 = mp.Process(
-        #     target=governor_proc,
-        #     args=(
-        #         shm,
-        #         cfg,
-        #     ),
-        # )
+        governor_proc0 = mp.Process(
+            target=governor_proc,
+            args=(runtime_engine,),
+        )
 
-        # motivator_proc0 = mp.Process(
-        #     target=motivator_proc,
-        #     args=(
-        #         shm,
-        #         queues,
-        #         cfg,
-        #     ),
-        # )
+        motivator_proc0 = mp.Process(
+            target=motivator_proc,
+            args=(runtime_engine,),
+        )
 
-        # brain_proc0 = mp.Process(
-        #     target=brain_proc,
-        #     args=(
-        #         shm,
-        #         queues,
-        #         cfg,
-        #     ),
-        # )
+        brain_proc0 = mp.Process(
+            target=brain_proc,
+            args=(runtime_engine,),
+        )
 
-        # commander_proc0 = mp.Process(
-        #     target=commander_proc,
-        #     args=(
-        #         shm,
-        #         cfg,
-        #     ),
-        # )
+        commander_proc0 = mp.Process(
+            target=commander_proc,
+            args=(runtime_engine,),
+        )
 
         ctx_proc0.start()
         perceive_proc0.start()
         memory_manager_proc0.start()
         memory_manager_proc1.start()
-        # motivator_proc0.start()
-        # brain_proc0.start()
-        # governor_proc0.start()
-        # commander_proc0.start()
+        motivator_proc0.start()
+        brain_proc0.start()
+        governor_proc0.start()
+        commander_proc0.start()
 
         ctx_proc0.join()
         perceive_proc0.join()
         memory_manager_proc0.join()
         memory_manager_proc1.join()
+        brain_proc0.join()
+        motivator_proc0.join()
+        governor_proc0.join()
+        commander_proc0.join()
 
     def initialize_robot_info(self, robot_cfg):
         import zmq
