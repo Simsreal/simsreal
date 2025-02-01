@@ -6,13 +6,15 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.process.brain import brain_proc
-from human.process.commander import commander_proc
-from human.process.ctx import ctx_proc
-from human.process.governor import governor_proc
-from human.process.memorizer import memory_manager_proc
-from human.process.motivator import motivator_proc
-from human.process.perceive import perceive_proc
+from human.process import (
+    brain_proc,
+    commander_proc,
+    ctx_proc,
+    governor_proc,
+    memory_manager_proc,
+    motivator_proc,
+    perceive_proc,
+)
 
 
 class Hostv2:
@@ -218,16 +220,16 @@ class Hostv2:
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        msg: dict = sub.recv_json()  # type: ignore
+        frame: dict = sub.recv_json()  # type: ignore
         sub.close()
         zmq_tmp_ctx.term()
 
-        robot_state = json.loads(msg["robot_state"])
-        geom_mapping = robot_state["robot_geom_mapping"]["geom_name_id_mapping"]
-        joint_mapping = robot_state["robot_joint_mapping"]["joint_name_id_mapping"]
+        robot_state = json.loads(frame["robot_state"])
+        geom_mapping = robot_state["geom_mapping"]["geom_name_id_mapping"]
+        joint_mapping = robot_state["joint_mapping"]["joint_name_id_mapping"]
         geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
         joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
-        egocentric_view = vision_parser(msg)
+        egocentric_view = vision_parser(frame)
 
         robot_info = {
             "geom_id2name": geom_mapping_rev,
