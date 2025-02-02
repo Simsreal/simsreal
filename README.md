@@ -67,7 +67,6 @@ Enable it to enhance multi-processing performance on GPU (Only Linux).
 ```bash
 bash start_mps.sh
 ```
-
 ### Memory
 ```bash
 # windows
