@@ -68,33 +68,6 @@ Enable it to enhance multi-processing performance on GPU (Only Linux).
 bash start_mps.sh
 ```
 
-```shell
-# upon MPS launch, you should see nvidia-cuda-mps-server in processes.
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 550.120                Driver Version: 550.120        CUDA Version: 12.4     |
-|-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA GeForce RTX 4090 ...    Off |   00000000:01:00.0 Off |                  N/A |
-| N/A   64C    P0             55W /  115W |    1097MiB /  16376MiB |     40%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|    0   N/A  N/A      2628      G   /usr/lib/xorg/Xorg                              4MiB |
-|    0   N/A  N/A     10925      C   nvidia-cuda-mps-server                         28MiB |
-|    0   N/A  N/A     67657    M+C   /usr/bin/python                               350MiB |
-|    0   N/A  N/A     67661    M+C   /usr/bin/python                               368MiB |
-|    0   N/A  N/A     67662    M+C   /usr/bin/python                               334MiB |
-+-----------------------------------------------------------------------------------------+
-```
-
 ### Memory
 ```bash
 # windows
