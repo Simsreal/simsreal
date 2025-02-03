@@ -35,6 +35,10 @@ pip install -r requirements-dev.txt
 Pytorch
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+Rapids-ai
+```bash
 pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
