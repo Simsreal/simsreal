@@ -52,7 +52,7 @@ To be added
 
 #### Linux
 ```bash
-export PYTHONPATH=$PYTHONPATH:/home/$USER/gitrepo/simsreal
+export PYTHONPATH=$PYTHONPATH:<path-to-simsreal>
 ```
 
 ## Contribution
