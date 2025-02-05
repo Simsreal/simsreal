@@ -55,13 +55,6 @@ To be added
 export PYTHONPATH=$PYTHONPATH:/home/$USER/gitrepo/simsreal
 ```
 
-### Optional
-* if you are using `nvim` or `vscode`/`cursor`, you can consider downloading `pyright` extension to get better intellisense.
-* To accelerate workflow, consider installing `thefuck` to fix your command line errors.
-```bash
-pip install thefuck
-```
-
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
