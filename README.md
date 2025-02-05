@@ -37,7 +37,7 @@ Pytorch
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-Rapids-ai (Only on linux)
+Rapids-ai (Linux/ WSL2)
 ```bash
 pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
@@ -59,8 +59,8 @@ export PYTHONPATH=$PYTHONPATH:/home/$USER/gitrepo/simsreal
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-### CUDA MPS (Only on Linux)
-Enable it to enhance multi-processing performance on GPU (Only Linux).
+### CUDA MPS
+Enable it to enhance multi-processing performance on GPU (Linux OS only).
 ```bash
 bash start_mps.sh
 ```
