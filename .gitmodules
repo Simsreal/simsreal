@@ -1,6 +1,3 @@
-[submodule "human"]
-	path = human
-	url = git@github.com:Simsreal/human.git
 [submodule "utilities"]
 	path = utilities
 	url = git@github.com:Simsreal/utilities.git
