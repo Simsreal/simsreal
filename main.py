@@ -22,15 +22,15 @@ from utilities.tools.retry import retry
 
 class RuntimeEngine:
     def __init__(self):
-        self.shared_queues: Dict[str, mp.Queue] = {}
+        self.shared_guidances: Dict[str, mp.Queue] = {}
         self.shared_memory: Dict[str, torch.Tensor] = {}
         self.metadata: Dict[str, Any] = {}
 
-    def add_queue(self, name: str, queue: mp.Queue):
-        self.shared_queues[name] = queue
+    def add_guidance(self, name: str, guidance: mp.Queue):
+        self.shared_guidances[name] = guidance
 
-    def get_queue(self, name: str) -> mp.Queue:
-        return self.shared_queues[name]
+    def get_guidance(self, name: str) -> mp.Queue:
+        return self.shared_guidances[name]
 
     def add_shm(self, name: str, shape: Tuple[int, ...], dtype: torch.dtype):
         shm = torch.zeros(shape, dtype=dtype)
@@ -94,10 +94,10 @@ class Host:
         runtime_engine.add_metadata("latent_slices", latent_slices)
 
         # queues
-        drives_q = mp.Queue()
-        emotions_q = mp.Queue()
-        runtime_engine.add_queue("drives_q", drives_q)
-        runtime_engine.add_queue("emotions_q", emotions_q)
+        torque_guidance_q = mp.Queue()
+        emotions_guidance_q = mp.Queue()
+        runtime_engine.add_guidance("torque", torque_guidance_q)
+        runtime_engine.add_guidance("emotion", emotions_guidance_q)
 
         runtime_engine.add_shm(
             "human_state",

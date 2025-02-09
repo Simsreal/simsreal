@@ -11,7 +11,7 @@ class CognitiveDissonance(Intrinsic):
     def impl(
         self,
         shm,
-        queues,
+        guidances,
         physics=None,
     ):
         if not self.memory_is_available:

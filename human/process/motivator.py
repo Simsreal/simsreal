@@ -60,7 +60,7 @@ def motivator_proc(runtime_engine):
         for intrinsic in intrinsics:
             motivators[intrinsic].guide(
                 runtime_engine.shared_memory,
-                runtime_engine.shared_queues,
+                runtime_engine.shared_guidances,
                 physics,
             )
         time.sleep(1 / cfg["running_frequency"])

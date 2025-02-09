@@ -7,7 +7,7 @@ class FearOfUnknown(Intrinsic):
     min_familiarity_wanted = 0.3
     number_of_recall = 10
 
-    def impl(self, shm, queues, physics=None):
+    def impl(self, shm, guidances, physics=None):
         if not self.memory_is_available:
             return
 
@@ -26,9 +26,9 @@ class FearOfUnknown(Intrinsic):
             return
 
         if familarity.item() < self.min_familiarity_wanted:
-            queues["emotions_q"].put(self.pad_vector("fearful") * self.activeness(shm))
+            guidances["emotion"].put(self.pad_vector("fearful") * self.activeness(shm))
         else:
-            queues["emotions_q"].put(self.pad_vector("neutral") * self.activeness(shm))
+            guidances["emotion"].put(self.pad_vector("neutral") * self.activeness(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=[])

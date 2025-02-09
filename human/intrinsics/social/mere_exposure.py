@@ -9,7 +9,7 @@ class MereExposure(Intrinsic):
     def impl(
         self,
         shm,
-        queues,
+        guidances,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -30,7 +30,7 @@ class MereExposure(Intrinsic):
             return
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
-        queues["emotions_q"].put(emotions * self.activeness(shm))
+        guidances["emotion"].put(emotions * self.activeness(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=[])

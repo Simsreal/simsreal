@@ -72,8 +72,8 @@ def brain_proc(runtime_engine):
             out_torques = out["torques"]
             out_emotions = out["emotions"]
 
-            t = try_get(runtime_engine.get_queue("drives_q"))
-            e = try_get(runtime_engine.get_queue("emotions_q"))
+            t = try_get(runtime_engine.get_guidance("torque"))
+            e = try_get(runtime_engine.get_guidance("emotion"))
 
             loss = 0
 

@@ -69,17 +69,17 @@ class Intrinsic(ABC):
     def guide(
         self,
         shm,
-        queues,
+        guidances,
         physics=None,
     ):
-        self.impl(shm, queues, physics)
+        self.impl(shm, guidances, physics)
         pass
 
     @abstractmethod
     def impl(
         self,
         shm,
-        queues,
+        guidances,
         physics=None,
     ):
         # physics is useful for motion generation

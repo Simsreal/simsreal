@@ -9,7 +9,7 @@ class Boredom(Intrinsic):
     def impl(
         self,
         shm,
-        queues,
+        guidances,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -29,7 +29,7 @@ class Boredom(Intrinsic):
 
         dist_to_boredom = torch.norm(avg_emotion - neutral_emotion, p=2)
         if dist_to_boredom < self.boredom_threshold:
-            queues["emotions_q"].put(self.pad_vector("bored") * self.activeness(shm))
+            guidances["emotion"].put(self.pad_vector("bored") * self.activeness(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=[])
