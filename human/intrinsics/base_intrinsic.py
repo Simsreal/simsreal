@@ -82,7 +82,11 @@ class Intrinsic(ABC):
         guidances,
         physics=None,
     ):
-        # physics is useful for motion generation
+        """
+        :param shm: Dict[str, torch.Tensor]
+        :param guidances: Dict[str, mp.Queue]
+        :param physics: dm_control.physics.Physics
+        """
         raise NotImplementedError
 
     @abstractmethod

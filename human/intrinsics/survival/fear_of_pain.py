@@ -21,6 +21,7 @@ class FearOfPain(Intrinsic):
     ):
         forces = shm["force_on_geoms"] > self.acceptable_forceN
         painful = torch.any(forces).item()
+        print(painful)
         guidances["emotion"].put(
             self.pad_vector("fearful" if painful else "neutral") * self.activeness(shm)
         )

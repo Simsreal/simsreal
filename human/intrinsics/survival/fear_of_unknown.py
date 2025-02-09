@@ -25,10 +25,14 @@ class FearOfUnknown(Intrinsic):
             # occurs if there is lack of memory
             return
 
-        if familarity.item() < self.min_familiarity_wanted:
-            guidances["emotion"].put(self.pad_vector("fearful") * self.activeness(shm))
-        else:
-            guidances["emotion"].put(self.pad_vector("neutral") * self.activeness(shm))
+        guidances["emotion"].put(
+            self.pad_vector(
+                "fearful"
+                if familarity.item() < self.min_familiarity_wanted
+                else "neutral"
+            )
+            * self.activeness(shm)
+        )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=[])

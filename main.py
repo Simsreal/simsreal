@@ -95,9 +95,9 @@ class Host:
 
         # queues
         torque_guidance_q = mp.Queue()
-        emotions_guidance_q = mp.Queue()
+        emotion_guidance_q = mp.Queue()
         runtime_engine.add_guidance("torque", torque_guidance_q)
-        runtime_engine.add_guidance("emotion", emotions_guidance_q)
+        runtime_engine.add_guidance("emotion", emotion_guidance_q)
 
         runtime_engine.add_shm(
             "human_state",
