@@ -286,10 +286,42 @@ class Host:
 
 
 if __name__ == "__main__":
+    import platform
+    import subprocess
+    from argparse import ArgumentParser
+
+    if platform.system() == "Linux":
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-d",
+                "-p",
+                "6333:6333",
+                "-v",
+                f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
+                "qdrant/qdrant",
+            ]
+        )
+    elif platform.system() == "Windows":
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-d",
+                "-p",
+                "6333:6333",
+                "-v",
+                f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
+                "qdrant/qdrant",
+            ]
+        )
+
     mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
     print(f"available CPU cores: {mp.cpu_count()}")
-    from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")

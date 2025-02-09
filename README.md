@@ -43,26 +43,13 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
-### Unity Simulator setup
-Follow [Simulator Prerequisites](https://github.com/Simsreal/simulator?tab=readme-ov-file#prerequisites) to setup the simulator.
-
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch Simsreal
-### CUDA MPS
-Enable it to enhance multi-processing performance on GPU (Linux OS only).
-```bash
-bash start_mps.sh
-```
-### Memory
-```bash
-# windows
-docker run --rm -d -p 6333:6333 -v ${PWD}/qdrant_storage:/qdrant/storage qdrant/qdrant
 
-# linux
-docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
-```
+### Memory
+
 ### Simulator
 #### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
@@ -70,4 +57,11 @@ Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#l
 ### Simsreal
 ```bash
 python main.py
+```
+
+## Performance
+### CUDA MPS
+Enable it to enhance multi-processing performance on GPU (Linux OS only).
+```bash
+bash start_mps.sh
 ```
