@@ -32,7 +32,7 @@ class MereExposure(Intrinsic):
             return
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
-        guidances["emotion"].put(emotions * self.activeness(shm))
+        self.add_guidance("emotion", emotions * self.activeness_fn(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())

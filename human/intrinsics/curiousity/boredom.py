@@ -31,7 +31,7 @@ class Boredom(Intrinsic):
 
         dist_to_boredom = torch.norm(avg_emotion - neutral_emotion, p=2)
         if dist_to_boredom < self.boredom_threshold:
-            guidances["emotion"].put(self.pad_vector("bored") * self.activeness(shm))
+            self.add_guidance("emotion", "bored")
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())
