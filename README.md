@@ -46,15 +46,6 @@ pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ### Unity Simulator setup
 Follow [Simulator Prerequisites](https://github.com/Simsreal/simulator?tab=readme-ov-file#prerequisites) to setup the simulator.
 
-### Environment Variables (for Intellisense)
-#### Windows
-To be added
-
-#### Linux
-```bash
-export PYTHONPATH=$PYTHONPATH:<path-to-simsreal>
-```
-
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
