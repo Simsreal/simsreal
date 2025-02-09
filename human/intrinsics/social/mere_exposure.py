@@ -6,7 +6,7 @@ from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 class MereExposure(Intrinsic):
     number_of_recall = 5
 
-    def impact(
+    def impl(
         self,
         shm,
         queues,

@@ -6,7 +6,7 @@ from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 class Boredom(Intrinsic):
     boredom_threshold = 0.05
 
-    def impact(
+    def impl(
         self,
         shm,
         queues,

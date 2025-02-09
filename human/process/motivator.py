@@ -58,7 +58,7 @@ def motivator_proc(runtime_engine):
             physics.data.qvel[:] = runtime_engine.get_shm("qvel").numpy()  # type: ignore
 
         for intrinsic in intrinsics:
-            motivators[intrinsic].impact(
+            motivators[intrinsic].guide(
                 runtime_engine.shared_memory,
                 runtime_engine.shared_queues,
                 physics,

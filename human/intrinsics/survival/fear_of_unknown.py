@@ -7,7 +7,7 @@ class FearOfUnknown(Intrinsic):
     min_familiarity_wanted = 0.3
     number_of_recall = 10
 
-    def impact(self, shm, queues, physics=None):
+    def impl(self, shm, queues, physics=None):
         if not self.memory_is_available:
             return
 

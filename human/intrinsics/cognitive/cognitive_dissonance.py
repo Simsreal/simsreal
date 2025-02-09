@@ -8,7 +8,7 @@ class CognitiveDissonance(Intrinsic):
     k = 10
     alpha = 0.1
 
-    def impact(
+    def impl(
         self,
         shm,
         queues,

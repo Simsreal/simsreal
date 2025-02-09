@@ -1,6 +1,7 @@
+# import heapq
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import torch
@@ -28,7 +29,7 @@ class Intrinsic(ABC):
         self.live_memory_store: MemoryStore = live_memory_store
         self.episodic_memory_store: MemoryStore = episodic_memory_store
 
-        self.motion_trajectory: MotionTrajectory | None = None
+        self.priorities: List[Tuple[float, MotionTrajectory]] = []
 
     @property
     def memory_is_available(self) -> bool:
@@ -65,8 +66,17 @@ class Intrinsic(ABC):
             joint_names=joint_names,
         )
 
+    def guide(
+        self,
+        shm,
+        queues,
+        physics=None,
+    ):
+        self.impl(shm, queues, physics)
+        pass
+
     @abstractmethod
-    def impact(
+    def impl(
         self,
         shm,
         queues,
