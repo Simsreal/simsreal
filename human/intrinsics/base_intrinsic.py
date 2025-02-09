@@ -1,7 +1,8 @@
-# import heapq
+import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Deque, List, Tuple
+from queue import Empty, PriorityQueue
+from typing import Deque, Dict, Tuple
 
 import numpy as np
 import torch
@@ -9,6 +10,7 @@ from dm_control.utils.inverse_kinematics import IKResult, qpos_from_site_pose
 
 from human.memory.store import MemoryStore
 from utilities.emotions.pad import emotion_look_up
+from utilities.tools.retry import retry
 
 
 @dataclass
@@ -24,12 +26,23 @@ class MotionTrajectory:
 
 
 class Intrinsic(ABC):
+    priority_queue_size = 1000
+
     def __init__(self, id, live_memory_store, episodic_memory_store):
         self.id = id
         self.live_memory_store: MemoryStore = live_memory_store
         self.episodic_memory_store: MemoryStore = episodic_memory_store
 
-        self.priorities: List[Tuple[float, MotionTrajectory]] = []
+        self.priorities: Dict[
+            str, PriorityQueue[Tuple[float, torch.Tensor | MotionTrajectory]]
+        ] = {
+            "emotion": PriorityQueue(maxsize=self.priority_queue_size),
+            "motion": PriorityQueue(maxsize=self.priority_queue_size),
+        }
+
+        # runtime
+        self.activeness = 0.0
+        self.importance = 0.0
 
     @property
     def memory_is_available(self) -> bool:
@@ -40,22 +53,25 @@ class Intrinsic(ABC):
         except Exception:
             return False
 
-    def importance(self, shm) -> float:
+    def importance_fn(
+        self,
+        shm,
+    ) -> float:
         """
-        decides how much the intrinsic should be prioritized.
+        decides how much the intrinsic should be prioritized at current time step.
+        default to self.activeness.
+        """
+        return -self.activeness
 
-        If not implemented, treat activeness as importance.
+    def activeness_fn(self, shm) -> float:
         """
-        return self.activeness(shm)
-
-    def activeness(self, shm) -> float:
-        """
-        intrinsic governance output.
+        decides the extent of the intrinsic's influence on the agent.
+        default to corresponding governance output.
 
         :param shm: Dict[str, torch.Tensor]
         :return: activeness: float
         """
-        return shm["governance"][self.id].item()
+        return -shm["governance"][self.id].item()
 
     def pad_vector(
         self,
@@ -80,13 +96,51 @@ class Intrinsic(ABC):
             joint_names=joint_names,
         )
 
+    @retry
+    def add_guidance(
+        self,
+        guidance_type: str,
+        guidance: torch.Tensor | str,
+    ):
+        if guidance_type == "emotion":
+            if isinstance(guidance, str):
+                emotion = self.pad_vector(guidance)
+            else:
+                emotion = guidance
+            self.priorities[guidance_type].put(
+                (
+                    self.importance + random.random() * 1e-9,
+                    emotion * self.activeness,
+                )
+            )
+        else:
+            print(f"Invalid guidance type: {guidance_type}")
+
     def guide(
         self,
         shm,
         guidances,
         physics=None,
     ):
+        self.activeness = self.activeness_fn(shm)
+        self.importance = self.importance_fn(shm)
         self.impl(shm, guidances, physics)
+
+        try:
+            emotion_guidance = self.priorities["emotion"].get_nowait()[1]
+        except Empty:
+            emotion_guidance = None
+
+        try:
+            motion_guidance = self.priorities["motion"].get_nowait()[1]
+        except Empty:
+            motion_guidance = None
+
+        if emotion_guidance is not None:
+            guidances["emotion"].put(emotion_guidance)
+
+        if motion_guidance is not None:
+            guidances["motion"].put(motion_guidance)
 
     @abstractmethod
     def impl(
