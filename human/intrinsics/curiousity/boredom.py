@@ -1,3 +1,5 @@
+from collections import deque
+
 import torch
 
 from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
@@ -32,4 +34,4 @@ class Boredom(Intrinsic):
             guidances["emotion"].put(self.pad_vector("bored") * self.activeness(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
-        return MotionTrajectory(trajectory=[])
+        return MotionTrajectory(trajectory=deque())

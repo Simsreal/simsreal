@@ -1,3 +1,5 @@
+from collections import deque
+
 import torch
 
 from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
@@ -22,7 +24,7 @@ class FearOfUnknown(Intrinsic):
         familarity = torch.mean(familiarities)
 
         if torch.isnan(familarity):
-            # occurs if there is lack of memory
+            # could occur if there is lack of memory
             return
 
         guidances["emotion"].put(
@@ -35,4 +37,4 @@ class FearOfUnknown(Intrinsic):
         )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
-        return MotionTrajectory(trajectory=[])
+        return MotionTrajectory(trajectory=deque())

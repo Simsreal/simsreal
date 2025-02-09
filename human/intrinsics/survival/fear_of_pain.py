@@ -1,3 +1,5 @@
+from collections import deque
+
 import torch
 
 from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
@@ -26,5 +28,5 @@ class FearOfPain(Intrinsic):
             self.pad_vector("fearful" if painful else "neutral") * self.activeness(shm)
         )
 
-    def generate_motion_trajectory(self):
-        return MotionTrajectory(trajectory=[])
+    def generate_motion_trajectory(self) -> MotionTrajectory:
+        return MotionTrajectory(trajectory=deque())

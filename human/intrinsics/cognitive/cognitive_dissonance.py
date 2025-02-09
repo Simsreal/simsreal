@@ -1,3 +1,5 @@
+from collections import deque
+
 import numpy as np
 from scipy.spatial.distance import cdist
 
@@ -42,4 +44,4 @@ class CognitiveDissonance(Intrinsic):
         )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
-        return MotionTrajectory(trajectory=[])
+        return MotionTrajectory(trajectory=deque())

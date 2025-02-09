@@ -1,7 +1,7 @@
 # import heapq
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Deque, List, Tuple
 
 import numpy as np
 import torch
@@ -20,7 +20,7 @@ class MotionCheckpoint:
 
 @dataclass
 class MotionTrajectory:
-    trajectory: List[MotionCheckpoint]
+    trajectory: Deque[MotionCheckpoint]
 
 
 class Intrinsic(ABC):
@@ -40,13 +40,27 @@ class Intrinsic(ABC):
         except Exception:
             return False
 
+    def importance(self, shm) -> float:
+        """
+        decides how much the intrinsic should be prioritized.
+
+        If not implemented, treat activeness as importance.
+        """
+        return self.activeness(shm)
+
     def activeness(self, shm) -> float:
+        """
+        intrinsic governance output.
+
+        :param shm: Dict[str, torch.Tensor]
+        :return: activeness: float
+        """
         return shm["governance"][self.id].item()
 
     def pad_vector(
         self,
-        emotion,
-        unsqueeze=True,
+        emotion: str,
+        unsqueeze: bool = True,
     ) -> torch.Tensor:
         if unsqueeze:
             return emotion_look_up[emotion].unsqueeze(0)
@@ -73,7 +87,6 @@ class Intrinsic(ABC):
         physics=None,
     ):
         self.impl(shm, guidances, physics)
-        pass
 
     @abstractmethod
     def impl(

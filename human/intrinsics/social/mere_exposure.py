@@ -1,3 +1,5 @@
+from collections import deque
+
 import torch
 
 from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
@@ -33,4 +35,4 @@ class MereExposure(Intrinsic):
         guidances["emotion"].put(emotions * self.activeness(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
-        return MotionTrajectory(trajectory=[])
+        return MotionTrajectory(trajectory=deque())
