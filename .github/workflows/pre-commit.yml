@@ -12,6 +12,11 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: verify current branch details
+        run: |
+          git branch
+          git status
+
       - name: Install pre-commit
         run: |
           python -m pip install --upgrade pip
@@ -24,7 +29,7 @@ jobs:
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit
-        run: pre-commit run --all-files
+        run: pre-commit run --all-files --config .pre-commit-config.yaml
 
       - name: Show status
         run: echo "🍏 Job status is ${{ job.status }}"

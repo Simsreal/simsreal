@@ -1,21 +1,21 @@
 import gc
 import json
 import os
-from typing import Any
-from typing import Dict
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.process import brain_proc
-from human.process import commander_proc
-from human.process import ctx_proc
-from human.process import governor_proc
-from human.process import memory_manager_proc
-from human.process import motivator_proc
-from human.process import perceive_proc
+from human.process import (
+    brain_proc,
+    commander_proc,
+    ctx_proc,
+    governor_proc,
+    memory_manager_proc,
+    motivator_proc,
+    perceive_proc,
+)
 from utilities.mj.mjcf import get_humanoid_geoms
 from utilities.tools.retry import retry
 
@@ -230,7 +230,7 @@ class Host:
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
-        url = f"{robot_sub_cfg['protocol']}: //{robot_sub_cfg['ip']}: {robot_sub_cfg['port']}"
+        url = f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"  # type: ignore
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
