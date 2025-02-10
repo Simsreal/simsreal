@@ -8,8 +8,7 @@
 ## Table of Contents
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
-  - [Install development packages](#install-development-packages)
-  - [Unity Simulator setup](#unity-simulator-setup)
+  - [Dependencies](#dependencies)
 - [Contribution](#contribution)
 - [Launch Simsreal](#launch-simsreal)
 
@@ -26,9 +25,8 @@ git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
 git submodule update --init --recursive
 ```
-To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md).
 
-### Install development packages
+### Dependencies
 ```bash
 pip install -r requirements-dev.txt
 ```
@@ -46,10 +44,9 @@ pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
-## Launch Simsreal
+## Launch
 
 ### Simulator
-#### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
 ### Simsreal
