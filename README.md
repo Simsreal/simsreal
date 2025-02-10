@@ -48,8 +48,6 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 
 ## Launch Simsreal
 
-### Memory
-
 ### Simulator
 #### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
@@ -57,11 +55,4 @@ Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#l
 ### Simsreal
 ```bash
 python main.py
-```
-
-## Performance
-### CUDA MPS
-Enable it to enhance multi-processing performance on GPU (Linux OS only).
-```bash
-bash start_mps.sh
 ```
