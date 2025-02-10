@@ -65,7 +65,7 @@ def ctx_proc(runtime_engine):
     zmq_ctx = zmq.Context()
     sub = zmq_ctx.socket(zmq.SUB)
     sub.connect(
-        f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
+        f"{robot_sub_cfg['protocol']}: //{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
     )
     sub.setsockopt_string(zmq.SUBSCRIBE, "")
 
