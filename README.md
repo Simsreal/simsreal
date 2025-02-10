@@ -10,7 +10,7 @@
   - [Clone the repository](#clone-the-repository)
   - [Dependencies](#dependencies)
 - [Contribution](#contribution)
-- [Launch Simsreal](#launch-simsreal)
+- [Launch](#launch)
 
 ## Prerequisites
 
