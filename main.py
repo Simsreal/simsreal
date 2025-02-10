@@ -291,6 +291,8 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     if platform.system() == "Linux":
+        import shutil
+
         subprocess.run(
             [
                 "docker",
@@ -306,6 +308,12 @@ if __name__ == "__main__":
                 "qdrant/qdrant",
             ]
         )
+        if shutil.which("nvidia-cuda-mps-control"):
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+            os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
+            os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
+            subprocess.run(["nvidia-cuda-mps-control", "-d"])
+
     elif platform.system() == "Windows":
         subprocess.run(
             [
