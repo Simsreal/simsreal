@@ -131,16 +131,14 @@ class Intrinsic(ABC):
         except Empty:
             emotion_guidance = None
 
-        try:
-            motion_guidance = self.priorities["motion"].get_nowait()[1]
-        except Empty:
-            motion_guidance = None
+        print(self.priorities["emotion"].queue)
+        # try:
+        #     motion_guidance = self.priorities["motion"].get_nowait()[1]
+        # except Empty:
+        #     motion_guidance = None
 
         if emotion_guidance is not None:
             guidances["emotion"].put(emotion_guidance)
-
-        if motion_guidance is not None:
-            guidances["motion"].put(motion_guidance)
 
     @abstractmethod
     def impl(

@@ -1,5 +1,11 @@
-from human.intrinsics.base_intrinsic import Intrinsic
+from collections import deque
+
+from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 
 class OrientingReflex(Intrinsic):
-    pass
+    def impl(self, shm, guidances, physics=None):
+        pass
+
+    def generate_motion_trajectory(self) -> MotionTrajectory:
+        return MotionTrajectory(trajectory=deque())
