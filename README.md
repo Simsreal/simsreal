@@ -48,8 +48,6 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 
 ## Launch Simsreal
 
-### Memory
-
 ### Simulator
 #### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
