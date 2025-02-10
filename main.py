@@ -230,7 +230,7 @@ class Host:
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
-        url = f"{robot_sub_cfg['protocol']}: //{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
+        url = f"{robot_sub_cfg['protocol']}: //{robot_sub_cfg['ip']}: {robot_sub_cfg['port']}"
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
