@@ -14,6 +14,8 @@ repos:
     rev: 5.12.0
     hooks:
     -   id: isort
+        args: ["--profile", "black", "--diff", "--verbose"]
+        fail_fast: false
 -   repo: https://github.com/pycqa/flake8
     rev: 6.0.0
     hooks:

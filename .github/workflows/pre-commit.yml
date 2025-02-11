@@ -7,6 +7,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -16,12 +20,10 @@ jobs:
         run: |
           git branch
           git status
-
       - name: Install pre-commit
         run: |
           python -m pip install --upgrade pip
           pip install pre-commit
-
       - name: Cache pre-commit hooks
         uses: actions/cache@v3
         with:
@@ -29,7 +31,9 @@ jobs:
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
 
       - name: Run pre-commit
-        run: pre-commit run --all-files --config .pre-commit-config.yaml
-
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            pre-commit run --files $file
+          done
       - name: Show status
         run: echo "🍏 Job status is ${{ job.status }}"

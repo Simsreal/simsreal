@@ -9,7 +9,7 @@ def commander_proc(runtime_engine):
     robot_pub_cfg = cfg["robot"]["pub"]
     pub = zmq.Context().socket(zmq.PUB)
     pub.bind(
-        f"{robot_pub_cfg['protocol']}: //{robot_pub_cfg['ip']}: {robot_pub_cfg['port']}"
+        f"{robot_pub_cfg['protocol']}://{robot_pub_cfg['ip']}:{robot_pub_cfg['port']}"  # type: ignore
     )
 
     while True:
