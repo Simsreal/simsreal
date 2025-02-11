@@ -8,10 +8,9 @@
 ## Table of Contents
 - [Prerequisites](#prerequisites)
   - [Clone the repository](#clone-the-repository)
-  - [Install development packages](#install-development-packages)
-  - [Unity Simulator setup](#unity-simulator-setup)
+  - [Dependencies](#dependencies)
 - [Contribution](#contribution)
-- [Launch Simsreal](#launch-simsreal)
+- [Launch](#launch)
 
 ## Prerequisites
 
@@ -26,45 +25,24 @@ git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
 git submodule update --init --recursive
 ```
-To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md).
 
-### Install development packages
+
+### Install dependencies
 ```bash
 pip install -r requirements-dev.txt
-```
-Pytorch
-```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-```
 
-Rapids-ai (Linux/ WSL2)
-```bash
+# only on linux
 pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
-### Unity Simulator setup
-Follow [Simulator Prerequisites](https://github.com/Simsreal/simulator?tab=readme-ov-file#prerequisites) to setup the simulator.
-
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
-## Launch Simsreal
-### CUDA MPS
-Enable it to enhance multi-processing performance on GPU (Linux OS only).
-```bash
-bash start_mps.sh
-```
-### Memory
-```bash
-# windows
-docker run --rm -d -p 6333:6333 -v ${PWD}/qdrant_storage:/qdrant/storage qdrant/qdrant
+## Launch
 
-# linux
-docker run --rm -d -p 6333:6333 -v $(pwd)/qdrant_storage:/qdrant/storage  qdrant/qdrant
-```
 ### Simulator
-#### Unity
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
 ### Simsreal
