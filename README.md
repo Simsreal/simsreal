@@ -24,7 +24,6 @@ The easiest way to clone the repository is to create a ssh key and use it to clo
 ```bash
 git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
-git submodule update --init --recursive
 ```
 To understand more about the submodules, have a look at [docs/submodules_overview.md](docs/submodules_overview.md).
 
