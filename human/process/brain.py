@@ -7,7 +7,6 @@ import torch.nn.functional as F
 from human.preference.conscious import LSTM, xLSTM
 
 
-# from utilities.pytorch_utils.gradients import check_gradients
 def brain_proc(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
     device = runtime_engine.get_metadata("device")
@@ -65,9 +64,8 @@ def brain_proc(runtime_engine):
     while True:
         with torch.cuda.stream(stream):  # type: ignore
             ctx = ctx.detach()
-            if torch.any(torch.isnan(runtime_engine.get_shm("latent"))):
-                continue
             ctx = fifo(ctx, runtime_engine.get_shm("latent"))
+            print(ctx[0, 0, :])
             out = lstm(ctx)
             out_torques = out["torques"]
             out_emotions = out["emotions"]

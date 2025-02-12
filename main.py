@@ -37,11 +37,20 @@ class RuntimeEngine:
         self.shared_memory[name] = shm
         shm.share_memory_()
 
-    def update_shm(self, name: str, tensor: torch.Tensor) -> None:
+    def update_shm(
+        self,
+        name: str,
+        tensor: torch.Tensor,
+        slice_: slice | None = None,
+    ) -> None:
         if torch.any(torch.isnan(tensor)):
             print(f"writing nan to {name}. skipping.")
-            return
-        self.shared_memory[name].copy_(tensor, non_blocking=True)
+            return None
+
+        if slice_ is None:
+            self.shared_memory[name].copy_(tensor, non_blocking=True)
+        else:
+            self.shared_memory[name][slice_] = tensor
 
     def get_shm(self, name: str) -> torch.Tensor | None:
         if torch.any(torch.isnan(self.shared_memory[name])):
