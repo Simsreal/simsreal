@@ -37,11 +37,20 @@ class RuntimeEngine:
         self.shared_memory[name] = shm
         shm.share_memory_()
 
-    def update_shm(self, name: str, tensor: torch.Tensor) -> None:
+    def update_shm(
+        self,
+        name: str,
+        tensor: torch.Tensor,
+        slice_: slice | None = None,
+    ) -> None:
         if torch.any(torch.isnan(tensor)):
             print(f"writing nan to {name}. skipping.")
-            return
-        self.shared_memory[name].copy_(tensor, non_blocking=True)
+            return None
+
+        if slice_ is None:
+            self.shared_memory[name].copy_(tensor, non_blocking=True)
+        else:
+            self.shared_memory[name][slice_] = tensor
 
     def get_shm(self, name: str) -> torch.Tensor | None:
         if torch.any(torch.isnan(self.shared_memory[name])):
@@ -224,7 +233,7 @@ class Host:
     def initialize_robot_info(self, robot_cfg):
         import zmq
 
-        from human.process.ctx import vision_parser
+        from human.process.ctx import CTXParser
 
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
@@ -239,8 +248,10 @@ class Host:
         zmq_tmp_ctx.term()
         print("robot connected.")
 
+        ctx_parser = CTXParser(robot_cfg)
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
+        robot_state["egocentric_view"] = bytes(frame["egocentric_view"])
         geom_mapping = robot_state["geom_mapping"]["geom_name_id_mapping"]
         humanoid_geom_mapping = {
             k: v
@@ -260,7 +271,9 @@ class Host:
         actuator_mapping = robot_state["actuator_mapping"]["actuator_name_id_mapping"]
         actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
 
-        egocentric_view = vision_parser(frame)
+        egocentric_view = ctx_parser.parse(robot_state, "vision")
+        if egocentric_view is None:
+            raise ValueError("egocentric_view is None")
 
         robot_info = {
             "geom_id2name": geom_mapping_rev,
@@ -286,10 +299,54 @@ class Host:
 
 
 if __name__ == "__main__":
+    import platform
+    import subprocess
+    from argparse import ArgumentParser
+
+    if platform.system() == "Linux":
+        import shutil
+
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-d",
+                "--name",
+                "qdrant",
+                "-p",
+                "6333:6333",
+                "-v",
+                f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
+                "qdrant/qdrant",
+            ]
+        )
+        if shutil.which("nvidia-cuda-mps-control"):
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+            os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
+            os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
+            subprocess.run(["nvidia-cuda-mps-control", "-d"])
+
+    elif platform.system() == "Windows":
+        subprocess.run(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-d",
+                "--name",
+                "qdrant",
+                "-p",
+                "6333:6333",
+                "-v",
+                f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
+                "qdrant/qdrant",
+            ]
+        )
+
     mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
     print(f"available CPU cores: {mp.cpu_count()}")
-    from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")
