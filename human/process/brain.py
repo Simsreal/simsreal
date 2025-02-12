@@ -65,7 +65,9 @@ def brain_proc(runtime_engine):
     while True:
         with torch.cuda.stream(stream):  # type: ignore
             ctx = ctx.detach()
-            if torch.any(torch.isnan(runtime_engine.get_shm("latent"))):
+            if runtime_engine.get_shm("latent") is None or torch.any(
+                torch.isnan(runtime_engine.get_shm("latent"))
+            ):
                 continue
             ctx = fifo(ctx, runtime_engine.get_shm("latent"))
             out = lstm(ctx)
