@@ -23,10 +23,10 @@ perceivers:
 
 intrinsics:
   - FearOfPain
-  # - MereExposure
-  # - FearOfUnknown
-  # - CognitiveDissonance
-  # - Boredom
+  - MereExposure
+  - FearOfUnknown
+  - CognitiveDissonance
+  - Boredom
 
 brain:
   module: lstm

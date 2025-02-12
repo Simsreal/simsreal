@@ -65,7 +65,6 @@ def brain_proc(runtime_engine):
         with torch.cuda.stream(stream):  # type: ignore
             ctx = ctx.detach()
             ctx = fifo(ctx, runtime_engine.get_shm("latent"))
-            print(ctx[0, 0, :])
             out = lstm(ctx)
             out_torques = out["torques"]
             out_emotions = out["emotions"]
