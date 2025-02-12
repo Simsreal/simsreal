@@ -1,25 +1,16 @@
 import time
+from importlib import import_module
 
 from dm_control.mujoco import Physics
 
-from human.intrinsics import (
-    Boredom,
-    CognitiveDissonance,
-    FearOfPain,
-    FearOfUnknown,
-    MereExposure,
-)
 from human.memory.store import MemoryStore
 
 
 def motivator_proc(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
+    intrinsics_module = import_module("human.intrinsics")
     instrinsic_lookup = {
-        "fear_of_pain": FearOfPain,
-        "mere_exposure": MereExposure,
-        "fear_of_unknown": FearOfUnknown,
-        "cognitive_dissonance": CognitiveDissonance,
-        "boredom": Boredom,
+        name: getattr(intrinsics_module, name) for name in intrinsics_module.__all__
     }
     intrinsics = cfg["intrinsics"]
     physics = Physics.from_xml_path(cfg["robot"]["mjcf_path"])

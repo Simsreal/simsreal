@@ -22,11 +22,11 @@ perceivers:
     emb_dim: 16
 
 intrinsics:
-  - fear_of_pain
-  - mere_exposure
-  - fear_of_unknown
-  - cognitive_dissonance
-  - boredom
+  - FearOfPain
+  # - MereExposure
+  # - FearOfUnknown
+  # - CognitiveDissonance
+  # - Boredom
 
 brain:
   module: lstm
