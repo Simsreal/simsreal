@@ -24,15 +24,10 @@ def vision_preproc(x) -> torch.Tensor | None:
 
 
 def vae_loss_function(reconstructed, original, mu, logvar) -> torch.Tensor:
-    # Reconstruction loss
     reconstruction_loss = nn.functional.mse_loss(
         reconstructed, original, reduction="sum"
     )
-
-    # KL divergence loss
     kl_divergence_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-
-    # Total VAE loss
     total_loss = reconstruction_loss + kl_divergence_loss
     return total_loss
 
@@ -79,12 +74,14 @@ def perceive_proc(runtime_engine, name):
             x0 = x.clone()
             r, mu_normalized, logvar = forward(x)
             if torch.any(torch.isnan(mu_normalized)):
-                print(f"nan in {name}")
                 continue
+
             backprop(r, x0, mu_normalized, logvar)
             with torch.no_grad():
-                runtime_engine.get_shm("latent")[:, slice_].copy_(
-                    mu_normalized, non_blocking=True
+                runtime_engine.update_shm(
+                    "latent",
+                    mu_normalized,
+                    slice_=slice_,
                 )
 
         time.sleep(1 / cfg["running_frequency"])
