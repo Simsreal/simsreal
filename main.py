@@ -224,7 +224,7 @@ class Host:
     def initialize_robot_info(self, robot_cfg):
         import zmq
 
-        from human.process.ctx import vision_parser
+        from human.process.ctx import CTXParser
 
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
@@ -239,8 +239,10 @@ class Host:
         zmq_tmp_ctx.term()
         print("robot connected.")
 
+        ctx_parser = CTXParser(robot_cfg)
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
+        robot_state["egocentric_view"] = bytes(frame["egocentric_view"])
         geom_mapping = robot_state["geom_mapping"]["geom_name_id_mapping"]
         humanoid_geom_mapping = {
             k: v
@@ -260,7 +262,9 @@ class Host:
         actuator_mapping = robot_state["actuator_mapping"]["actuator_name_id_mapping"]
         actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
 
-        egocentric_view = vision_parser(frame)
+        egocentric_view = ctx_parser.parse(robot_state, "vision")
+        if egocentric_view is None:
+            raise ValueError("egocentric_view is None")
 
         robot_info = {
             "geom_id2name": geom_mapping_rev,
