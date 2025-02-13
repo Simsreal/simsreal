@@ -54,7 +54,7 @@ def memory_manager_proc(runtime_engine, mem_type):
             if live_memory is not None:
                 consolidated = live_memory.consolidate("emotion_intesity")
                 if len(consolidated) and len(consolidated[0]):
-                    memory.memorize_points(consolidated[0])
+                    memory.memorize_points(consolidated[0])  # type: ignore
 
         if time.time() - last_memory_decay > memory_cfg["decay_every"]:
             last_memory_decay = time.time()
