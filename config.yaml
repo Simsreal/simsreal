@@ -8,13 +8,13 @@ running_frequency: 20 # hz
 robot:
   sub:
     protocol: tcp
-    ip: 127.0.0.1
+    ip: 0.0.0.0
     port: 5556
   pub:
     protocol: tcp
-    ip: 127.0.0.1
+    ip: 172.27.160.28
     port: 5557
-  mjcf_path: /home/spoonbobo/simulator/Assets/MJCF/humanoid.xml
+  mjcf_path: /mnt/e/simsreal/simulator/Assets/MJCF/humanoid.xml
   pose: arm_stretch
 
 perceivers:
