@@ -1,12 +1,14 @@
+from abc import ABC
+from abc import abstractmethod
 import random
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from queue import Empty, PriorityQueue
 from typing import Deque, Dict, Tuple
 
 import numpy as np
 import torch
-from dm_control.utils.inverse_kinematics import IKResult, qpos_from_site_pose
+from dm_control.utils.inverse_kinematics import IKResult
+from dm_control.utils.inverse_kinematics import qpos_from_site_pose
 
 from human.memory.store import MemoryStore
 from utilities.emotions.pad import emotion_look_up
