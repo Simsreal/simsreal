@@ -232,16 +232,32 @@ class Host:
     @retry
     def initialize_robot_info(self, robot_cfg):
         import zmq
-
         from human.process.ctx import CTXParser
+        from dotenv import load_dotenv
 
-        print("connecting to robot.")
+        # def load_config():
+        #     from dotenv import load_dotenv
+        #     import yaml
+
+        #     load_dotenv()
+
+        #     with open("config.yaml", "r") as file:
+        #         content = file.read()
+        #         content = os.path.expandvars(content)
+        #         config = yaml.safe_load(content)
+
+        #     return config
+
+        load_dotenv()
+
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
-        print("robot_sub_cfg: ", robot_sub_cfg)
-        # url = f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"  # type: ignore
-        url = f"{robot_sub_cfg['protocol']}://172.20.10.2:{robot_sub_cfg['port']}"  # type: ignore
+        ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
+        print(ip)
+        print("robot_sub_cfg: ", ip)
+        url = f"{robot_sub_cfg['protocol']}://10.68.27.230:{robot_sub_cfg['port']}"  # type: ignore
+        # url = f"{robot_sub_cfg['protocol']}://172.20.10.2:{robot_sub_cfg['port']}"  # type: ignore
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")

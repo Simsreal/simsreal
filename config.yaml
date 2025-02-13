@@ -12,9 +12,9 @@ robot:
     port: 5556
   pub:
     protocol: tcp
-    ip: 172.27.160.28
+    ip: ${WSL_IP}
     port: 5557
-  mjcf_path: /mnt/e/simsreal/simulator/Assets/MJCF/humanoid.xml
+  mjcf_path: ${MJCF_PATH}
   pose: arm_stretch
 
 perceivers:
