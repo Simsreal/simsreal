@@ -4,30 +4,15 @@ from enum import auto
 
 import torch
 
-from human.preference.emotions import AlphaSR
-from human.preference.emotions import PolicyValueNet
-from utilities.emotions.pad import get_closest_emotion
+from human.preference.alphaSR import AlphaSR, PolicyValueNet
+
+# from utilities.emotions.pad import get_closest_emotion
 from utilities.emotions.pad import get_emotion_magnitude
 from utilities.emotions.pad import get_emotion_reward
 
 
-class HumanStateSymbol(IntEnum):
-    FULLNESS = auto()
-    AGE = auto()
-    EMOTION = auto()
-
-
-class HumanState(IntEnum):
-    FULLNESS = auto()
-    AGE = auto()
-
-
-def fullness_to_symbol(fullness):
-    return 1.0
-
-
-def age_to_symbol(age):
-    return 1.0
+class GovernorState(IntEnum):
+    DUMMY = auto()
 
 
 def governor_proc(runtime_engine):
@@ -38,16 +23,8 @@ def governor_proc(runtime_engine):
     intrinsic_dim = len(intrinsics)
 
     def augment(state) -> torch.Tensor:
-        human_state = runtime_engine.get_shm("human_state")
-        emotions = runtime_engine.get_shm("emotions")
-        state[HumanStateSymbol.FULLNESS] = fullness_to_symbol(
-            human_state[HumanState.FULLNESS]
-        )
-        state[HumanStateSymbol.AGE] = age_to_symbol(human_state[HumanState.AGE])
-
-        state[HumanStateSymbol.EMOTION] = get_closest_emotion(
-            emotions.squeeze(), return_symbol=True
-        )
+        # governor_state = runtime_engine.get_shm("governor_state")
+        # to implement
         return state
 
     policy_value_net = PolicyValueNet(
@@ -64,7 +41,8 @@ def governor_proc(runtime_engine):
 
     while True:
         with torch.cuda.stream(stream):  # type: ignore
-            state = augment(torch.zeros(state_dim, dtype=torch.float32))
+            governor_state = augment(torch.zeros(state_dim, dtype=torch.float32))
+            # print(governor_state)
             emotions = runtime_engine.get_shm("emotions")
 
             emotion_strength = get_emotion_magnitude(emotions.squeeze())
@@ -72,7 +50,7 @@ def governor_proc(runtime_engine):
             reward = emotion_strength + emotion_reward
 
             governance = alphasr.forward(
-                state,
+                governor_state,
                 reward,
                 optimizer,
             )

@@ -109,7 +109,7 @@ class Host:
         runtime_engine.add_queue("emotions_q", emotions_q)
 
         runtime_engine.add_shm(
-            "human_state",
+            "governor_state",
             (10,),
             torch.float64,
         )
