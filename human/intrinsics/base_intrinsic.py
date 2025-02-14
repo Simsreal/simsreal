@@ -120,10 +120,12 @@ class Intrinsic(ABC):
 
     def guide(
         self,
-        shm,
-        guidances,
+        runtime_engine,
         physics=None,
     ):
+        shm = runtime_engine.shared_memory
+        guidances = runtime_engine.shared_guidances
+
         self.activeness = self.activeness_fn(shm)
         self.importance = self.importance_fn(shm)
         self.impl(shm, guidances, physics)
