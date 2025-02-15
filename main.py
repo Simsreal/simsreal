@@ -256,7 +256,7 @@ class Host:
         ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
         print(ip)
         print("robot_sub_cfg: ", ip)
-        url = f"{robot_sub_cfg['protocol']}://10.68.27.230:{robot_sub_cfg['port']}"  # type: ignore
+        url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
         # url = f"{robot_sub_cfg['protocol']}://172.20.10.2:{robot_sub_cfg['port']}"  # type: ignore
         print(url)
         sub.connect(url)
