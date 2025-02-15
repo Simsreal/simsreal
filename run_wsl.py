@@ -137,7 +137,7 @@ def run_main():
         main_path = os.path.join(current_dir, "main.py")
 
         if not os.path.exists(main_path):
-            print(f"ERROR: main.py not found in {current_dir}")  # type: ignore
+            print(f"ERROR: no main.py found in {current_dir}")  # type: ignore
             sys.exit(1)
 
         # 使用Python解释器运行main.py
