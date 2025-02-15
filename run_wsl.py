@@ -131,35 +131,27 @@ def write_to_env():
         sys.exit(1)
 
 
+def run_main():
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        main_path = os.path.join(current_dir, "main.py")
+
+        if not os.path.exists(main_path):
+            print(f"ERROR: main.py not found in {current_dir}")
+            sys.exit(1)
+
+        # 使用Python解释器运行main.py
+        subprocess.run([sys.executable, main_path], check=True)
+
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: Failed to run main.py - {str(e)}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"ERROR: Unexpected error while running main.py - {str(e)}")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     # Get IP addresses from command line arguments or other methods
     write_to_env()
-    # 请将更新后的env替换部分同路径下的./config.ymal文件
-    # 具体而言， ymal文件格式如下
-    """
-robot:
-  sub:
-    protocol: tcp
-    ip: 127.0.0.1
-    port: 5556
-  pub:
-    protocol: tcp
-    ip: 127.0.0.1
-    port: 5557
-  mjcf_path: /home/spoonbobo/simulator/Assets/MJCF/humanoid.xml
-  pose: arm_stretch
-    """
-    # 你需要替换为
-    """
-robot:
-  sub:
-    protocol: tcp
-    ip: 0.0.0.0
-    port: 5556
-  pub:
-    protocol: tcp
-    ip: ${WSL_IP}
-    port: 5557
-  mjcf_path: ${MJCF_PATH}
-  pose: arm_stretch
-    """
+    run_main()
