@@ -4,6 +4,7 @@ import sys
 import subprocess
 from dotenv import load_dotenv, set_key
 from typing import Tuple
+import yaml
 
 
 def get_mjcf_path(env_path):
@@ -49,6 +50,41 @@ def get_ip_addresses() -> Tuple[str, str]:
         raise
 
 
+def update_yaml_config(wsl_ip, mjcf_path):
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        yaml_path = os.path.join(current_dir, "config.yaml")
+
+        # 读取现有的YAML文件
+        with open(yaml_path, "r") as f:
+            config = yaml.safe_load(f)
+
+        # 只更新robot部分的配置
+        if "robot" in config:
+            config["robot"].update(
+                {
+                    "sub": {"protocol": "tcp", "ip": "0.0.0.0", "port": 5556},
+                    "pub": {"protocol": "tcp", "ip": wsl_ip, "port": 5557},
+                    "mjcf_path": mjcf_path,
+                    "pose": "arm_stretch",
+                }
+            )
+
+        # 写回YAML文件，保持其他配置不变
+        with open(yaml_path, "w") as f:
+            yaml.dump(config, f, default_flow_style=False)
+
+        print(f"Updated robot configuration in config.yaml at: {yaml_path}")
+
+    except Exception as e:
+        print(f"ERROR: Failed to update YAML config - {str(e)}")
+        sys.exit(1)
+
+    except Exception as e:
+        print(f"ERROR: Failed to update YAML config - {str(e)}")
+        sys.exit(1)
+
+
 def write_to_env():
     try:
         # Get the parent directory of the current script
@@ -69,6 +105,9 @@ def write_to_env():
 
         # Load the .env file
         load_dotenv(env_path)
+        mjcf_path = os.getenv(
+            "MCJF_PATH", "/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"
+        )
 
         # Get IP addresses from run.sh
         try:
@@ -79,6 +118,9 @@ def write_to_env():
             set_key(env_path, "WINDOWS_IP", windows_ip)
 
             print(f"Updated .env file with WSL_IP={wsl_ip} and WINDOWS_IP={windows_ip}")
+
+            # Update the YAML config file
+            update_yaml_config(wsl_ip, mjcf_path)
 
         except Exception as e:
             print(f"Warning: Failed to update IP addresses - {str(e)}")
