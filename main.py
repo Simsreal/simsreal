@@ -302,25 +302,28 @@ if __name__ == "__main__":
     import platform
     import subprocess
     from argparse import ArgumentParser
+    from utilities.docker.container import running_containers
 
     if platform.system() == "Linux":
         import shutil
 
-        subprocess.run(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "-d",
-                "--name",
-                "qdrant",
-                "-p",
-                "6333:6333",
-                "-v",
-                f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
-                "qdrant/qdrant",
-            ]
-        )
+        if "qdrant" not in running_containers():
+            subprocess.run(
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "-d",
+                    "--name",
+                    "qdrant",
+                    "-p",
+                    "6333:6333",
+                    "-v",
+                    f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
+                    "qdrant/qdrant",
+                ]
+            )
+
         if shutil.which("nvidia-cuda-mps-control"):
             os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
@@ -328,21 +331,22 @@ if __name__ == "__main__":
             subprocess.run(["nvidia-cuda-mps-control", "-d"])
 
     elif platform.system() == "Windows":
-        subprocess.run(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "-d",
-                "--name",
-                "qdrant",
-                "-p",
-                "6333:6333",
-                "-v",
-                f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
-                "qdrant/qdrant",
-            ]
-        )
+        if "qdrant" not in running_containers():
+            subprocess.run(
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "-d",
+                    "--name",
+                    "qdrant",
+                    "-p",
+                    "6333:6333",
+                    "-v",
+                    f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
+                    "qdrant/qdrant",
+                ]
+            )
 
     mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
@@ -351,14 +355,12 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
-    parser.add_argument("-uc", "--unconsciousness", action="store_true")
+    # parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
-    parser.add_argument("-s", "--silent", action="store_true")
+    # parser.add_argument("-s", "--silent", action="store_true")
 
     args = parser.parse_args()
-    os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
-    os.environ["UNCONSCIOUS"] = str(args.unconsciousness)
-    os.environ["VERBOSE"] = "silent" if args.silent else "verbose"
+    os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"  # TODO: fix it.
     os.environ["DEBUG"] = str(args.debug)
 
     host = Host(
