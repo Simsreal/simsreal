@@ -303,6 +303,7 @@ if __name__ == "__main__":
     import subprocess
     from argparse import ArgumentParser
     from utilities.docker.container import running_containers
+    from utilities.nvidia.nvidia_smi import get_nvidia_process_names
 
     if platform.system() == "Linux":
         import shutil
@@ -324,7 +325,11 @@ if __name__ == "__main__":
                 ]
             )
 
-        if shutil.which("nvidia-cuda-mps-control"):
+        if (
+            shutil.which("nvidia-cuda-mps-control")
+            and "nvidia-cuda-mps-server" not in get_nvidia_process_names()
+        ):
+            print("starting mps")
             os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
             os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"

@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# from utilities.pytorch_utils.gradients import check_gradients
+# from utilities.torch.gradients import check_gradients
 
 
 class PAD(nn.Module):
