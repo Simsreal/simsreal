@@ -81,9 +81,9 @@ class Host:
         self.cfg = cfg
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        robot_info = self.connect_robot()
+        robot_props = self.connect_robot()
 
-        runtime_engine.add_metadata("robot_info", robot_info)
+        runtime_engine.add_metadata("robot_props", robot_props)
         runtime_engine.add_metadata("config", cfg)
         runtime_engine.add_metadata("device", device)
         runtime_engine.add_metadata("intrinsics", intrinsics)
@@ -117,24 +117,24 @@ class Host:
             "vision",
             (
                 3,
-                robot_info["egocentric_view_height"],
-                robot_info["egocentric_view_width"],
+                robot_props["egocentric_view_height"],
+                robot_props["egocentric_view_width"],
             ),
             torch.float32,
         )
         runtime_engine.add_shm(
             "qpos",
-            (robot_info["nq"],),
+            (robot_props["nq"],),
             torch.float32,
         )
         runtime_engine.add_shm(
             "qvel",
-            (robot_info["nv"],),
+            (robot_props["nv"],),
             torch.float32,
         )
         runtime_engine.add_shm(
             "force_on_geoms",
-            (robot_info["n_geoms"],),
+            (robot_props["n_geoms"],),
             torch.float32,
         )
 
@@ -151,7 +151,7 @@ class Host:
 
         runtime_engine.add_shm(
             "torques",
-            (1, robot_info["n_actuators"]),
+            (1, robot_props["n_actuators"]),
             torch.float32,
         )
 
@@ -229,7 +229,7 @@ class Host:
         commander_proc0.join()
 
     @retry
-    def connect_robot(self):
+    def connect_robot(self) -> Dict[str, Any]:
         import zmq
         from human.process.ctx import CTXParser
 
@@ -274,7 +274,7 @@ class Host:
         if egocentric_view is None:
             raise ValueError("egocentric_view is None")
 
-        robot_info = {
+        robot_props = {
             "geom_id2name": geom_mapping_rev,
             "geom_name2id": geom_mapping,
             "humanoid_geom_name2id": humanoid_geom_mapping,
@@ -294,7 +294,7 @@ class Host:
             "nv": len(robot_state["qvel"]),
         }
 
-        return robot_info
+        return robot_props
 
 
 if __name__ == "__main__":
@@ -303,6 +303,10 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     from utilities.docker.container import running_containers
     from utilities.nvidia.nvidia_smi import get_nvidia_process_names
+
+    mp.set_start_method("spawn", force=True)
+    print("available start methods:", mp.get_all_start_methods())
+    print(f"available CPU cores: {mp.cpu_count()}")
 
     if platform.system() == "Linux":
         import shutil
@@ -352,16 +356,10 @@ if __name__ == "__main__":
                 ]
             )
 
-    mp.set_start_method("spawn", force=True)
-    print("available start methods:", mp.get_all_start_methods())
-    print(f"available CPU cores: {mp.cpu_count()}")
-
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
-    # parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
-    # parser.add_argument("-s", "--silent", action="store_true")
 
     args = parser.parse_args()
     os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"  # TODO: fix it.

@@ -23,7 +23,7 @@ def brain_proc(runtime_engine):
             return None
 
     brain_cfg = cfg["brain"]
-    nu = runtime_engine.get_metadata("robot_info")["n_actuators"]
+    nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
 
     if brain_cfg["module"] == "xlstm" and device == "cuda":
         lstm = xLSTM(
