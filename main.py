@@ -79,11 +79,9 @@ class Host:
 
         cfg = yaml.safe_load(open(self.cfg_file))
         self.cfg = cfg
-        robot_cfg = cfg["robot"]
-        perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        robot_info = self.initialize_robot_info(robot_cfg)
+        robot_info = self.connect_robot()
 
         runtime_engine.add_metadata("robot_info", robot_info)
         runtime_engine.add_metadata("config", cfg)
@@ -95,8 +93,10 @@ class Host:
         latent_offset = 0
         latent_slices = {}
 
-        for name, params in perceivers_cfg.items():
-            emb_dim = params.get("emb_dim", 0)
+        for name, params in cfg["perceivers"].items():
+            assert "emb_dim" in params, f"emb_dim not found in {name}"
+            assert params["emb_dim"] > 0, f"emb_dim must be greater than 0 in {name}"
+            emb_dim = params["emb_dim"]
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
             latent_offset += emb_dim
 
@@ -230,11 +230,11 @@ class Host:
         commander_proc0.join()
 
     @retry
-    def initialize_robot_info(self, robot_cfg):
+    def connect_robot(self):
         import zmq
-
         from human.process.ctx import CTXParser
 
+        robot_cfg = self.cfg["robot"]
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
