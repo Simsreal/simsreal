@@ -94,7 +94,6 @@ class Host:
         latent_slices = {}
 
         for name, params in cfg["perceivers"].items():
-            assert "emb_dim" in params, f"emb_dim not found in {name}"
             assert params["emb_dim"] > 0, f"emb_dim must be greater than 0 in {name}"
             emb_dim = params["emb_dim"]
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
