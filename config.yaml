@@ -27,6 +27,7 @@ intrinsics:
   - FearOfUnknown
   - CognitiveDissonance
   - Boredom
+  - MereExposure
 
 brain:
   module: lstm
