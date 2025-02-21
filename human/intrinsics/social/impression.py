@@ -3,7 +3,7 @@ import torch
 from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 
-class MereExposure(Intrinsic):
+class Impression(Intrinsic):
     number_of_recall = 5
 
     def impact(
@@ -26,6 +26,7 @@ class MereExposure(Intrinsic):
             [pt.payload["emotion"] for pt in recalled if pt.payload is not None],
             dtype=torch.float32,
         )
+        print(emotions_tensor)
         if emotions_tensor.size(0) == 0:
             return
 
