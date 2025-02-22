@@ -91,11 +91,18 @@ def write_to_env():
         current_dir = os.path.dirname(os.path.abspath(__file__))
         env_path = os.path.join(current_dir, ".env")
         env_example_path = os.path.join(current_dir, ".env.example")
+        yaml_path = os.path.join(current_dir, "config.yaml")
+        yaml_example_path = os.path.join(current_dir, "config.template.yaml")
 
         # Copy .env.example to .env if .env doesn't exist but .env.example does
         if not os.path.exists(env_path) and os.path.exists(env_example_path):
             shutil.copy2(env_example_path, env_path)
             print(f"Copied .env.example to .env at: {env_path}")
+
+        # Copy config.yaml.example to config.yaml if config.yaml doesn't exist but config.yaml.example does
+        if not os.path.exists(yaml_path) and os.path.exists(yaml_example_path):
+            shutil.copy2(yaml_example_path, yaml_path)
+            print(f"Copied config.template.yaml to config.yaml at: {yaml_path}")
 
         # Check if MCJF_PATH exists in the system
         mjcf_path = get_mjcf_path(env_path)
