@@ -8,6 +8,9 @@ fi
 echo "Copying .env.linux.example to .env..."
 cp .env.linux.example .env
 
+echo "Copying config.template.yaml to config.yaml..."
+cp config.template.yaml config.yaml
+
 if [ $? -eq 0 ]; then
     echo "Successfully copied .env.example to .env"
 else
