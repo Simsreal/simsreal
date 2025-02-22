@@ -5,8 +5,8 @@ if [ ! -f .env.example ]; then
     exit 1
 fi
 
-echo "Copying .env.example to .env..."
-cp .env.example .env
+echo "Copying .env.linux.example to .env..."
+cp .env.linux.example .env
 
 if [ $? -eq 0 ]; then
     echo "Successfully copied .env.example to .env"
