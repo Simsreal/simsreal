@@ -232,13 +232,18 @@ class Host:
     def connect_robot(self) -> Dict[str, Any]:
         import zmq
         from human.process.ctx import CTXParser
+        from dotenv import load_dotenv
+
+        load_dotenv()
 
         robot_cfg = self.cfg["robot"]
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
-        url = f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"  # type: ignore
+        ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
+        print("robot_sub_cfg: ", ip)
+        url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
         print(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
