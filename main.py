@@ -79,13 +79,11 @@ class Host:
 
         cfg = yaml.safe_load(open(self.cfg_file))
         self.cfg = cfg
-        robot_cfg = cfg["robot"]
-        perceivers_cfg = cfg["perceivers"]
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        robot_info = self.initialize_robot_info(robot_cfg)
+        robot_props = self.connect_robot()
 
-        runtime_engine.add_metadata("robot_info", robot_info)
+        runtime_engine.add_metadata("robot_props", robot_props)
         runtime_engine.add_metadata("config", cfg)
         runtime_engine.add_metadata("device", device)
         runtime_engine.add_metadata("intrinsics", intrinsics)
@@ -95,8 +93,9 @@ class Host:
         latent_offset = 0
         latent_slices = {}
 
-        for name, params in perceivers_cfg.items():
-            emb_dim = params.get("emb_dim", 0)
+        for name, params in cfg["perceivers"].items():
+            assert params["emb_dim"] > 0, f"emb_dim must be greater than 0 in {name}"
+            emb_dim = params["emb_dim"]
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
             latent_offset += emb_dim
 
@@ -118,24 +117,24 @@ class Host:
             "vision",
             (
                 3,
-                robot_info["egocentric_view_height"],
-                robot_info["egocentric_view_width"],
+                robot_props["egocentric_view_height"],
+                robot_props["egocentric_view_width"],
             ),
             torch.float32,
         )
         runtime_engine.add_shm(
             "qpos",
-            (robot_info["nq"],),
+            (robot_props["nq"],),
             torch.float32,
         )
         runtime_engine.add_shm(
             "qvel",
-            (robot_info["nv"],),
+            (robot_props["nv"],),
             torch.float32,
         )
         runtime_engine.add_shm(
             "force_on_geoms",
-            (robot_info["n_geoms"],),
+            (robot_props["n_geoms"],),
             torch.float32,
         )
 
@@ -152,7 +151,7 @@ class Host:
 
         runtime_engine.add_shm(
             "torques",
-            (1, robot_info["n_actuators"]),
+            (1, robot_props["n_actuators"]),
             torch.float32,
         )
 
@@ -230,11 +229,11 @@ class Host:
         commander_proc0.join()
 
     @retry
-    def initialize_robot_info(self, robot_cfg):
+    def connect_robot(self) -> Dict[str, Any]:
         import zmq
-
         from human.process.ctx import CTXParser
 
+        robot_cfg = self.cfg["robot"]
         print("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
@@ -275,7 +274,7 @@ class Host:
         if egocentric_view is None:
             raise ValueError("egocentric_view is None")
 
-        robot_info = {
+        robot_props = {
             "geom_id2name": geom_mapping_rev,
             "geom_name2id": geom_mapping,
             "humanoid_geom_name2id": humanoid_geom_mapping,
@@ -295,70 +294,75 @@ class Host:
             "nv": len(robot_state["qvel"]),
         }
 
-        return robot_info
+        return robot_props
 
 
 if __name__ == "__main__":
     import platform
     import subprocess
     from argparse import ArgumentParser
+    from utilities.docker.container import running_containers
+    from utilities.nvidia.nvidia_smi import get_nvidia_process_names
+
+    mp.set_start_method("spawn", force=True)
+    print("available start methods:", mp.get_all_start_methods())
+    print(f"available CPU cores: {mp.cpu_count()}")
 
     if platform.system() == "Linux":
         import shutil
 
-        subprocess.run(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "-d",
-                "--name",
-                "qdrant",
-                "-p",
-                "6333:6333",
-                "-v",
-                f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
-                "qdrant/qdrant",
-            ]
-        )
-        if shutil.which("nvidia-cuda-mps-control"):
+        if "qdrant" not in running_containers():
+            subprocess.run(
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "-d",
+                    "--name",
+                    "qdrant",
+                    "-p",
+                    "6333:6333",
+                    "-v",
+                    f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
+                    "qdrant/qdrant",
+                ]
+            )
+
+        if (
+            shutil.which("nvidia-cuda-mps-control")
+            and "nvidia-cuda-mps-server" not in get_nvidia_process_names()
+        ):
+            print("starting mps")
             os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
             os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
             subprocess.run(["nvidia-cuda-mps-control", "-d"])
 
     elif platform.system() == "Windows":
-        subprocess.run(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "-d",
-                "--name",
-                "qdrant",
-                "-p",
-                "6333:6333",
-                "-v",
-                f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
-                "qdrant/qdrant",
-            ]
-        )
-
-    mp.set_start_method("spawn", force=True)
-    print("available start methods:", mp.get_all_start_methods())
-    print(f"available CPU cores: {mp.cpu_count()}")
+        if "qdrant" not in running_containers():
+            subprocess.run(
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "-d",
+                    "--name",
+                    "qdrant",
+                    "-p",
+                    "6333:6333",
+                    "-v",
+                    f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
+                    "qdrant/qdrant",
+                ]
+            )
 
     parser = ArgumentParser()
     parser.add_argument("--config", type=str, default="config.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
-    parser.add_argument("-uc", "--unconsciousness", action="store_true")
     parser.add_argument("-d", "--debug", action="store_true")
-    parser.add_argument("-s", "--silent", action="store_true")
 
     args = parser.parse_args()
-    os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"
-    os.environ["UNCONSCIOUS"] = str(args.unconsciousness)
-    os.environ["VERBOSE"] = "silent" if args.silent else "verbose"
+    os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"  # TODO: fix it.
     os.environ["DEBUG"] = str(args.debug)
 
     host = Host(

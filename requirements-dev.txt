@@ -21,3 +21,4 @@ qdrant-client
 qdrant-client[fastembed-gpu]
 ninja
 cupy-cuda12x
+nvidia-ml-py

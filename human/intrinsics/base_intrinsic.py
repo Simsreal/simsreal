@@ -9,7 +9,7 @@ from dm_control.utils.inverse_kinematics import IKResult
 from dm_control.utils.inverse_kinematics import qpos_from_site_pose
 
 from human.memory.store import MemoryStore
-from utilities.emotions.pad import emotion_look_up
+from utilities.emotion.pad import emotion_look_up
 
 
 @dataclass
