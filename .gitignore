@@ -185,4 +185,4 @@ cython_debug/
 #.idea/
 
 # Ymal
-config.ymal
+config.yaml
