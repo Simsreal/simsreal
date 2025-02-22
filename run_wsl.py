@@ -103,12 +103,6 @@ def write_to_env():
             print("ERROR: MJCF Path does not exist, please replace it")
             sys.exit(1)
 
-        # Load the .env file
-        load_dotenv(env_path)
-        mjcf_path = os.getenv(
-            "MCJF_PATH", "/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"
-        )
-
         # Get IP addresses from run.sh
         try:
             wsl_ip, windows_ip = get_ip_addresses()
@@ -125,6 +119,12 @@ def write_to_env():
         except Exception as e:
             print(f"Warning: Failed to update IP addresses - {str(e)}")
             # Don't exit here, as this might be optional
+
+        # Load the .env file
+        load_dotenv(env_path)
+        mjcf_path = os.getenv(
+            "MCJF_PATH", "/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"
+        )
 
     except Exception as e:
         print(f"ERROR: Failed to write .env file - {str(e)}")
