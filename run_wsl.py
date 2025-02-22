@@ -140,7 +140,7 @@ def run_main():
             print(f"ERROR: no main.py found in {current_dir}")  # type: ignore
             sys.exit(1)
 
-        # 使用Python解释器运行main.py
+        # run main.py on python
         subprocess.run([sys.executable, main_path], check=True)
 
     except subprocess.CalledProcessError as e:
