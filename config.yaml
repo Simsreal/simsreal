@@ -1,62 +1,72 @@
-birth: 2025-01-13-00-00-00
-brain:
-  lstm:
-    convid_kernel_size: 4
-    ctx_len: 100
-    hidden_dim: 32
-    n_layers: 1
-    n_lstm_heads: 4
-    n_xlstm_blocks: 4
-    proj_factor: 1.3
-    qkv_proj_blocksize: 4
-  module: lstm
-emotion:
-  pad_dim: 3
-intrinsics:
-- FearOfPain
-- MereExposure
-- FearOfUnknown
-- CognitiveDissonance
-- Boredom
-mcts:
-  decay_period: 6000
-  decay_rate: 0.9
-  max_visits: 10000
-  min_visits: 1000
-  prune_period: 6000
-memory_management:
-  episodic_memory:
-    capacity: 1600
-    collection: episodic
-    decay_every: 10
-    host: localhost
-    hz: 1
-    port: 6333
-    reset: true
-    retain_time: null
-  live_memory:
-    capacity: null
-    collection: iconic
-    decay_every: 5
-    host: localhost
-    hz: 20
-    port: 6333
-    reset: true
-    retain_time: 5
 name: aji6
+
+birth: "2025-01-13-00-00-00"
+timelapse_multiplier: 2000
+# timelapse_multiplier: 1000    # 1 real day = 2.74 years
+running_frequency: 20 # hz
+
+robot:
+  sub:
+    protocol: tcp
+    ip: 127.0.0.1
+    port: 5556
+  pub:
+    protocol: tcp
+    ip: 127.0.0.1
+    port: 5557
+  mjcf_path: /home/spoonbobo/simulator/Assets/MJCF/humanoid.xml
+  pose: arm_stretch
+
 perceivers:
   vision:
     emb_dim: 16
-robot:
-  mjcf_path: /mnt/e/simsreal/simulator/Assets/MJCF/humanoid.xml
-  pose: arm_stretch
-  pub:
-    ip: 172.27.160.28
-    port: 5557
-    protocol: tcp
-  sub:
-    ip: 0.0.0.0
-    port: 5556
-    protocol: tcp
-running_frequency: 20
-timelapse_multiplier: 2000
+
+intrinsics:
+  - FearOfPain
+  - Impression
+  - FearOfUnknown
+  - CognitiveDissonance
+  - Boredom
+  - MereExposure
+
+brain:
+  module: lstm
+  lstm:
+    ctx_len: 100
+    hidden_dim: 32
+    n_layers: 1
+    n_xlstm_blocks: 4
+    n_lstm_heads: 4
+    convid_kernel_size: 4
+    qkv_proj_blocksize: 4
+    proj_factor: 1.3
+
+emotion:
+  pad_dim: 3
+
+memory_management:
+  live_memory:
+    hz: 20
+    capacity: null
+    retain_time: 5
+    collection: iconic
+    host: localhost
+    port: 6333
+    decay_every: 5
+    reset: true
+  episodic_memory:
+    hz: 1
+    capacity: 1600
+    retain_time: null
+    collection: episodic
+    host: localhost
+    port: 6333
+    decay_every: 10
+    reset: true
+
+mcts:
+  decay_rate: 0.9
+  max_visits: 10000
+  min_visits: 1000
+  decay_period: 6000
+  prune_period: 6000
