@@ -1,15 +1,16 @@
+from collections import deque
 import torch
 
-from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
+from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 
 class Impression(Intrinsic):
     number_of_recall = 5
 
-    def impact(
+    def impl(
         self,
         shm,
-        queues,
+        guidances,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -31,7 +32,7 @@ class Impression(Intrinsic):
             return
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
-        queues["emotions_q"].put(emotions * self.activeness(shm))
+        self.add_guidance("emotion", emotions * self.activeness_fn(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
-        return MotionTrajectory(trajectory=[])
+        return MotionTrajectory(trajectory=deque())

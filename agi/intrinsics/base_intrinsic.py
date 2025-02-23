@@ -10,9 +10,9 @@ import torch
 from dm_control.utils.inverse_kinematics import IKResult
 from dm_control.utils.inverse_kinematics import qpos_from_site_pose
 
-from human.memory.store import MemoryStore
-from utilities.emotions.pad import emotion_look_up
-from utilities.tools.retry import retry
+from agi.memory.store import MemoryStore
+from src.utilities.emotion.pad import emotion_look_up
+from src.utilities.tools.retry import retry
 
 
 @dataclass
@@ -135,7 +135,6 @@ class Intrinsic(ABC):
         except Empty:
             emotion_guidance = None
 
-        print(self.priorities["emotion"].queue)
         # try:
         #     motion_guidance = self.priorities["motion"].get_nowait()[1]
         # except Empty:

@@ -3,12 +3,12 @@ from importlib import import_module
 
 from dm_control.mujoco import Physics
 
-from human.memory.store import MemoryStore
+from agi.memory.store import MemoryStore
 
 
 def motivator_proc(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
-    intrinsics_module = import_module("human.intrinsics")
+    intrinsics_module = import_module("agi.intrinsics")
     instrinsic_lookup = {
         name: getattr(intrinsics_module, name) for name in intrinsics_module.__all__
     }

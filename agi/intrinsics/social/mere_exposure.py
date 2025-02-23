@@ -2,7 +2,7 @@ from collections import deque
 
 import torch
 
-from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
+from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 
 class MereExposure(Intrinsic):

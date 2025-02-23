@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from human.preference.efforts import Torques
-from human.preference.emotions import PAD
+from agi.preference.efforts import Torques
+from agi.preference.emotions import PAD
 
 
 class LSTM(nn.Module):

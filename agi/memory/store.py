@@ -13,8 +13,8 @@ from qdrant_client.models import (
     UpdateResult,
 )
 
-from utilities.emotion.pad import get_emotion_magnitude
-from utilities.vectordb.vec_store import VectorStore
+from src.utilities.emotion.pad import get_emotion_magnitude
+from src.utilities.vectordb.vec_store import VectorStore
 
 
 class MemoryStore:

@@ -1,6 +1,6 @@
 from collections import deque
 
-from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
+from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 
 class OrientingReflex(Intrinsic):

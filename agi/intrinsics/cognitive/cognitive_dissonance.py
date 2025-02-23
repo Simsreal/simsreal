@@ -3,7 +3,7 @@ from collections import deque
 import numpy as np
 from scipy.spatial.distance import cdist
 
-from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
+from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 
 class CognitiveDissonance(Intrinsic):

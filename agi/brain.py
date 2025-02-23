@@ -4,7 +4,7 @@ from queue import Empty
 import torch
 import torch.nn.functional as F
 
-from human.preference.conscious import LSTM, xLSTM
+from agi.preference.conscious import LSTM, xLSTM
 
 
 def brain_proc(runtime_engine):

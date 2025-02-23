@@ -1,6 +1,6 @@
 import time
 
-from human.memory.store import MemoryStore
+from agi.memory.store import MemoryStore
 
 
 def memory_manager_proc(runtime_engine, mem_type):

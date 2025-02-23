@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 
-from human.preference.perceive import Retina
+from agi.preference.perceive import Retina
 
 # from utilities.torch.gradients import check_gradients
 

@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 import zmq
 from PIL import Image
 
-from utilities.mj.geoms import compute_net_force_on_geom
+from src.utilities.mj.geoms import compute_net_force_on_geom
 
 SUBSCRIBING_CTX = [
     "vision",

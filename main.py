@@ -7,17 +7,15 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
-from human.process import (
-    brain_proc,
-    commander_proc,
-    ctx_proc,
-    governor_proc,
-    memory_manager_proc,
-    motivator_proc,
-    perceive_proc,
-)
-from utilities.mj.mjcf import get_humanoid_geoms
-from utilities.tools.retry import retry
+from agi.brain import brain_proc
+from agi.commander import commander_proc
+from agi.ctx import ctx_proc
+from agi.governor import governor_proc
+from agi.memorizer import memory_manager_proc
+from agi.motivator import motivator_proc
+from agi.perceive import perceive_proc
+from src.utilities.mj.mjcf import get_humanoid_geoms
+from src.utilities.tools.retry import retry
 
 
 class RuntimeEngine:
@@ -231,7 +229,7 @@ class Host:
     @retry
     def connect_robot(self) -> Dict[str, Any]:
         import zmq
-        from human.process.ctx import CTXParser
+        from agi.ctx import CTXParser
         from dotenv import load_dotenv
 
         load_dotenv()
@@ -306,8 +304,8 @@ if __name__ == "__main__":
     import platform
     import subprocess
     from argparse import ArgumentParser
-    from utilities.docker.container import running_containers
-    from utilities.nvidia.nvidia_smi import get_nvidia_process_names
+    from src.utilities.docker.container import running_containers
+    from src.utilities.nvidia.nvidia_smi import get_nvidia_process_names
 
     mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
@@ -362,7 +360,7 @@ if __name__ == "__main__":
             )
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="config.yaml")
+    parser.add_argument("--config", type=str, default="config.template.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
     parser.add_argument("-d", "--debug", action="store_true")
 

@@ -1,14 +1,14 @@
 import time
-from enum import IntEnum
-from enum import auto
+from enum import IntEnum, auto
 
 import torch
 
-from human.preference.emotions import AlphaSR
-from human.preference.emotions import PolicyValueNet
-from utilities.emotion.pad import get_emotion_magnitude
-from utilities.emotion.pad import get_emotion_reward
-from utilities.emotion.pad import get_closest_emotion
+from agi.preference.emotions import AlphaSR, PolicyValueNet
+from src.utilities.emotion.pad import (
+    get_emotion_magnitude,
+    get_emotion_reward,
+    get_closest_emotion,
+)
 
 
 class HumanStateSymbol(IntEnum):
