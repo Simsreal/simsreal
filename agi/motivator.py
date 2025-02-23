@@ -6,7 +6,7 @@ from dm_control.mujoco import Physics
 from agi.memory.store import MemoryStore
 
 
-def motivator_proc(runtime_engine):
+def motivator(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
     intrinsics_module = import_module("agi.intrinsics")
     instrinsic_lookup = {

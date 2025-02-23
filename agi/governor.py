@@ -30,7 +30,7 @@ def age_to_symbol(age):
     return 1.0
 
 
-def governor_proc(runtime_engine):
+def governor(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
     device = runtime_engine.get_metadata("device")
     intrinsics = cfg["intrinsics"]

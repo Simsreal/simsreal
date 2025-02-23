@@ -159,7 +159,7 @@ class MemoryStore:
                 with_payload=True,
             )
         except Exception as e:
-            print(e)
+            print(f"error in consolidate: {e}")
             return ([], None)
 
         return consolidated

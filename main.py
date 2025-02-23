@@ -7,13 +7,15 @@ import torch
 import yaml
 from torch import multiprocessing as mp
 
-from agi.brain import brain_proc
-from agi.commander import commander_proc
-from agi.ctx import ctx_proc
-from agi.governor import governor_proc
-from agi.memorizer import memory_manager_proc
-from agi.motivator import motivator_proc
-from agi.perceive import perceive_proc
+from agi import (
+    ctx_parser,
+    perceiver,
+    memory_manager,
+    motivator,
+    brain,
+    governor,
+    actuator,
+)
 from src.utilities.mj.mjcf import get_humanoid_geoms
 from src.utilities.tools.retry import retry
 
@@ -48,7 +50,7 @@ class RuntimeEngine:
         if slice_ is None:
             self.shared_memory[name].copy_(tensor, non_blocking=True)
         else:
-            self.shared_memory[name][slice_] = tensor
+            self.shared_memory[name][slice_].copy_(tensor, non_blocking=True)
 
     def get_shm(self, name: str) -> torch.Tensor | None:
         if torch.any(torch.isnan(self.shared_memory[name])):
@@ -159,13 +161,13 @@ class Host:
             torch.float32,
         )
 
-        ctx_proc0 = mp.Process(
-            target=ctx_proc,
+        ctx_parser0 = mp.Process(
+            target=ctx_parser,
             args=(runtime_engine,),
         )
 
-        perceive_proc0 = mp.Process(
-            target=perceive_proc,
+        perceiver_proc0 = mp.Process(
+            target=perceiver,
             args=(
                 runtime_engine,
                 "vision",
@@ -173,7 +175,7 @@ class Host:
         )
 
         memory_manager_proc0 = mp.Process(
-            target=memory_manager_proc,
+            target=memory_manager,
             args=(
                 runtime_engine,
                 "live_memory",
@@ -181,7 +183,7 @@ class Host:
         )
 
         memory_manager_proc1 = mp.Process(
-            target=memory_manager_proc,
+            target=memory_manager,
             args=(
                 runtime_engine,
                 "episodic_memory",
@@ -189,47 +191,47 @@ class Host:
         )
 
         governor_proc0 = mp.Process(
-            target=governor_proc,
+            target=governor,
             args=(runtime_engine,),
         )
 
         motivator_proc0 = mp.Process(
-            target=motivator_proc,
+            target=motivator,
             args=(runtime_engine,),
         )
 
         brain_proc0 = mp.Process(
-            target=brain_proc,
+            target=brain,
             args=(runtime_engine,),
         )
 
-        commander_proc0 = mp.Process(
-            target=commander_proc,
+        actuator0 = mp.Process(
+            target=actuator,
             args=(runtime_engine,),
         )
 
-        ctx_proc0.start()
-        perceive_proc0.start()
+        ctx_parser0.start()
+        perceiver_proc0.start()
         memory_manager_proc0.start()
         memory_manager_proc1.start()
         motivator_proc0.start()
         brain_proc0.start()
         governor_proc0.start()
-        commander_proc0.start()
+        actuator0.start()
 
-        ctx_proc0.join()
-        perceive_proc0.join()
+        ctx_parser0.join()
+        perceiver_proc0.join()
         memory_manager_proc0.join()
         memory_manager_proc1.join()
         brain_proc0.join()
         motivator_proc0.join()
         governor_proc0.join()
-        commander_proc0.join()
+        actuator0.join()
 
     @retry
     def connect_robot(self) -> Dict[str, Any]:
         import zmq
-        from agi.ctx import CTXParser
+        from agi.ctx_parser import CTXParser
         from dotenv import load_dotenv
 
         load_dotenv()

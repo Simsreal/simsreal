@@ -74,7 +74,7 @@ class CTXParser:
             return None
 
 
-def ctx_proc(runtime_engine):
+def ctx_parser(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
     robot_sub_cfg = cfg["robot"]["sub"]
     zmq_ctx = zmq.Context()

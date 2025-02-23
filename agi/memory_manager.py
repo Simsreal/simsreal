@@ -3,7 +3,7 @@ import time
 from agi.memory.store import MemoryStore
 
 
-def memory_manager_proc(runtime_engine, mem_type):
+def memory_manager(runtime_engine, mem_type):
     cfg = runtime_engine.get_metadata("config")
     latent_dim = runtime_engine.get_shm("latent").shape[-1]
     mem_manage_cfg = cfg["memory_management"]

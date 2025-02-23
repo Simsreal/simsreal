@@ -4,7 +4,7 @@ import time
 import zmq
 
 
-def commander_proc(runtime_engine):
+def actuator(runtime_engine):
     cfg = runtime_engine.get_metadata("config")
     robot_pub_cfg = cfg["robot"]["pub"]
     pub = zmq.Context().socket(zmq.PUB)
@@ -14,8 +14,8 @@ def commander_proc(runtime_engine):
 
     while True:
         torques = runtime_engine.get_shm("torques").clone().squeeze(0)
-        cmds = {
+        actuation = {
             "torques": torques.tolist(),
         }
-        pub.send_string(json.dumps(cmds))
+        pub.send_string(json.dumps(actuation))
         time.sleep(1 / cfg["running_frequency"])

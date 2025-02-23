@@ -32,7 +32,7 @@ def vae_loss_function(reconstructed, original, mu, logvar) -> torch.Tensor:
     return total_loss
 
 
-def perceive_proc(runtime_engine, name):
+def perceiver(runtime_engine, name):
     perceivers_lookup = {
         "vision": Retina,
     }
@@ -59,6 +59,7 @@ def perceive_proc(runtime_engine, name):
         loss = vae_loss_function(r, x0, mu, logvar)
         optimizer.zero_grad()
         loss.backward()
+        print(loss)
         optimizer.step()
 
     stream = torch.cuda.Stream(device=device)
