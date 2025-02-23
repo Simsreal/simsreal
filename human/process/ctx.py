@@ -21,9 +21,9 @@ SUBSCRIBING_CTX = [
 class CTXParser:
     def __init__(
         self,
-        robot_info: Dict[str, Any],
+        robot_props: Dict[str, Any],
     ):
-        self.robot_info = robot_info
+        self.robot_props = robot_props
 
     def parse(
         self,
@@ -54,9 +54,9 @@ class CTXParser:
 
             elif ctx == "force_on_geoms":
                 force_on_geoms = torch.zeros(
-                    self.robot_info["n_geoms"], dtype=torch.float32
+                    self.robot_props["n_geoms"], dtype=torch.float32
                 )
-                humanoid_geom_mapping = self.robot_info["humanoid_geom_name2id"]
+                humanoid_geom_mapping = self.robot_props["humanoid_geom_name2id"]
 
                 for name, id in humanoid_geom_mapping.items():
                     _, force_magnitude, _ = compute_net_force_on_geom(
@@ -84,8 +84,8 @@ def ctx_proc(runtime_engine):
     )
     sub.setsockopt_string(zmq.SUBSCRIBE, "")
 
-    robot_info = runtime_engine.get_metadata("robot_info")
-    ctx_parser = CTXParser(robot_info)
+    robot_props = runtime_engine.get_metadata("robot_props")
+    ctx_parser = CTXParser(robot_props)
 
     while True:
         frame: dict = sub.recv_json()  # type: ignore

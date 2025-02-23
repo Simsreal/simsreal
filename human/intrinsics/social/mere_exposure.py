@@ -7,6 +7,8 @@ from human.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 class MereExposure(Intrinsic):
     number_of_recall = 5
+    acceptance_threshold = 0.9
+    exposure_weight = 0.1
 
     def impl(
         self,
@@ -24,14 +26,25 @@ class MereExposure(Intrinsic):
         except Exception:
             return
 
+        familiarities = torch.tensor([pt.score for pt in recalled], dtype=torch.float32)
+        familarity = torch.mean(familiarities)
+
         emotions_tensor = torch.tensor(
             [pt.payload["emotion"] for pt in recalled if pt.payload is not None],
             dtype=torch.float32,
         )
+
+        if torch.isnan(familarity):
+            return
+
         if emotions_tensor.size(0) == 0:
             return
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
+        emotions = (
+            self.exposure_weight * emotions
+            + (1 - self.exposure_weight) * shm["emotions"]
+        )
         self.add_guidance("emotion", emotions * self.activeness_fn(shm))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:

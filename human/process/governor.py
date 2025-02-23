@@ -6,9 +6,9 @@ import torch
 
 from human.preference.emotions import AlphaSR
 from human.preference.emotions import PolicyValueNet
-from utilities.emotions.pad import get_closest_emotion
-from utilities.emotions.pad import get_emotion_magnitude
-from utilities.emotions.pad import get_emotion_reward
+from utilities.emotion.pad import get_emotion_magnitude
+from utilities.emotion.pad import get_emotion_reward
+from utilities.emotion.pad import get_closest_emotion
 
 
 class HumanStateSymbol(IntEnum):
