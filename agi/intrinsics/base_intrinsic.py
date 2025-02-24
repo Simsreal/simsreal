@@ -114,13 +114,13 @@ class Intrinsic(ABC):
 
     def guide(
         self,
-        infomation: Dict[str, torch.Tensor],
-        guidance,
+        information: Dict[str, torch.Tensor],
+        brain_shm,
         physics=None,
     ):
-        self.activeness = self.activeness_fn(infomation["governance"])
+        self.activeness = self.activeness_fn(information["governance"])
         self.importance = self.importance_fn()
-        self.impl(infomation, physics)
+        self.impl(information, brain_shm, physics)
 
         try:
             emotion_guidance = self.priorities["emotion"].get_nowait()[1]
@@ -128,16 +128,17 @@ class Intrinsic(ABC):
             emotion_guidance = None
 
         if emotion_guidance is not None:
-            guidance["emotion"].put(emotion_guidance)
+            brain_shm["emotion"].put(emotion_guidance)
 
     @abstractmethod
     def impl(
         self,
-        infomation: Dict[str, torch.Tensor],
+        information: Dict[str, torch.Tensor],
+        brain_shm,
         physics=None,
     ):
         """
-        :param infomation: Dict[str, torch.Tensor]
+        :param information: Dict[str, torch.Tensor]
         :param physics: dm_control.physics.Physics
         """
         raise NotImplementedError

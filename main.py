@@ -91,6 +91,7 @@ class Host:
             "torque": mp.Queue(),
         }
         motivator_shm = {
+            "emotion": mp.Queue(),
             "governance": mp.Queue(),
             "latent": mp.Queue(),
             "jnt_state": mp.Queue(),

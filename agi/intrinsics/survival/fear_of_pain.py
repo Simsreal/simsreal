@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Dict
 
 import torch
 
@@ -17,11 +18,11 @@ class FearOfPain(Intrinsic):
 
     def impl(
         self,
-        shm,
-        guidances,
+        information: Dict[str, torch.Tensor],
+        brain_shm,
         physics=None,
     ):
-        forces = shm["force_on_geoms"] > self.acceptable_forceN
+        forces = information["force_on_geoms"] > self.acceptable_forceN
         painful = torch.any(forces).item()
         self.add_guidance("emotion", "fearful" if painful else "neutral")
 

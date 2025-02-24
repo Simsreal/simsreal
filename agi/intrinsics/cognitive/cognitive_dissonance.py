@@ -1,6 +1,8 @@
 from collections import deque
+from typing import Dict
 
 import numpy as np
+import torch
 from scipy.spatial.distance import cdist
 
 from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
@@ -8,12 +10,12 @@ from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 class CognitiveDissonance(Intrinsic):
     k = 10
-    alpha = 0.1
+    alpha = 0.9
 
     def impl(
         self,
-        shm,
-        guidances,
+        information: Dict[str, torch.Tensor],
+        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -21,7 +23,8 @@ class CognitiveDissonance(Intrinsic):
 
         try:
             memory = self.episodic_memory_store.recall_all(payloads=["emotion"])
-        except Exception:
+        except Exception as e:
+            print(e)
             return
 
         memorized_emotions = np.array(
@@ -30,7 +33,7 @@ class CognitiveDissonance(Intrinsic):
         )
 
         dist = cdist(
-            shm["emotions"].clone().numpy(),
+            information["emotion"].clone().numpy(),
             memorized_emotions,
             metric="cosine",
         )
@@ -38,10 +41,11 @@ class CognitiveDissonance(Intrinsic):
         memories = [memory[i].vector for i in closest_indices]
         avg_memory = np.mean(np.array(memories, dtype=np.float32), axis=0)
         norm_memory = avg_memory / np.linalg.norm(avg_memory)
-        shm["latent"].copy_(
-            self.alpha * shm["latent"] + (1 - self.alpha) * norm_memory,
-            non_blocking=True,
+        dissonance = (
+            self.alpha * information["emotion"] + (1 - self.alpha) * norm_memory
         )
+        print(dissonance)
+        # guidance["latent"].put(dissonance)
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())

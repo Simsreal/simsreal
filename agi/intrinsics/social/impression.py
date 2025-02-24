@@ -11,7 +11,8 @@ class Impression(Intrinsic):
 
     def impl(
         self,
-        infomation: Dict[str, torch.Tensor],
+        information: Dict[str, torch.Tensor],
+        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -19,7 +20,7 @@ class Impression(Intrinsic):
 
         try:
             recalled = self.episodic_memory_store.recall(
-                infomation["latent"].squeeze(0).cpu().numpy().tolist(),
+                information["latent"].squeeze(0).cpu().numpy().tolist(),
                 self.number_of_recall,
             )
 
@@ -36,7 +37,7 @@ class Impression(Intrinsic):
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
         self.add_guidance(
-            "emotion", emotions * self.activeness_fn(infomation["governance"])
+            "emotion", emotions * self.activeness_fn(information["governance"])
         )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:

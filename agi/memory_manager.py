@@ -88,6 +88,7 @@ def memory_manager(runtime_engine, mem_type):
                     )
                     brain_shm["latent"].put(latent)
                     motivator_shm["latent"].put(latent)
+                    motivator_shm["emotion"].put(emotion)
                     governor_shm["emotion"].put(emotion)
 
                 except Exception as e:

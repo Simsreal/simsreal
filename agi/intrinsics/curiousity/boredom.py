@@ -10,8 +10,8 @@ class Boredom(Intrinsic):
 
     def impl(
         self,
-        shm,
-        guidances,
+        information,
+        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:

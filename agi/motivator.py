@@ -47,17 +47,20 @@ def motivator(runtime_engine):
             episodic_memory_store=episodic_memory_store,
         )
 
-    guidance = {
-        "torque": brain_shm["torque"],
-        "emotion": brain_shm["emotion"],
-    }
-
     while True:
         latent = try_get(motivator_shm["latent"], device)
         jnt_state = try_get(motivator_shm["jnt_state"], device)
         governance = try_get(motivator_shm["governance"], device)
+        force_on_geoms = try_get(motivator_shm["force_on_geoms"], device)
+        emotion = try_get(motivator_shm["emotion"], device)
 
-        if latent is None or jnt_state is None or governance is None:
+        if (
+            latent is None
+            or jnt_state is None
+            or governance is None
+            or force_on_geoms is None
+            or emotion is None
+        ):
             continue
 
         qpos = jnt_state[:n_qpos]
@@ -67,14 +70,16 @@ def motivator(runtime_engine):
             physics.data.qpos[:] = qpos.cpu().numpy()  # type: ignore
             physics.data.qvel[:] = qvel.cpu().numpy()  # type: ignore
 
-        infomation = {
+        information = {
             "latent": latent,
+            "emotion": emotion,
             "governance": governance,
+            "force_on_geoms": force_on_geoms,
         }
 
         for intrinsic in intrinsics:
             motivators[intrinsic].guide(
-                infomation=infomation,
-                guidance=guidance,
+                information=information,
+                brain_shm=brain_shm,
                 physics=physics,
             )

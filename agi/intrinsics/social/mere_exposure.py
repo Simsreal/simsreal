@@ -12,8 +12,8 @@ class MereExposure(Intrinsic):
 
     def impl(
         self,
-        shm,
-        guidances,
+        information,
+        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -21,7 +21,8 @@ class MereExposure(Intrinsic):
 
         try:
             recalled = self.episodic_memory_store.recall(
-                shm["latent"].squeeze(0).numpy().tolist(), self.number_of_recall
+                information["latent"].squeeze(0).cpu().numpy().tolist(),
+                self.number_of_recall,
             )
         except Exception:
             return
@@ -43,9 +44,11 @@ class MereExposure(Intrinsic):
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
         emotions = (
             self.exposure_weight * emotions
-            + (1 - self.exposure_weight) * shm["emotions"]
+            + (1 - self.exposure_weight) * brain_shm["emotion"]
         )
-        self.add_guidance("emotion", emotions * self.activeness_fn(shm))
+        self.add_guidance(
+            "emotion", emotions * self.activeness_fn(information["governance"])
+        )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())
