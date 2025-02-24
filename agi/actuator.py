@@ -1,7 +1,8 @@
 import json
-import time
 
 import zmq
+
+from src.utilities.queues.queue_util import try_get
 
 
 def actuator(runtime_engine):
@@ -11,11 +12,15 @@ def actuator(runtime_engine):
     pub.bind(
         f"{robot_pub_cfg['protocol']}://{robot_pub_cfg['ip']}:{robot_pub_cfg['port']}"  # type: ignore
     )
+    device = runtime_engine.get_metadata("device")
+    actuator_shm = runtime_engine.get_shared_memory("actuator")
 
     while True:
-        torques = runtime_engine.get_shm("torques").clone().squeeze(0)
+        torque = try_get(actuator_shm["torque"], device)
+        if torque is None:
+            continue
+
         actuation = {
-            "torques": torques.tolist(),
+            "torques": torque.squeeze(0).tolist(),
         }
         pub.send_string(json.dumps(actuation))
-        time.sleep(1 / cfg["running_frequency"])

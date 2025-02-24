@@ -1,26 +1,23 @@
-import time
-from queue import Empty
+# import time
 
 import torch
 import torch.nn.functional as F
 
 from agi.preference.conscious import LSTM, xLSTM
+from src.utilities.queues.queue_util import try_get
 
 
 def brain(runtime_engine):
-    cfg = runtime_engine.get_metadata("config")
-    device = runtime_engine.get_metadata("device")
-    latent_dim = runtime_engine.get_shm("latent").shape[-1]
-
     def fifo(ctx, x) -> torch.Tensor:
         x = x.to(device)
         return torch.cat((ctx[:, 1:, :], x.unsqueeze(1)), dim=1)
 
-    def try_get(queue) -> torch.Tensor | None:
-        try:
-            return queue.get_nowait().to(device)
-        except Empty:
-            return None
+    cfg = runtime_engine.get_metadata("config")
+    device = runtime_engine.get_metadata("device")
+    latent_dim = runtime_engine.get_metadata("latent_size")
+    brain_shm = runtime_engine.get_shared_memory("brain")
+    memory_manager_shm = runtime_engine.get_shared_memory("memory_manager")
+    actuator_shm = runtime_engine.get_shared_memory("actuator")
 
     brain_cfg = cfg["brain"]
     nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
@@ -50,7 +47,6 @@ def brain(runtime_engine):
 
     brain_optimizer = torch.optim.Adam(lstm.parameters(), lr=0.001)
     ctx_len = brain_cfg["lstm"]["ctx_len"]
-    stream = torch.cuda.Stream(device=device)
 
     ctx = torch.zeros(
         (
@@ -62,37 +58,38 @@ def brain(runtime_engine):
     ).to(device)
 
     while True:
-        with torch.cuda.stream(stream):  # type: ignore
-            ctx = ctx.detach()
-            try:
-                ctx = fifo(ctx, runtime_engine.get_shm("latent"))
-            except Exception as e:
-                print(f"error in fifo: {e}")
-                continue
-            out = lstm(ctx)
-            out_torques = out["torques"]
-            out_emotions = out["emotions"]
+        latent = try_get(brain_shm["latent"], device)
+        ctx = ctx.detach()
+        if latent is None:
+            continue
+        ctx = fifo(ctx, latent)
 
-            t = try_get(runtime_engine.get_guidance("torque"))
-            e = try_get(runtime_engine.get_guidance("emotion"))
+        torque_guidance = try_get(brain_shm["torque"], device)
+        emotion_guidance = try_get(brain_shm["emotion"], device)
 
-            loss = 0
+        out = lstm(ctx)
+        out_torques = out["torques"]
+        out_emotions = out["emotions"]
 
-            if t is not None:
-                torque_loss = F.mse_loss(out_torques, t)
-                loss += torque_loss
+        loss: int | torch.Tensor = 0
 
-            if e is not None:
-                emotions_loss = F.mse_loss(out_emotions, e)
-                loss += emotions_loss
+        if torque_guidance is not None:
+            torque_loss = F.mse_loss(out_torques, torque_guidance)
+            loss += torque_loss
 
-            if not (t is None) or not (e is None):
-                brain_optimizer.zero_grad()
-                loss.backward()  # type: ignore
-                brain_optimizer.step()
+        if emotion_guidance is not None:
+            emotions_loss = F.mse_loss(out_emotions, emotion_guidance)
+            loss += emotions_loss
 
-            with torch.no_grad():
-                runtime_engine.update_shm("torques", out_torques.detach())
-                runtime_engine.update_shm("emotions", out_emotions.detach())
+        if not (torque_guidance is None) or not (emotion_guidance is None):
+            brain_optimizer.zero_grad()
+            if isinstance(loss, torch.Tensor):
+                loss.backward()
+            brain_optimizer.step()
 
-        time.sleep(1 / cfg["running_frequency"])
+        out_torques.detach_()
+        out_emotions.detach_()
+
+        memory_manager_shm["torque"].put(out_torques)
+        memory_manager_shm["emotion"].put(out_emotions)
+        actuator_shm["torque"].put(out_torques)

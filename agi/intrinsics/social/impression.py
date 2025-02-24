@@ -1,4 +1,6 @@
 from collections import deque
+from typing import Dict
+
 import torch
 
 from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
@@ -9,8 +11,7 @@ class Impression(Intrinsic):
 
     def impl(
         self,
-        shm,
-        guidances,
+        infomation: Dict[str, torch.Tensor],
         physics=None,
     ):
         if not self.memory_is_available:
@@ -18,8 +19,10 @@ class Impression(Intrinsic):
 
         try:
             recalled = self.episodic_memory_store.recall(
-                shm["latent"].squeeze(0).numpy().tolist(), self.number_of_recall
+                infomation["latent"].squeeze(0).cpu().numpy().tolist(),
+                self.number_of_recall,
             )
+
         except Exception:
             return
 
@@ -32,7 +35,9 @@ class Impression(Intrinsic):
             return
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
-        self.add_guidance("emotion", emotions * self.activeness_fn(shm))
+        self.add_guidance(
+            "emotion", emotions * self.activeness_fn(infomation["governance"])
+        )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())

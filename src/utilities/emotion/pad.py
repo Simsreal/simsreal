@@ -120,7 +120,7 @@ def get_closest_emotion(emotion, return_symbol=False):
 
 
 def get_emotion_reward(pad_vector):
-    happy = emotion_look_up["happy"]
+    happy = emotion_look_up["happy"].to(pad_vector.device)
     distance = torch.linalg.norm(pad_vector - happy, ord=2)
     reward = 1.0 / (1.0 + distance.item())
     return reward

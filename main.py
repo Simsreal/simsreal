@@ -1,7 +1,7 @@
 import gc
 import json
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import torch
 import yaml
@@ -11,9 +11,9 @@ from agi import (
     ctx_parser,
     perceiver,
     memory_manager,
+    governor,
     motivator,
     brain,
-    governor,
     actuator,
 )
 from src.utilities.mj.mjcf import get_humanoid_geoms
@@ -22,43 +22,22 @@ from src.utilities.tools.retry import retry
 
 class RuntimeEngine:
     def __init__(self):
-        self.shared_guidances: Dict[str, mp.Queue] = {}
-        self.shared_memory: Dict[str, torch.Tensor] = {}
+        self.shared_memory: Dict[str, Dict[str, mp.Queue]] = {}
         self.metadata: Dict[str, Any] = {}
 
-    def add_guidance(self, name: str, guidance: mp.Queue):
-        self.shared_guidances[name] = guidance
+    def add_shared_memory(self, name: str, shared_memory: Dict[str, mp.Queue]):
+        """
+        stores shared memory for agi
+        """
+        self.shared_memory[name] = shared_memory
 
-    def get_guidance(self, name: str) -> mp.Queue:
-        return self.shared_guidances[name]
-
-    def add_shm(self, name: str, shape: Tuple[int, ...], dtype: torch.dtype):
-        shm = torch.zeros(shape, dtype=dtype)
-        self.shared_memory[name] = shm
-        shm.share_memory_()
-
-    def update_shm(
-        self,
-        name: str,
-        tensor: torch.Tensor,
-        slice_: slice | None = None,
-    ) -> None:
-        if torch.any(torch.isnan(tensor)):
-            print(f"writing nan to {name}. skipping.")
-            return None
-
-        if slice_ is None:
-            self.shared_memory[name].copy_(tensor, non_blocking=True)
-        else:
-            self.shared_memory[name][slice_].copy_(tensor, non_blocking=True)
-
-    def get_shm(self, name: str) -> torch.Tensor | None:
-        if torch.any(torch.isnan(self.shared_memory[name])):
-            print(f"reading nan from {name}. skipping.")
-            return None
+    def get_shared_memory(self, name: str) -> Dict[str, mp.Queue]:
         return self.shared_memory[name]
 
     def add_metadata(self, name: str, metadata: Any):
+        """
+        stores agi metadata
+        """
         self.metadata[name] = metadata
 
     def get_metadata(self, name: str) -> Any:
@@ -71,6 +50,7 @@ class Host:
         cfg_file,
         exp_dir,
     ):
+        # ----------configuration----------
         runtime_engine = RuntimeEngine()
         self.cfg_file = cfg_file
         self.exp_dir = exp_dir
@@ -83,13 +63,7 @@ class Host:
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
         robot_props = self.connect_robot()
 
-        runtime_engine.add_metadata("robot_props", robot_props)
-        runtime_engine.add_metadata("config", cfg)
-        runtime_engine.add_metadata("device", device)
-        runtime_engine.add_metadata("intrinsics", intrinsics)
-        runtime_engine.add_metadata("intrinsic_indices", intrinsic_indices)
-
-        # shm
+        # ----------metadata----------
         latent_offset = 0
         latent_slices = {}
 
@@ -99,140 +73,89 @@ class Host:
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
             latent_offset += emb_dim
 
+        runtime_engine.add_metadata("robot_props", robot_props)
+        runtime_engine.add_metadata("config", cfg)
+        runtime_engine.add_metadata("device", device)
+        runtime_engine.add_metadata("intrinsics", intrinsics)
+        runtime_engine.add_metadata("intrinsic_indices", intrinsic_indices)
         runtime_engine.add_metadata("latent_slices", latent_slices)
+        runtime_engine.add_metadata("latent_size", latent_offset)
 
-        # queues
-        torque_guidance_q = mp.Queue()
-        emotion_guidance_q = mp.Queue()
-        runtime_engine.add_guidance("torque", torque_guidance_q)
-        runtime_engine.add_guidance("emotion", emotion_guidance_q)
+        # ----------shared memory----------
+        perceiver_shm = {
+            "vision": mp.Queue(),
+        }
+        memory_manager_shm = {
+            "vision_latent": mp.Queue(),
+            "emotion": mp.Queue(),
+            "torque": mp.Queue(),
+        }
+        motivator_shm = {
+            "governance": mp.Queue(),
+            "latent": mp.Queue(),
+            "jnt_state": mp.Queue(),
+            "force_on_geoms": mp.Queue(),
+        }
+        governor_shm = {
+            "emotion": mp.Queue(),
+        }
+        brain_shm = {
+            "latent": mp.Queue(),
+            "emotion": mp.Queue(),
+            "torque": mp.Queue(),
+        }
+        actuator_shm = {
+            "torque": mp.Queue(),
+        }
 
-        runtime_engine.add_shm(
-            "human_state",
-            (10,),
-            torch.float64,
-        )
+        runtime_engine.add_shared_memory("perceiver", perceiver_shm)
+        runtime_engine.add_shared_memory("memory_manager", memory_manager_shm)
+        runtime_engine.add_shared_memory("brain", brain_shm)
+        runtime_engine.add_shared_memory("motivator", motivator_shm)
+        runtime_engine.add_shared_memory("governor", governor_shm)
+        runtime_engine.add_shared_memory("actuator", actuator_shm)
 
-        runtime_engine.add_shm(
-            "vision",
-            (
-                3,
-                robot_props["egocentric_view_height"],
-                robot_props["egocentric_view_width"],
-            ),
-            torch.float32,
+        # ---------process----------
+        ctx_parser_process = mp.Process(target=ctx_parser, args=(runtime_engine,))
+        perceiver_vision_process = mp.Process(
+            target=perceiver, args=(runtime_engine, "vision")
         )
-        runtime_engine.add_shm(
-            "qpos",
-            (robot_props["nq"],),
-            torch.float32,
+        memory_manager_live_process = mp.Process(
+            target=memory_manager, args=(runtime_engine, "live_memory")
         )
-        runtime_engine.add_shm(
-            "qvel",
-            (robot_props["nv"],),
-            torch.float32,
+        memory_manager_episodic_process = mp.Process(
+            target=memory_manager, args=(runtime_engine, "episodic_memory")
         )
-        runtime_engine.add_shm(
-            "force_on_geoms",
-            (robot_props["n_geoms"],),
-            torch.float32,
-        )
+        governor_process = mp.Process(target=governor, args=(runtime_engine,))
+        motivator_process = mp.Process(target=motivator, args=(runtime_engine,))
+        brain_process = mp.Process(target=brain, args=(runtime_engine,))
+        actuator_process = mp.Process(target=actuator, args=(runtime_engine,))
 
-        runtime_engine.add_shm(
-            "latent",
-            (1, latent_offset),
-            torch.float32,
-        )
-        runtime_engine.add_shm(
-            "emotions",
-            (1, cfg["emotion"]["pad_dim"]),
-            torch.float32,
-        )
+        ctx_parser_process.start()
+        perceiver_vision_process.start()
+        memory_manager_live_process.start()
+        memory_manager_episodic_process.start()
+        governor_process.start()
+        motivator_process.start()
+        brain_process.start()
+        actuator_process.start()
 
-        runtime_engine.add_shm(
-            "torques",
-            (1, robot_props["n_actuators"]),
-            torch.float32,
-        )
-
-        runtime_engine.add_shm(
-            "governance",
-            (len(intrinsics),),
-            torch.float32,
-        )
-
-        ctx_parser0 = mp.Process(
-            target=ctx_parser,
-            args=(runtime_engine,),
-        )
-
-        perceiver_proc0 = mp.Process(
-            target=perceiver,
-            args=(
-                runtime_engine,
-                "vision",
-            ),
-        )
-
-        memory_manager_proc0 = mp.Process(
-            target=memory_manager,
-            args=(
-                runtime_engine,
-                "live_memory",
-            ),
-        )
-
-        memory_manager_proc1 = mp.Process(
-            target=memory_manager,
-            args=(
-                runtime_engine,
-                "episodic_memory",
-            ),
-        )
-
-        governor_proc0 = mp.Process(
-            target=governor,
-            args=(runtime_engine,),
-        )
-
-        motivator_proc0 = mp.Process(
-            target=motivator,
-            args=(runtime_engine,),
-        )
-
-        brain_proc0 = mp.Process(
-            target=brain,
-            args=(runtime_engine,),
-        )
-
-        actuator0 = mp.Process(
-            target=actuator,
-            args=(runtime_engine,),
-        )
-
-        ctx_parser0.start()
-        perceiver_proc0.start()
-        memory_manager_proc0.start()
-        memory_manager_proc1.start()
-        motivator_proc0.start()
-        brain_proc0.start()
-        governor_proc0.start()
-        actuator0.start()
-
-        ctx_parser0.join()
-        perceiver_proc0.join()
-        memory_manager_proc0.join()
-        memory_manager_proc1.join()
-        brain_proc0.join()
-        motivator_proc0.join()
-        governor_proc0.join()
-        actuator0.join()
+        ctx_parser_process.join()
+        perceiver_vision_process.join()
+        memory_manager_live_process.join()
+        memory_manager_episodic_process.join()
+        governor_process.join()
+        motivator_process.join()
+        brain_process.join()
+        actuator_process.join()
 
     @retry
     def connect_robot(self) -> Dict[str, Any]:
         import zmq
-        from agi.ctx_parser import CTXParser
         from dotenv import load_dotenv
+        from PIL import Image
+        import io
+        import torchvision.transforms as transforms
 
         load_dotenv()
 
@@ -252,7 +175,6 @@ class Host:
         zmq_tmp_ctx.term()
         print("robot connected.")
 
-        ctx_parser = CTXParser(robot_cfg)
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
         robot_state["egocentric_view"] = bytes(frame["egocentric_view"])
@@ -275,8 +197,11 @@ class Host:
         actuator_mapping = robot_state["actuator_mapping"]["actuator_name_id_mapping"]
         actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
 
-        egocentric_view = ctx_parser.parse(robot_state, "vision")
-        if egocentric_view is None:
+        img_data = bytes(robot_state["egocentric_view"])
+        img = Image.open(io.BytesIO(img_data))
+        transform = transforms.ToTensor()
+        img = transform(img)
+        if torch.any(torch.isnan(img)):
             raise ValueError("egocentric_view is None")
 
         robot_props = {
@@ -293,10 +218,10 @@ class Host:
             "joint_name2id": joint_mapping,
             "actuator_id2name": actuator_mapping_rev,
             "actuator_name2id": actuator_mapping,
-            "egocentric_view_width": egocentric_view.shape[2],
-            "egocentric_view_height": egocentric_view.shape[1],
-            "nq": len(robot_state["qpos"]),
-            "nv": len(robot_state["qvel"]),
+            "egocentric_view_width": img.shape[2],
+            "egocentric_view_height": img.shape[1],
+            "n_qpos": len(robot_state["qpos"]),
+            "n_qvel": len(robot_state["qvel"]),
         }
 
         return robot_props

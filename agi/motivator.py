@@ -1,9 +1,9 @@
-import time
 from importlib import import_module
 
 from dm_control.mujoco import Physics
 
 from agi.memory.store import MemoryStore
+from src.utilities.queues.queue_util import try_get
 
 
 def motivator(runtime_engine):
@@ -15,10 +15,14 @@ def motivator(runtime_engine):
     intrinsics = cfg["intrinsics"]
     physics = Physics.from_xml_path(cfg["robot"]["mjcf_path"])
     intrinsic_indices = runtime_engine.get_metadata("intrinsic_indices")
-
     episodic_memory_cfg = cfg["memory_management"]["episodic_memory"]
     live_memory_cfg = cfg["memory_management"]["live_memory"]
-    vector_size = runtime_engine.get_shm("latent").shape[-1]
+    vector_size = runtime_engine.get_metadata("latent_size")
+    motivator_shm = runtime_engine.get_shared_memory("motivator")
+    brain_shm = runtime_engine.get_shared_memory("brain")
+    robot_props = runtime_engine.get_metadata("robot_props")
+    device = runtime_engine.get_metadata("device")
+    n_qpos = robot_props["n_qpos"]
 
     episodic_memory_store = MemoryStore(
         vector_size,
@@ -43,14 +47,34 @@ def motivator(runtime_engine):
             episodic_memory_store=episodic_memory_store,
         )
 
+    guidance = {
+        "torque": brain_shm["torque"],
+        "emotion": brain_shm["emotion"],
+    }
+
     while True:
+        latent = try_get(motivator_shm["latent"], device)
+        jnt_state = try_get(motivator_shm["jnt_state"], device)
+        governance = try_get(motivator_shm["governance"], device)
+
+        if latent is None or jnt_state is None or governance is None:
+            continue
+
+        qpos = jnt_state[:n_qpos]
+        qvel = jnt_state[n_qpos:]
+
         with physics.reset_context():
-            physics.data.qpos[:] = runtime_engine.get_shm("qpos").numpy()  # type: ignore
-            physics.data.qvel[:] = runtime_engine.get_shm("qvel").numpy()  # type: ignore
+            physics.data.qpos[:] = qpos.cpu().numpy()  # type: ignore
+            physics.data.qvel[:] = qvel.cpu().numpy()  # type: ignore
+
+        infomation = {
+            "latent": latent,
+            "governance": governance,
+        }
 
         for intrinsic in intrinsics:
             motivators[intrinsic].guide(
-                runtime_engine=runtime_engine,
+                infomation=infomation,
+                guidance=guidance,
                 physics=physics,
             )
-        time.sleep(1 / cfg["running_frequency"])

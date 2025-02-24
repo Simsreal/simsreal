@@ -18,7 +18,7 @@ from src.utilities.vectordb.vec_store import VectorStore
 
 
 class MemoryStore:
-    strong_emotion_intensity = 0
+    strong_emotion_intensity = -1
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class MemoryStore:
                     vector=latent,
                     payload={
                         "emotion": emotion,
-                        "emotion_intesity": get_emotion_magnitude(emotion),
+                        "emotion_intensity": get_emotion_magnitude(emotion),
                         "timestamp": time.time(),
                         "efforts": efforts,
                     },
@@ -140,7 +140,7 @@ class MemoryStore:
 
     def consolidate(self, attr) -> Tuple[Sequence[PointStruct | Record], Any]:
         thresh_lookup = {
-            "emotion_intesity": self.strong_emotion_intensity,
+            "emotion_intensity": self.strong_emotion_intensity,
         }
 
         try:

@@ -1,10 +1,9 @@
-import time
-
 import torch
 import torch.nn as nn
 from torchvision import transforms
 
 from agi.preference.perceive import Retina
+from src.utilities.queues.queue_util import try_get
 
 # from utilities.torch.gradients import check_gradients
 
@@ -33,6 +32,17 @@ def vae_loss_function(reconstructed, original, mu, logvar) -> torch.Tensor:
 
 
 def perceiver(runtime_engine, name):
+    def forward(x) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        r, mu, logvar = perceptor(x)
+        mu_normalized = mu / torch.linalg.norm(mu, ord=2, dim=1, keepdim=True)
+        return r, mu_normalized, logvar
+
+    def backprop(r, x0, mu, logvar) -> None:
+        loss = vae_loss_function(r, x0, mu, logvar)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
     perceivers_lookup = {
         "vision": Retina,
     }
@@ -48,41 +58,23 @@ def perceiver(runtime_engine, name):
 
     optimizer = torch.optim.Adam(perceptor.parameters(), lr=0.001)
 
-    latent_slices = runtime_engine.get_metadata("latent_slices")
-
-    def forward(x) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        r, mu, logvar = perceptor(x)
-        mu_normalized = mu / torch.linalg.norm(mu, ord=2, dim=1, keepdim=True)
-        return r, mu_normalized, logvar
-
-    def backprop(r, x0, mu, logvar) -> None:
-        loss = vae_loss_function(r, x0, mu, logvar)
-        optimizer.zero_grad()
-        loss.backward()
-        print(loss)
-        optimizer.step()
-
     stream = torch.cuda.Stream(device=device)
+    perceiver_shm = runtime_engine.get_shared_memory("perceiver")
+    memory_manager_shm = runtime_engine.get_shared_memory("memory_manager")
 
     while True:
         with torch.cuda.stream(stream):  # type: ignore
             preproc = preproc_lookup[name]
-            slice_ = latent_slices[name]
-            x = preproc(runtime_engine.get_shm(name))
-            if x is None:
-                continue
-            x = x.to(device).unsqueeze(0)
-            x0 = x.clone()
-            r, mu_normalized, logvar = forward(x)
-            if torch.any(torch.isnan(mu_normalized)):
-                continue
+            ctx = try_get(perceiver_shm[name], device)
 
-            backprop(r, x0, mu_normalized, logvar)
-            with torch.no_grad():
-                runtime_engine.update_shm(
-                    "latent",
-                    mu_normalized,
-                    slice_=slice_,
-                )
-
-        time.sleep(1 / cfg["running_frequency"])
+            if ctx is not None:
+                x = preproc(ctx)
+                if x is None:
+                    continue
+                x = x.to(device).unsqueeze(0)
+                x0 = x.clone()
+                r, mu_normalized, logvar = forward(x)
+                if torch.any(torch.isnan(mu_normalized)):
+                    continue
+                backprop(r, x0, mu_normalized, logvar)
+                memory_manager_shm[f"{name}_latent"].put(mu_normalized.detach())
