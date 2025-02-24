@@ -44,7 +44,7 @@ class MereExposure(Intrinsic):
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
         emotions = (
             self.exposure_weight * emotions
-            + (1 - self.exposure_weight) * brain_shm["emotion"]
+            + (1 - self.exposure_weight) * information["emotion"].cpu()
         )
         self.add_guidance(
             "emotion", emotions * self.activeness_fn(information["governance"])

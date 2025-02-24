@@ -33,7 +33,7 @@ class CognitiveDissonance(Intrinsic):
         )
 
         dist = cdist(
-            information["emotion"].clone().numpy(),
+            information["emotion"].clone().cpu().numpy(),
             memorized_emotions,
             metric="cosine",
         )
@@ -41,11 +41,15 @@ class CognitiveDissonance(Intrinsic):
         memories = [memory[i].vector for i in closest_indices]
         avg_memory = np.mean(np.array(memories, dtype=np.float32), axis=0)
         norm_memory = avg_memory / np.linalg.norm(avg_memory)
+
+        if np.isnan(norm_memory).any():
+            return
+
         dissonance = (
-            self.alpha * information["emotion"] + (1 - self.alpha) * norm_memory
+            self.alpha * information["latent"].cpu() + (1 - self.alpha) * norm_memory
         )
-        print(dissonance)
-        # guidance["latent"].put(dissonance)
+
+        brain_shm["latent"].put(dissonance)
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())
