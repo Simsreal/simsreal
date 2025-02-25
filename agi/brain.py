@@ -63,7 +63,7 @@ def brain(runtime_engine):
         if latent is None:
             continue
         ctx = fifo(ctx, latent)
-        print(ctx)
+        print(ctx.shape)
 
         torque_guidance = try_get(brain_shm["torque"], device)
         emotion_guidance = try_get(brain_shm["emotion"], device)

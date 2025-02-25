@@ -257,19 +257,6 @@ if __name__ == "__main__":
                     "qdrant/qdrant",
                 ]
             )
-
-        # if (
-        #     shutil.which("nvidia-cuda-mps-control")
-        # ):
-        #     print("starting mps")
-        #     subprocess.run(["nvidia-smi", "-i", "0", "-c", "DEFAULT"])
-        #     subprocess.run(["echo", "quit", "|", "nvidia-cuda-mps-control"])
-        #     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-        #     os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
-        #     os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
-        #     subprocess.run(["nvidia-smi", "-i", "0", "-c", "EXCLUSIVE_PROCESS"])
-        #     subprocess.run(["nvidia-cuda-mps-control", "-d"])
-
     elif platform.system() == "Windows":
         if "qdrant" not in running_containers():
             subprocess.run(
