@@ -94,7 +94,7 @@ class Host:
             "emotion": mp.Queue(),
             "governance": mp.Queue(),
             "latent": mp.Queue(),
-            "jnt_state": mp.Queue(),
+            "robot_state": mp.Queue(),
             "force_on_geoms": mp.Queue(),
         }
         governor_shm = {
@@ -235,15 +235,12 @@ if __name__ == "__main__":
     import subprocess
     from argparse import ArgumentParser
     from src.utilities.docker.container import running_containers
-    from src.utilities.nvidia.nvidia_smi import get_nvidia_process_names
 
     mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
     print(f"available CPU cores: {mp.cpu_count()}")
 
     if platform.system() == "Linux":
-        import shutil
-
         if "qdrant" not in running_containers():
             subprocess.run(
                 [
@@ -261,15 +258,17 @@ if __name__ == "__main__":
                 ]
             )
 
-        if (
-            shutil.which("nvidia-cuda-mps-control")
-            and "nvidia-cuda-mps-server" not in get_nvidia_process_names()
-        ):
-            print("starting mps")
-            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-            os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
-            os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
-            subprocess.run(["nvidia-cuda-mps-control", "-d"])
+        # if (
+        #     shutil.which("nvidia-cuda-mps-control")
+        # ):
+        #     print("starting mps")
+        #     subprocess.run(["nvidia-smi", "-i", "0", "-c", "DEFAULT"])
+        #     subprocess.run(["echo", "quit", "|", "nvidia-cuda-mps-control"])
+        #     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+        #     os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
+        #     os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
+        #     subprocess.run(["nvidia-smi", "-i", "0", "-c", "EXCLUSIVE_PROCESS"])
+        #     subprocess.run(["nvidia-cuda-mps-control", "-d"])
 
     elif platform.system() == "Windows":
         if "qdrant" not in running_containers():

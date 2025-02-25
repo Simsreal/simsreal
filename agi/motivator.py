@@ -1,6 +1,7 @@
 from importlib import import_module
 
 from dm_control.mujoco import Physics
+import numpy as np
 
 from agi.memory.store import MemoryStore
 from src.utilities.queues.queue_util import try_get
@@ -20,9 +21,7 @@ def motivator(runtime_engine):
     vector_size = runtime_engine.get_metadata("latent_size")
     motivator_shm = runtime_engine.get_shared_memory("motivator")
     brain_shm = runtime_engine.get_shared_memory("brain")
-    robot_props = runtime_engine.get_metadata("robot_props")
     device = runtime_engine.get_metadata("device")
-    n_qpos = robot_props["n_qpos"]
 
     episodic_memory_store = MemoryStore(
         vector_size,
@@ -49,26 +48,26 @@ def motivator(runtime_engine):
 
     while True:
         latent = try_get(motivator_shm["latent"], device)
-        jnt_state = try_get(motivator_shm["jnt_state"], device)
+        robot_state: dict = try_get(motivator_shm["robot_state"])
         governance = try_get(motivator_shm["governance"], device)
         force_on_geoms = try_get(motivator_shm["force_on_geoms"], device)
         emotion = try_get(motivator_shm["emotion"], device)
 
         if (
             latent is None
-            or jnt_state is None
+            or robot_state is None
             or governance is None
             or force_on_geoms is None
             or emotion is None
         ):
             continue
 
-        qpos = jnt_state[:n_qpos]
-        qvel = jnt_state[n_qpos:]
+        qpos = robot_state["qpos"]
+        qvel = robot_state["qvel"]
 
         with physics.reset_context():
-            physics.data.qpos[:] = qpos.cpu().numpy()  # type: ignore
-            physics.data.qvel[:] = qvel.cpu().numpy()  # type: ignore
+            physics.data.qpos[:] = np.array(qpos)  # type: ignore
+            physics.data.qvel[:] = np.array(qvel)  # type: ignore
 
         information = {
             "latent": latent,

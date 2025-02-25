@@ -32,13 +32,6 @@ def ctx_parser(runtime_engine):
         transform = transforms.ToTensor()
         egocentric_view = transform(egocentric_view)
 
-        # joint position
-        qpos = torch.tensor(robot_state["qpos"], dtype=torch.float32)
-
-        # joint velocity
-        qvel = torch.tensor(robot_state["qvel"], dtype=torch.float32)
-        print(qpos, qvel)
-
         # force on geoms
         force_on_geoms = torch.zeros(robot_props["n_geoms"], dtype=torch.float32)
         humanoid_geom_mapping = robot_props["humanoid_geom_name2id"]
@@ -53,4 +46,4 @@ def ctx_parser(runtime_engine):
             force_on_geoms[id] = torch.tensor(force_magnitude)
         perceiver_shm["vision"].put(egocentric_view)
         motivator_shm["force_on_geoms"].put(force_on_geoms)
-        motivator_shm["jnt_state"].put(torch.cat([qpos, qvel], dim=-1))
+        motivator_shm["robot_state"].put(robot_state)

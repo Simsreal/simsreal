@@ -30,7 +30,7 @@ intrinsics:
   - MereExposure
 
 brain:
-  module: lstm
+  module: xlstm
   lstm:
     ctx_len: 100
     hidden_dim: 32
