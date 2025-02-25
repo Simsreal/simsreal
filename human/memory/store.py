@@ -1,24 +1,20 @@
-# import sys
-
-# sys.path.append(".")
 import time
-from typing import Any
-from typing import List
-from typing import Sequence
-from typing import Tuple
+from typing import Any, List, Sequence, Tuple
 
 import numpy as np
-from qdrant_client.models import FieldCondition
-from qdrant_client.models import Filter
-from qdrant_client.models import FilterSelector
-from qdrant_client.models import PointStruct
-from qdrant_client.models import Range
-from qdrant_client.models import Record
-from qdrant_client.models import ScoredPoint
-from qdrant_client.models import UpdateResult
+from qdrant_client.models import (
+    FieldCondition,
+    Filter,
+    FilterSelector,
+    PointStruct,
+    Range,
+    Record,
+    ScoredPoint,
+    UpdateResult,
+)
 
-from utilities.emotions.pad import get_emotion_magnitude
-from utilities.vectorstores.vec_store import VectorStore
+from utilities.emotion.pad import get_emotion_magnitude
+from utilities.vectordb.vec_store import VectorStore
 
 
 class MemoryStore:
