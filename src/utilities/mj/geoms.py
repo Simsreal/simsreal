@@ -15,7 +15,7 @@ def compute_net_force_on_geom(ncon, contact_list, efc_force, geom_id):
     # Sum over all contacts that involve geom_id
     for i in range(ncon):
         contact = contact_list[i]
-        if geom_id not in [contact["geom1"], contact["geom2"]]:
+        if geom_id not in [contact["geom"][0], contact["geom"][1]]:
             continue
 
         dim = contact["dim"]

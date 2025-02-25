@@ -31,14 +31,13 @@ def ctx_parser(runtime_engine):
         egocentric_view = Image.open(io.BytesIO(egocentric_view))
         transform = transforms.ToTensor()
         egocentric_view = transform(egocentric_view)
-        perceiver_shm["vision"].put(egocentric_view)
 
         # joint position
         qpos = torch.tensor(robot_state["qpos"], dtype=torch.float32)
 
         # joint velocity
         qvel = torch.tensor(robot_state["qvel"], dtype=torch.float32)
-        motivator_shm["jnt_state"].put(torch.cat([qpos, qvel], dim=-1))
+        print(qpos, qvel)
 
         # force on geoms
         force_on_geoms = torch.zeros(robot_props["n_geoms"], dtype=torch.float32)
@@ -46,10 +45,12 @@ def ctx_parser(runtime_engine):
 
         for name, id in humanoid_geom_mapping.items():
             _, force_magnitude, _ = compute_net_force_on_geom(
-                len(robot_state["contact_list"]),
-                robot_state["contact_list"],
+                len(robot_state["contact"]),
+                robot_state["contact"],
                 robot_state["efc_force"],
                 id,
             )
             force_on_geoms[id] = torch.tensor(force_magnitude)
+        perceiver_shm["vision"].put(egocentric_view)
         motivator_shm["force_on_geoms"].put(force_on_geoms)
+        motivator_shm["jnt_state"].put(torch.cat([qpos, qvel], dim=-1))

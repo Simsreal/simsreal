@@ -21,7 +21,7 @@ def governor(runtime_engine):
     state_dim = 10
     intrinsic_dim = len(intrinsics)
     governor_shm = runtime_engine.get_shared_memory("governor")
-    motivation_shm = runtime_engine.get_shared_memory("motivator")
+    motivator_shm = runtime_engine.get_shared_memory("motivator")
 
     policy_value_net = PolicyValueNet(
         state_dim=state_dim,
@@ -51,7 +51,7 @@ def governor(runtime_engine):
                 optimizer,
             )
 
-            motivation_shm["governance"].put(governance.detach())
+            motivator_shm["governance"].put(governance.detach())
 
             if counter % cfg["mcts"]["decay_period"] == 0:
                 alphasr.decay_visits()

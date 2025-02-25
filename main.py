@@ -175,11 +175,13 @@ class Host:
         sub.close()
         zmq_tmp_ctx.term()
         print("robot connected.")
+        print(frame.keys())
 
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
+        robot_mapping = json.loads(frame["robot_mapping"])
         robot_state["egocentric_view"] = bytes(frame["egocentric_view"])
-        geom_mapping = robot_state["geom_mapping"]["geom_name_id_mapping"]
+        geom_mapping = robot_mapping["geom_name_id_mapping"]
         humanoid_geom_mapping = {
             k: v
             for k, v in geom_mapping.items()
@@ -191,11 +193,11 @@ class Host:
             for k, v in geom_mapping.items()
             if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
         ]
-        joint_mapping = robot_state["joint_mapping"]["joint_name_id_mapping"]
+        joint_mapping = robot_mapping["joint_name_id_mapping"]
         geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
         joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
 
-        actuator_mapping = robot_state["actuator_mapping"]["actuator_name_id_mapping"]
+        actuator_mapping = robot_mapping["actuator_name_id_mapping"]
         actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
 
         img_data = bytes(robot_state["egocentric_view"])
