@@ -166,7 +166,7 @@ def generate_network_relationship_graph():
                     if edge_key not in edge_labels:
                         edge_labels[edge_key] = []
                     edge_labels[edge_key].append(key)
-                    print(f"  -> {target_process} (key: {key})")
+                    print(f"  -> {target_process} (key: {key})")  # type: ignore
 
     # Add Unity I/O edges manually with specific colors
     edge_colors = get_edge_colors()
