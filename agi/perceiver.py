@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 
-from agi.preference.perceive import Retina
+from agi.learning.perceive import Retina
 from src.utilities.queues.queue_util import try_get
 
 # from utilities.torch.gradients import check_gradients

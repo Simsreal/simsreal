@@ -3,7 +3,7 @@
 import torch
 import torch.nn.functional as F
 
-from agi.preference.conscious import LSTM, xLSTM
+from agi.learning.conscious import LSTM, xLSTM
 from src.utilities.queues.queue_util import try_get
 
 

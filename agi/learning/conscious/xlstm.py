@@ -10,8 +10,8 @@ from xlstm import (
     xLSTMBlockStackConfig,
 )
 
-from agi.preference.efforts import Torques
-from agi.preference.emotions import PAD
+from agi.learning.efforts import Torques
+from agi.learning.emotions import PAD
 
 
 class xLSTM(nn.Module):

@@ -3,7 +3,7 @@
 
 import torch
 
-from agi.preference.emotions import AlphaSR, PolicyValueNet
+from agi.learning.emotions import AlphaSR, PolicyValueNet
 from src.utilities.emotion.pad import (
     get_emotion_magnitude,
     get_emotion_reward,
