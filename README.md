@@ -62,3 +62,22 @@ Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#l
 bash run_linux.sh # on linux
 python run_wsl.py # on windows (WSL2)
 ```
+
+
+## Performance
+
+* ### CUDA MPS
+Only available on Native Linux.
+
+```bash
+sudo su
+# ====== launch =========
+export CUDA_VISIBLE_DEVICES=0
+nvidia-smi -i 0 -c EXCLUSIVE_PROCESS
+nvidia-cuda-mps-control -d
+# ====== check =========
+ps -ef | grep mps
+# ====== stop =========
+nvidia-smi -i 0 -c DEFAULT
+echo quit | nvidia-cuda-mps-control
+```
