@@ -24,9 +24,12 @@ The easiest way to clone the repository is to create a ssh key and use it to clo
 git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
 ```
+### Docker
+```bash
+docker build -t simsreal .
+```
 
-
-### Install dependencies
+#### Install dependencies
 ```bash
 pip install -r requirements.txt
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
@@ -36,23 +39,18 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
-### Build docker image
-
-```bash
-docker build -t simsreal .
-```
 
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch
 
-### With Docker
+### Docker
 ```bash
 docker compose up
 ```
 
-### Without Docker
+### Local
 
 #### Simulator
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.

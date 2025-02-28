@@ -12,6 +12,8 @@ services:
       - RUNNING_ENV=docker
     volumes:
       - .:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   qdrant:
     image: qdrant/qdrant
@@ -20,3 +22,4 @@ services:
     volumes:
       - ./qdrant_storage:/qdrant/storage
     restart: always
+  
