@@ -23,11 +23,13 @@ The easiest way to clone the repository is to create a ssh key and use it to clo
 ```bash
 git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
+git submodule update --init --recursive
 ```
 ### Docker
 ```bash
 docker build -t simsreal .
 ```
+### Local
 
 #### Install dependencies
 ```bash
