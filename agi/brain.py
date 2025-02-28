@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 from loguru import logger
 
-from agi.learning.conscious import LSTM, xLSTM
+from agi.learning.conscious import LSTM
 from src.utilities.queues.queue_util import try_get
 
 
@@ -24,28 +24,15 @@ def brain(runtime_engine):
     brain_cfg = cfg["brain"]
     nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
 
-    if brain_cfg["module"] == "xlstm" and device == "cuda":
-        lstm = xLSTM(
-            ctx_len=brain_cfg["lstm"]["ctx_len"],
-            latent_size=latent_dim,
-            n_blocks=brain_cfg["lstm"]["n_xlstm_blocks"],
-            device=device,
-            n_actuators=nu,
-            n_lstm_heads=brain_cfg["lstm"]["n_lstm_heads"],
-            convid_kernel_size=brain_cfg["lstm"]["convid_kernel_size"],
-            qkv_proj_blocksize=brain_cfg["lstm"]["qkv_proj_blocksize"],
-            proj_factor=brain_cfg["lstm"]["proj_factor"],
-        ).to(device)
-
-    else:
-        lstm = LSTM(
-            latent_dim,
-            brain_cfg["lstm"]["hidden_dim"],
-            brain_cfg["lstm"]["n_layers"],
-            device,
-            1,
-            nu,
-        ).to(device)
+    # if brain_cfg["module"] == "xlstm" and device == "cuda":
+    lstm = LSTM(
+        latent_dim,
+        brain_cfg["lstm"]["hidden_dim"],
+        brain_cfg["lstm"]["n_layers"],
+        device,
+        1,
+        nu,
+    ).to(device)
 
     brain_optimizer = torch.optim.Adam(lstm.parameters(), lr=0.001)
     ctx_len = brain_cfg["lstm"]["ctx_len"]

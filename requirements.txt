@@ -12,7 +12,6 @@ dm_control
 uvicorn[standard]
 httpx
 pyzmq
-xlstm
 matplotlib
 opencv-python
 qdrant-client
