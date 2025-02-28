@@ -53,11 +53,11 @@ docker compose up
 
 ### Without Docker
 
-
 #### Simulator
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
 #### Simsreal
 ```bash
-python main.py
+bash run_linux.sh # on linux
+python run_wsl.py # on windows (WSL2)
 ```
