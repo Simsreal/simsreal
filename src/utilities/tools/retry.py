@@ -2,6 +2,7 @@ import time
 
 from loguru import logger
 
+
 def retry(func, max_retries=3, delay=1):
     def wrapper(*args, **kwargs):
         for i in range(max_retries):
