@@ -5,6 +5,7 @@ from queue import Empty, PriorityQueue
 from typing import Deque, Dict, Tuple
 
 import numpy as np
+from loguru import logger
 import torch
 from dm_control.utils.inverse_kinematics import IKResult, qpos_from_site_pose
 
@@ -110,7 +111,7 @@ class Intrinsic(ABC):
                 )
             )
         else:
-            print(f"Invalid guidance type: {guidance_type}")
+            logger.warning(f"Invalid guidance type: {guidance_type}")
 
     def guide(
         self,

@@ -3,6 +3,8 @@
 import torch
 import torch.nn.functional as F
 
+from loguru import logger
+
 from agi.learning.conscious import LSTM, xLSTM
 from src.utilities.queues.queue_util import try_get
 
@@ -63,7 +65,7 @@ def brain(runtime_engine):
         if latent is None:
             continue
         ctx = fifo(ctx, latent)
-        print(ctx.shape)
+        logger.info(ctx.shape)
 
         torque_guidance = try_get(brain_shm["torque"], device)
         emotion_guidance = try_get(brain_shm["emotion"], device)

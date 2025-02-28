@@ -1,6 +1,7 @@
 from collections import deque
 
 import torch
+from loguru import logger
 
 from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
@@ -19,7 +20,8 @@ class Boredom(Intrinsic):
 
         try:
             memory = self.live_memory_store.recall_all(["emotion"])
-        except Exception:
+        except Exception as e:
+            logger.warning(e)
             return
 
         emotions = torch.tensor(

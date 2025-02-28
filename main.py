@@ -10,12 +10,12 @@ from torch import multiprocessing as mp
 
 from agi import (
     ctx_parser,
-    perceiver,
-    memory_manager,
-    governor,
-    motivator,
-    brain,
-    actuator,
+    # perceiver,
+    # memory_manager,
+    # governor,
+    # motivator,
+    # brain,
+    # actuator,
 )
 from src.utilities.mj.mjcf import get_humanoid_geoms
 from src.utilities.tools.retry import retry
@@ -123,37 +123,37 @@ class Host:
 
         # ---------process----------
         ctx_parser_process = mp.Process(target=ctx_parser, args=(runtime_engine,))
-        perceiver_vision_process = mp.Process(
-            target=perceiver, args=(runtime_engine, "vision")
-        )
-        memory_manager_live_process = mp.Process(
-            target=memory_manager, args=(runtime_engine, "live_memory")
-        )
-        memory_manager_episodic_process = mp.Process(
-            target=memory_manager, args=(runtime_engine, "episodic_memory")
-        )
-        governor_process = mp.Process(target=governor, args=(runtime_engine,))
-        motivator_process = mp.Process(target=motivator, args=(runtime_engine,))
-        brain_process = mp.Process(target=brain, args=(runtime_engine,))
-        actuator_process = mp.Process(target=actuator, args=(runtime_engine,))
+        # perceiver_vision_process = mp.Process(
+        #     target=perceiver, args=(runtime_engine, "vision")
+        # )
+        # memory_manager_live_process = mp.Process(
+        #     target=memory_manager, args=(runtime_engine, "live_memory")
+        # )
+        # memory_manager_episodic_process = mp.Process(
+        #     target=memory_manager, args=(runtime_engine, "episodic_memory")
+        # )
+        # governor_process = mp.Process(target=governor, args=(runtime_engine,))
+        # motivator_process = mp.Process(target=motivator, args=(runtime_engine,))
+        # brain_process = mp.Process(target=brain, args=(runtime_engine,))
+        # actuator_process = mp.Process(target=actuator, args=(runtime_engine,))
 
         ctx_parser_process.start()
-        perceiver_vision_process.start()
-        memory_manager_live_process.start()
-        memory_manager_episodic_process.start()
-        governor_process.start()
-        motivator_process.start()
-        brain_process.start()
-        actuator_process.start()
+        # perceiver_vision_process.start()
+        # memory_manager_live_process.start()
+        # memory_manager_episodic_process.start()
+        # governor_process.start()
+        # motivator_process.start()
+        # brain_process.start()
+        # actuator_process.start()
 
         ctx_parser_process.join()
-        perceiver_vision_process.join()
-        memory_manager_live_process.join()
-        memory_manager_episodic_process.join()
-        governor_process.join()
-        motivator_process.join()
-        brain_process.join()
-        actuator_process.join()
+        # perceiver_vision_process.join()
+        # memory_manager_live_process.join()
+        # memory_manager_episodic_process.join()
+        # governor_process.join()
+        # motivator_process.join()
+        # brain_process.join()
+        # actuator_process.join()
 
     @retry
     def connect_robot(self) -> Dict[str, Any]:

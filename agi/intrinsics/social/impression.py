@@ -2,6 +2,7 @@ from collections import deque
 from typing import Dict
 
 import torch
+from loguru import logger
 
 from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
@@ -24,7 +25,8 @@ class Impression(Intrinsic):
                 self.number_of_recall,
             )
 
-        except Exception:
+        except Exception as e:
+            logger.warning(e)
             return
 
         emotions_tensor = torch.tensor(

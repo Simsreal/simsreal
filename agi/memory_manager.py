@@ -1,6 +1,7 @@
 import time
 
 import torch
+from loguru import logger
 
 from agi.memory.store import MemoryStore
 from src.utilities.queues.queue_util import try_get
@@ -92,7 +93,7 @@ def memory_manager(runtime_engine, mem_type):
                     governor_shm["emotion"].put(emotion)
 
                 except Exception as e:
-                    print(f"memory loss: {e}")
+                    logger.warning(f"memory loss: {e}")
 
             if live_memory is not None:
                 consolidated = live_memory.consolidate("emotion_intensity")
@@ -107,4 +108,4 @@ def memory_manager(runtime_engine, mem_type):
                 memory.decay_on_capacity("emotion_intensity")
 
             else:
-                print("Unable to decay memory")
+                logger.warning("Unable to decay memory")

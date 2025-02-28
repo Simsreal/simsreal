@@ -4,6 +4,7 @@ from typing import Dict
 import numpy as np
 import torch
 from scipy.spatial.distance import cdist
+from loguru import logger
 
 from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
@@ -24,7 +25,7 @@ class CognitiveDissonance(Intrinsic):
         try:
             memory = self.episodic_memory_store.recall_all(payloads=["emotion"])
         except Exception as e:
-            print(e)
+            logger.warning(e)
             return
 
         memorized_emotions = np.array(

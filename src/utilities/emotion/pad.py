@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 
+from loguru import logger
+
 emotion_look_up = {
     "happy": torch.tensor(
         [
@@ -136,6 +138,6 @@ def get_emotion_magnitude(pad_vector):
 
 if __name__ == "__main__":
     emotion = torch.tensor([[0.99, 0.99, 0.99]])
-    print(get_closest_emotion(emotion, return_symbol=False))
-    print(get_emotion_reward(emotion))
-    print(get_emotion_magnitude(emotion.squeeze().numpy()))
+    logger.info(get_closest_emotion(emotion, return_symbol=False))
+    logger.info(get_emotion_reward(emotion))
+    logger.info(get_emotion_magnitude(emotion.squeeze().numpy()))

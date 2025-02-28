@@ -1,8 +1,11 @@
-import networkx as nx
-import matplotlib.pyplot as plt
 import re
 import os
 from pathlib import Path
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+from loguru import logger
 
 
 def find_shm_patterns(file_path):
@@ -17,13 +20,13 @@ def find_shm_patterns(file_path):
 
         # Debug output
         if matches:
-            print(f"\nDebug - Found in {file_path}:")
+            logger.info(f"\nDebug - Found in {file_path}:")
             for target, key in matches:
-                print(f"  {target}_shm[{key}].put")
+                logger.info(f"  {target}_shm[{key}].put")
 
         return matches
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+        logger.warning(f"Error reading {file_path}: {e}")
         return []
 
 
@@ -145,8 +148,8 @@ def generate_network_relationship_graph():
     edge_labels = {}
 
     # Analyze each file for shared memory patterns
-    print("Known processes:", processes)
-    print("\nAnalyzing files for shared memory patterns...")
+    logger.info("Known processes:", processes)
+    logger.info("\nAnalyzing files for shared memory patterns...")
 
     for file_path in python_files:
         source_process = get_process_name(file_path)
@@ -155,7 +158,7 @@ def generate_network_relationship_graph():
 
         patterns = find_shm_patterns(file_path)
         if patterns:
-            print(f"\nIn {source_process}:")
+            logger.info(f"\nIn {source_process}:")
             for target, key in patterns:
                 target_process = f"agi.{target}"
                 if target_process in processes:
@@ -251,7 +254,7 @@ def generate_network_relationship_graph():
     )  # More padding around the plot
     plt.close()
 
-    print("\nGraph saved as process_graph.png")
+    logger.info("\nGraph saved as process_graph.png")
 
 
 if __name__ == "__main__":
