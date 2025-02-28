@@ -36,15 +36,28 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
+### Docker
+```bash
+docker build -t simsreal .
+```
+
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch
 
-### Simulator
+### With Docker
+```bash
+docker compose up
+```
+
+### Without Docker
+
+
+#### Simulator
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
-### Simsreal
+#### Simsreal
 ```bash
 python main.py
 ```

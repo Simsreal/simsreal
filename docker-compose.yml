@@ -1,0 +1,16 @@
+name: simsreal
+
+services:
+  simsreal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - RUNNING_ENV=docker
+    volumes:
+      - .:/app
+
+  qdrant:
+    image: qdrant/qdrant

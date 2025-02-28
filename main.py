@@ -312,11 +312,13 @@ if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)
     print("available start methods:", mp.get_all_start_methods())
     print(f"available CPU cores: {mp.cpu_count()}")
+    running_env = os.getenv("RUNNING_ENV")
+    print(f"running environment: {running_env}")
 
     if platform.system() == "Linux":
         import shutil
 
-        if "qdrant" not in running_containers():
+        if running_env != "docker" and "qdrant" not in running_containers():
             subprocess.run(
                 [
                     "docker",
@@ -344,7 +346,7 @@ if __name__ == "__main__":
             subprocess.run(["nvidia-cuda-mps-control", "-d"])
 
     elif platform.system() == "Windows":
-        if "qdrant" not in running_containers():
+        if running_env != "docker" and "qdrant" not in running_containers():
             subprocess.run(
                 [
                     "docker",
