@@ -83,7 +83,8 @@ class Host:
         if os.environ.get("RUNNING_ENV") == "docker":
             cfg["robot"]["sub"]["ip"] = "host.docker.internal"
             cfg["robot"]["pub"]["ip"] = "host.docker.internal"
-            cfg["robot"]["mjcf_path"] = "/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"
+            cfg["robot"]["mjcf_path"] = "/app/simulator/Assets/MJCF/humanoid.xml"
+
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
         robot_props = self.connect_robot()
