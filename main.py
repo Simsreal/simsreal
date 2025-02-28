@@ -3,8 +3,9 @@ import json
 import os
 from typing import Any, Dict, Tuple
 
-import torch
+from loguru import logger
 import yaml
+import torch
 from torch import multiprocessing as mp
 
 from human.process import (
@@ -44,7 +45,7 @@ class RuntimeEngine:
         slice_: slice | None = None,
     ) -> None:
         if torch.any(torch.isnan(tensor)):
-            print(f"writing nan to {name}. skipping.")
+            logger.warning(f"writing nan to {name}. skipping.")
             return None
 
         if slice_ is None:
@@ -54,7 +55,7 @@ class RuntimeEngine:
 
     def get_shm(self, name: str) -> torch.Tensor | None:
         if torch.any(torch.isnan(self.shared_memory[name])):
-            print(f"reading nan from {name}. skipping.")
+            logger.warning(f"reading nan from {name}. skipping.")
             return None
         return self.shared_memory[name]
 
@@ -237,20 +238,20 @@ class Host:
         load_dotenv()
 
         robot_cfg = self.cfg["robot"]
-        print("connecting to robot.")
+        logger.info("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
         ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
-        print("robot_sub_cfg: ", ip)
+        logger.info("robot_sub_cfg: {}", ip)
         url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
-        print(url)
+        logger.info("url: {}", url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
         frame: dict = sub.recv_json()  # type: ignore
         sub.close()
         zmq_tmp_ctx.term()
-        print("robot connected.")
+        logger.info("robot connected.")
 
         ctx_parser = CTXParser(robot_cfg)
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
@@ -310,10 +311,10 @@ if __name__ == "__main__":
     from utilities.nvidia.nvidia_smi import get_nvidia_process_names
 
     mp.set_start_method("spawn", force=True)
-    print("available start methods:", mp.get_all_start_methods())
-    print(f"available CPU cores: {mp.cpu_count()}")
+    logger.info("available start methods: {}", mp.get_all_start_methods())
+    logger.info("available CPU cores: {}", mp.cpu_count())
     running_env = os.getenv("RUNNING_ENV")
-    print(f"running environment: {running_env}")
+    logger.info("running environment: {}", running_env)
 
     if platform.system() == "Linux":
         import shutil
@@ -339,7 +340,7 @@ if __name__ == "__main__":
             shutil.which("nvidia-cuda-mps-control")
             and "nvidia-cuda-mps-server" not in get_nvidia_process_names()
         ):
-            print("starting mps")
+            logger.info("starting mps")
             os.environ["CUDA_VISIBLE_DEVICES"] = "0"
             os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
             os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"

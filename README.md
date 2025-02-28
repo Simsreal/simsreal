@@ -28,7 +28,7 @@ cd simsreal
 
 ### Install dependencies
 ```bash
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # only on linux
@@ -36,7 +36,8 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
-### Docker
+### Build docker image
+
 ```bash
 docker build -t simsreal .
 ```
