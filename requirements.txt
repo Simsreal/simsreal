@@ -1,4 +1,3 @@
-<<<<<<< HEAD:requirements-dev.txt
 flake8
 black
 isort
@@ -21,29 +20,3 @@ qdrant-client[fastembed-gpu]
 ninja
 cupy-cuda12x
 titans-pytorch
-=======
-flake8
-black
-isort
-pre-commit
-pytest
-fastapi
-uvicorn
-prometheus-client
-streamlit
-loguru
-rich
-mujoco==3.2.7
-dm_control
-uvicorn[standard]
-httpx
-pyzmq
-xlstm
-matplotlib
-opencv-python
-qdrant-client
-qdrant-client[fastembed-gpu]
-ninja
-cupy-cuda12x
-nvidia-ml-py
->>>>>>> 3fe4e1c3e4748824ec507706d1ee632e8982a697:requirements.txt

@@ -1,5 +1,5 @@
 name: Pre-commit Check
-on: [push]
+on: [push, pull_request]
 
 jobs:
   pre-commit:
