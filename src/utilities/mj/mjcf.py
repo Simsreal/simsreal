@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
 
+from loguru import logger
+
 
 def get_humanoid_geoms(mjcf_path):
     root = ET.parse(mjcf_path).getroot()
@@ -22,4 +24,4 @@ def get_humanoid_geoms(mjcf_path):
 
 
 if __name__ == "__main__":
-    print(get_humanoid_geoms("/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"))
+    logger.info(get_humanoid_geoms("/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"))

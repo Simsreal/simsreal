@@ -12,7 +12,7 @@ from qdrant_client.models import (
     ScoredPoint,
     UpdateResult,
 )
-
+from loguru import logger
 from src.utilities.emotion.pad import get_emotion_magnitude
 from src.utilities.vectordb.vec_store import VectorStore
 
@@ -159,7 +159,7 @@ class MemoryStore:
                 with_payload=True,
             )
         except Exception as e:
-            print(f"error in consolidate: {e}")
+            logger.warning(f"error in consolidate: {e}")
             return ([], None)
 
         return consolidated

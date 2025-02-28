@@ -1,5 +1,6 @@
 import torch.nn as nn
 
+from loguru import logger
 
 def check_gradients(model: nn.Module):
     """
@@ -10,6 +11,6 @@ def check_gradients(model: nn.Module):
     """
     for name, param in model.named_parameters():
         if param.grad is not None:
-            print(f"Gradient for {name}: {param.grad.norm()}")
+            logger.info(f"Gradient for {name}: {param.grad.norm()}")
         else:
-            print(f"Gradient for {name} is None")
+            logger.info(f"Gradient for {name} is None")

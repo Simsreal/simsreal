@@ -2,8 +2,7 @@ from typing import List
 
 import pynvml
 import psutil
-
-
+from loguru import logger
 def get_nvidia_process_names() -> List[str]:
     # Initialize NVML
     pynvml.nvmlInit()
@@ -26,9 +25,9 @@ def get_nvidia_process_names() -> List[str]:
                     process_name = proc.name()
                     process_names.append(process_name)
                 except psutil.NoSuchProcess:
-                    print(f"Process with PID {pid} no longer exists.")
+                    logger.warning(f"Process with PID {pid} no longer exists.")
         except pynvml.NVMLError as error:
-            print(f"Error getting processes for GPU {i}: {error}")
+            logger.warning(f"Error getting processes for GPU {i}: {error}")
 
     # Shutdown NVML
     pynvml.nvmlShutdown()
@@ -39,6 +38,6 @@ def get_nvidia_process_names() -> List[str]:
 # Example usage
 if __name__ == "__main__":
     process_names = get_nvidia_process_names()
-    print("Running processes using NVIDIA GPU:")
+    logger.info("Running processes using NVIDIA GPU:")
     for name in process_names:
-        print(name)
+        logger.info(name)

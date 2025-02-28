@@ -2,10 +2,11 @@ import os
 import shutil
 import sys
 import subprocess
-from dotenv import load_dotenv, set_key
 from typing import Tuple
 import yaml
 
+from loguru import logger
+from dotenv import load_dotenv, set_key
 
 def get_mjcf_path(env_path):
     try:
@@ -18,7 +19,7 @@ def get_mjcf_path(env_path):
                         return path
                     return None
     except Exception as e:
-        print(f"ERROR: Failed to find the path of MJCF in .env file - {str(e)}")
+        logger.error(f"ERROR: Failed to find the path of MJCF in .env file - {str(e)}")
 
 
 def get_ip_addresses() -> Tuple[str, str]:
@@ -46,7 +47,7 @@ def get_ip_addresses() -> Tuple[str, str]:
         wsl_ip, windows_ip = lines
         return wsl_ip.strip(), windows_ip.strip()
     except Exception as e:
-        print(f"Error getting IP addresses: {str(e)}")
+        logger.error(f"Error getting IP addresses: {str(e)}")
         raise
 
 
@@ -74,15 +75,12 @@ def update_yaml_config(wsl_ip, mjcf_path):
         with open(yaml_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False)
 
-        print(f"Updated robot configuration in config.yaml at: {yaml_path}")
+        logger.info(f"Updated robot configuration in config.yaml at: {yaml_path}")
 
     except Exception as e:
-        print(f"ERROR: Failed to update YAML config - {str(e)}")
+        logger.error(f"ERROR: Failed to update YAML config - {str(e)}")
         sys.exit(1)
 
-    except Exception as e:
-        print(f"ERROR: Failed to update YAML config - {str(e)}")
-        sys.exit(1)
 
 
 def write_to_env():
@@ -97,17 +95,17 @@ def write_to_env():
         # Copy .env.example to .env if .env doesn't exist but .env.example does
         if not os.path.exists(env_path) and os.path.exists(env_example_path):
             shutil.copy2(env_example_path, env_path)
-            print(f"Copied .env.example to .env at: {env_path}")
+            logger.info(f"Copied .env.example to .env at: {env_path}")
 
         # Copy config.yaml.example to config.yaml if config.yaml doesn't exist but config.yaml.example does
         if not os.path.exists(yaml_path) and os.path.exists(yaml_example_path):
             shutil.copy2(yaml_example_path, yaml_path)
-            print(f"Copied config.template.yaml to config.yaml at: {yaml_path}")
+            logger.info(f"Copied config.template.yaml to config.yaml at: {yaml_path}")
 
         # Check if MCJF_PATH exists in the system
         mjcf_path = get_mjcf_path(env_path)
         if not mjcf_path:
-            print("ERROR: MJCF Path does not exist, please replace it")
+            logger.error("ERROR: MJCF Path does not exist, please replace it")
             sys.exit(1)
 
         # Get IP addresses from run.sh
@@ -118,13 +116,13 @@ def write_to_env():
             set_key(env_path, "WSL_IP", wsl_ip)
             set_key(env_path, "WINDOWS_IP", windows_ip)
 
-            print(f"Updated .env file with WSL_IP={wsl_ip} and WINDOWS_IP={windows_ip}")
+            logger.info(f"Updated .env file with WSL_IP={wsl_ip} and WINDOWS_IP={windows_ip}")
 
             # Update the YAML config file
             update_yaml_config(wsl_ip, mjcf_path)
 
         except Exception as e:
-            print(f"Warning: Failed to update IP addresses - {str(e)}")
+            logger.warning(f"Warning: Failed to update IP addresses - {str(e)}")
             # Don't exit here, as this might be optional
 
         # Load the .env file
@@ -134,7 +132,7 @@ def write_to_env():
         )
 
     except Exception as e:
-        print(f"ERROR: Failed to write .env file - {str(e)}")
+        logger.error(f"ERROR: Failed to write .env file - {str(e)}")
         sys.exit(1)
 
 
@@ -144,17 +142,17 @@ def run_main():
         main_path = os.path.join(current_dir, "main.py")
 
         if not os.path.exists(main_path):
-            print(f"ERROR: no main.py found in {current_dir}")  # type: ignore
+            logger.error(f"ERROR: no main.py found in {current_dir}")  # type: ignore
             sys.exit(1)
 
         # run main.py on python
         subprocess.run([sys.executable, main_path], check=True)
 
     except subprocess.CalledProcessError as e:
-        print(f"ERROR: Failed to run main.py - {str(e)}")
+        logger.error(f"ERROR: Failed to run main.py - {str(e)}")
         sys.exit(1)
     except Exception as e:
-        print(f"ERROR: Unexpected error while running main.py - {str(e)}")
+        logger.error(f"ERROR: Unexpected error while running main.py - {str(e)}")
         sys.exit(1)
 
 

@@ -1,5 +1,6 @@
 import subprocess
 
+from loguru import logger
 
 def running_containers() -> list[str]:
     result = subprocess.run(
@@ -9,4 +10,4 @@ def running_containers() -> list[str]:
 
 
 if __name__ == "__main__":
-    print(running_containers())
+    logger.info(running_containers())
