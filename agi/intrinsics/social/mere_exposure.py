@@ -1,7 +1,6 @@
 from collections import deque
 
 import torch
-from loguru import logger
 
 from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
