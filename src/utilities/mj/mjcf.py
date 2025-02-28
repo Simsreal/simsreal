@@ -24,4 +24,6 @@ def get_humanoid_geoms(mjcf_path):
 
 
 if __name__ == "__main__":
-    logger.info(get_humanoid_geoms("/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml"))
+    logger.info(
+        get_humanoid_geoms("/home/spoonbobo/simulator/Assets/MJCF/humanoid.xml")
+    )

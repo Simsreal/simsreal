@@ -8,6 +8,7 @@ import yaml
 from loguru import logger
 from dotenv import load_dotenv, set_key
 
+
 def get_mjcf_path(env_path):
     try:
         with open(env_path, "r") as f:
@@ -82,7 +83,6 @@ def update_yaml_config(wsl_ip, mjcf_path):
         sys.exit(1)
 
 
-
 def write_to_env():
     try:
         # Get the parent directory of the current script
@@ -116,7 +116,9 @@ def write_to_env():
             set_key(env_path, "WSL_IP", wsl_ip)
             set_key(env_path, "WINDOWS_IP", windows_ip)
 
-            logger.info(f"Updated .env file with WSL_IP={wsl_ip} and WINDOWS_IP={windows_ip}")
+            logger.info(
+                f"Updated .env file with WSL_IP={wsl_ip} and WINDOWS_IP={windows_ip}"
+            )
 
             # Update the YAML config file
             update_yaml_config(wsl_ip, mjcf_path)

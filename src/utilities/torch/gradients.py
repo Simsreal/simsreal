@@ -2,6 +2,7 @@ import torch.nn as nn
 
 from loguru import logger
 
+
 def check_gradients(model: nn.Module):
     """
     Utility function to check and print the gradient norms of a PyTorch model's parameters.

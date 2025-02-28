@@ -3,6 +3,8 @@ from typing import List
 import pynvml
 import psutil
 from loguru import logger
+
+
 def get_nvidia_process_names() -> List[str]:
     # Initialize NVML
     pynvml.nvmlInit()

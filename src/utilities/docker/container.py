@@ -2,6 +2,7 @@ import subprocess
 
 from loguru import logger
 
+
 def running_containers() -> list[str]:
     result = subprocess.run(
         ["docker", "ps", "--format", "{{.Names}}"], capture_output=True, text=True

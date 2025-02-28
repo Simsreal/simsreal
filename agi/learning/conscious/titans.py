@@ -1,10 +1,13 @@
 # import torch
 import torch.nn as nn
+
 # from titans_pytorch import NeuralMemory
+
 
 class Titans(nn.Module):
     def __init__(self, ctx_len, latent_size, chunk_size, **kwargs):
         super().__init__()
+
     """
         mem = NeuralMemory(
         dim=16,
