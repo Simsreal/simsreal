@@ -3,8 +3,9 @@ import json
 import os
 from typing import Any, Dict
 
-import torch
 import yaml
+from loguru import logger
+import torch
 from torch import multiprocessing as mp
 
 from agi import (
@@ -58,6 +59,10 @@ class Host:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         cfg = yaml.safe_load(open(self.cfg_file))
+        if os.environ.get("RUNNING_ENV") == "docker":
+            cfg["robot"]["sub"]["ip"] = "host.docker.internal"
+            cfg["robot"]["pub"]["ip"] = "host.docker.internal"
+            cfg["robot"]["mjcf_path"] = "/app/simulator/Assets/MJCF/humanoid.xml"
         self.cfg = cfg
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
@@ -161,21 +166,21 @@ class Host:
         load_dotenv()
 
         robot_cfg = self.cfg["robot"]
-        print("connecting to robot.")
+        logger.info("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
         ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
-        print("robot_sub_cfg: ", ip)
+        logger.info("robot_sub_cfg: ", ip)
         url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
-        print(url)
+        logger.info(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
         frame: dict = sub.recv_json()  # type: ignore
         sub.close()
         zmq_tmp_ctx.term()
-        print("robot connected.")
-        print(frame.keys())
+        logger.info("robot connected.")
+        logger.info(frame.keys())
 
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
@@ -237,11 +242,12 @@ if __name__ == "__main__":
     from src.utilities.docker.container import running_containers
 
     mp.set_start_method("spawn", force=True)
-    print("available start methods:", mp.get_all_start_methods())
-    print(f"available CPU cores: {mp.cpu_count()}")
+    running_env = os.environ.get("RUNNING_ENV")
+    logger.info("available start methods:", mp.get_all_start_methods())
+    logger.info(f"available CPU cores: {mp.cpu_count()}")
 
     if platform.system() == "Linux":
-        if "qdrant" not in running_containers():
+        if running_env != "docker" and "qdrant" not in running_containers():
             subprocess.run(
                 [
                     "docker",
@@ -258,7 +264,7 @@ if __name__ == "__main__":
                 ]
             )
     elif platform.system() == "Windows":
-        if "qdrant" not in running_containers():
+        if running_env != "docker" and "qdrant" not in running_containers():
             subprocess.run(
                 [
                     "docker",
