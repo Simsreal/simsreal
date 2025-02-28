@@ -22,4 +22,3 @@ services:
     volumes:
       - ./qdrant_storage:/qdrant/storage
     restart: always
-  
