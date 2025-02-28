@@ -3,8 +3,9 @@ import json
 import os
 from typing import Any, Dict
 
-import torch
+from loguru import logger
 import yaml
+import torch
 from torch import multiprocessing as mp
 
 from agi import (
@@ -25,13 +26,36 @@ class RuntimeEngine:
         self.shared_memory: Dict[str, Dict[str, mp.Queue]] = {}
         self.metadata: Dict[str, Any] = {}
 
-    def add_shared_memory(self, name: str, shared_memory: Dict[str, mp.Queue]):
-        """
-        stores shared memory for agi
-        """
-        self.shared_memory[name] = shared_memory
+    def add_queue(self, name: str, queue: mp.Queue):
+        self.shared_queues[name] = queue
 
-    def get_shared_memory(self, name: str) -> Dict[str, mp.Queue]:
+    def get_queue(self, name: str) -> mp.Queue:
+        return self.shared_queues[name]
+
+    def add_shm(self, name: str, shape: Tuple[int, ...], dtype: torch.dtype):
+        shm = torch.zeros(shape, dtype=dtype)
+        self.shared_memory[name] = shm
+        shm.share_memory_()
+
+    def update_shm(
+        self,
+        name: str,
+        tensor: torch.Tensor,
+        slice_: slice | None = None,
+    ) -> None:
+        if torch.any(torch.isnan(tensor)):
+            logger.warning(f"writing nan to {name}. skipping.")
+            return None
+
+        if slice_ is None:
+            self.shared_memory[name].copy_(tensor, non_blocking=True)
+        else:
+            self.shared_memory[name][slice_] = tensor
+
+    def get_shm(self, name: str) -> torch.Tensor | None:
+        if torch.any(torch.isnan(self.shared_memory[name])):
+            logger.warning(f"reading nan from {name}. skipping.")
+            return None
         return self.shared_memory[name]
 
     def add_metadata(self, name: str, metadata: Any):
@@ -59,6 +83,11 @@ class Host:
 
         cfg = yaml.safe_load(open(self.cfg_file))
         self.cfg = cfg
+        if os.environ.get("RUNNING_ENV") == "docker":
+            cfg["robot"]["sub"]["ip"] = "host.docker.internal"
+            cfg["robot"]["pub"]["ip"] = "host.docker.internal"
+            cfg["robot"]["mjcf_path"] = "/app/simulator/Assets/MJCF/humanoid.xml"
+
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
         robot_props = self.connect_robot()
@@ -161,21 +190,20 @@ class Host:
         load_dotenv()
 
         robot_cfg = self.cfg["robot"]
-        print("connecting to robot.")
+        logger.info("connecting to robot.")
         zmq_tmp_ctx = zmq.Context()
         sub = zmq_tmp_ctx.socket(zmq.SUB)
         robot_sub_cfg = robot_cfg["sub"]
         ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
-        print("robot_sub_cfg: ", ip)
+        logger.info("robot_sub_cfg: {}", ip)
         url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
-        print(url)
+        logger.info("url: {}", url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
         frame: dict = sub.recv_json()  # type: ignore
         sub.close()
         zmq_tmp_ctx.term()
-        print("robot connected.")
-        print(frame.keys())
+        logger.info("robot connected.")
 
         humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
         robot_state = json.loads(frame["robot_state"])
@@ -237,11 +265,15 @@ if __name__ == "__main__":
     from src.utilities.docker.container import running_containers
 
     mp.set_start_method("spawn", force=True)
-    print("available start methods:", mp.get_all_start_methods())
-    print(f"available CPU cores: {mp.cpu_count()}")
+    logger.info("available start methods: {}", mp.get_all_start_methods())
+    logger.info("available CPU cores: {}", mp.cpu_count())
+    running_env = os.getenv("RUNNING_ENV")
+    logger.info("running environment: {}", running_env)
 
     if platform.system() == "Linux":
-        if "qdrant" not in running_containers():
+        import shutil
+
+        if running_env != "docker" and "qdrant" not in running_containers():
             subprocess.run(
                 [
                     "docker",
@@ -257,8 +289,19 @@ if __name__ == "__main__":
                     "qdrant/qdrant",
                 ]
             )
+
+        if (
+            shutil.which("nvidia-cuda-mps-control")
+            and "nvidia-cuda-mps-server" not in get_nvidia_process_names()
+        ):
+            logger.info("starting mps")
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+            os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
+            os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
+            subprocess.run(["nvidia-cuda-mps-control", "-d"])
+
     elif platform.system() == "Windows":
-        if "qdrant" not in running_containers():
+        if running_env != "docker" and "qdrant" not in running_containers():
             subprocess.run(
                 [
                     "docker",
