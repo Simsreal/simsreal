@@ -1,0 +1,24 @@
+name: simsreal
+
+services:
+  simsreal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5556:5556"
+      - "5557:5557"
+    environment:
+      - RUNNING_ENV=docker
+    volumes:
+      - .:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    restart: always
