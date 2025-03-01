@@ -13,6 +13,7 @@
 # from agi.learning.efforts import Torques
 # from agi.learning.emotions import PAD
 
+from loguru import logger
 
 # class xLSTM(nn.Module):
 #     def __init__(
@@ -76,4 +77,7 @@
 #         }
 
 class xLSTM:
-    raise DeprecationWarning("xLSTM is deprecated")
+    try:
+        raise DeprecationWarning("xLSTM is deprecated")
+    except DeprecationWarning as e:
+        logger.warning(e)
