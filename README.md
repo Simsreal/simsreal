@@ -25,11 +25,6 @@ git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
 git submodule update --init --recursive
 ```
-### Docker
-```bash
-docker build -t simsreal .
-```
-### Local
 
 #### Install dependencies
 ```bash
@@ -42,17 +37,11 @@ View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Sims
 
 ## Launch
 
-### Docker
-```bash
-docker compose up
-```
 
-### Local
-
-#### Simulator
+### Simulator
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
-#### Simsreal
+### Simsreal
 ```bash
 bash run_linux.sh # on linux
 python run_wsl.py # on windows (WSL2)
