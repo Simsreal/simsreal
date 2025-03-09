@@ -23,12 +23,17 @@ The easiest way to clone the repository is to create a ssh key and use it to clo
 ```bash
 git clone git@github.com:Simsreal/simsreal.git
 cd simsreal
+git submodule update --init --recursive
 ```
-
-
-### Install dependencies
+### Docker
 ```bash
-pip install -r requirements-dev.txt
+docker build -t simsreal .
+```
+### Local
+
+#### Install dependencies
+```bash
+pip install -r requirements.txt
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # only on linux
@@ -36,15 +41,43 @@ pip install pylibraft-cu11 --extra-index-url=https://pypi.nvidia.com
 pip install raft-dask-cu11 --extra-index-url=https://pypi.nvidia.com
 ```
 
+
 ## Contribution
 View [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contribution to Simsreal.
 
 ## Launch
 
-### Simulator
+### Docker
+```bash
+docker compose up
+```
+
+### Local
+
+#### Simulator
 Follow [Launch Unity](https://github.com/Simsreal/simulator?tab=readme-ov-file#launch-unity) to launch the simulator.
 
-### Simsreal
+#### Simsreal
 ```bash
-python main.py
+bash run_linux.sh # on linux
+python run_wsl.py # on windows (WSL2)
+```
+
+
+## Performance
+
+* ### CUDA MPS
+Only available on Native Linux.
+
+```bash
+sudo su
+# ====== launch =========
+export CUDA_VISIBLE_DEVICES=0
+nvidia-smi -i 0 -c EXCLUSIVE_PROCESS
+nvidia-cuda-mps-control -d
+# ====== check =========
+ps -ef | grep mps
+# ====== stop =========
+nvidia-smi -i 0 -c DEFAULT
+echo quit | nvidia-cuda-mps-control
 ```

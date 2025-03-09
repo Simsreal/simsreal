@@ -20,7 +20,6 @@ mujoco/
 IsaacLab/
 qdrant_storage/
 *.code-workspace
-simulators/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,6 +1,8 @@
 import subprocess
 import sys
 
+from loguru import logger
+
 
 def get_wsl_ip():
     try:
@@ -10,13 +12,13 @@ def get_wsl_ip():
         ip = result.stdout.strip()
 
         if not ip:
-            print("ERROR: WSL IP address not found")
+            logger.error("ERROR: WSL IP address not found")
             sys.exit(1)
         return ip
     except Exception as e:
-        print(f"ERROR: {str(e)}")
+        logger.error(f"ERROR: {str(e)}")
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    print(get_wsl_ip())
+    logger.info(get_wsl_ip())
