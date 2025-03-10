@@ -13,7 +13,6 @@ class MereExposure(Intrinsic):
     def impl(
         self,
         information,
-        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -46,8 +45,8 @@ class MereExposure(Intrinsic):
             self.exposure_weight * emotions
             + (1 - self.exposure_weight) * information["emotion"].cpu()
         )
-        self.add_guidance(
-            "emotion", emotions * self.activeness_fn(information["governance"])
+        self.brain_shm["emotion"].put(
+            emotions * self.activeness_fn(information["governance"])
         )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:

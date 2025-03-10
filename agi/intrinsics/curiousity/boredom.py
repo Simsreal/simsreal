@@ -12,7 +12,6 @@ class Boredom(Intrinsic):
     def impl(
         self,
         information,
-        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -33,7 +32,7 @@ class Boredom(Intrinsic):
 
         dist_to_boredom = torch.norm(avg_emotion - neutral_emotion, p=2)
         if dist_to_boredom < self.boredom_threshold:
-            self.add_guidance("emotion", "bored")
+            self.brain_shm["emotion"].put(self.pad_vector("bored"))
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())
