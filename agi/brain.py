@@ -3,7 +3,8 @@
 import torch
 import torch.nn.functional as F
 
-from loguru import logger
+# from loguru import logger
+
 
 from agi.learning.conscious.titans import Titans
 from agi.learning.conscious.lstm import LSTM
@@ -66,7 +67,6 @@ def brain(runtime_engine):
         emotion_guidance = try_get(brain_shm["emotion"], device)
 
         out = brain(ctx)
-        logger.info(out)
         out_torques = out["torques"]
         out_emotions = out["emotions"]
 
@@ -77,6 +77,7 @@ def brain(runtime_engine):
             loss += torque_loss
 
         if emotion_guidance is not None:
+            # logger.info(emotion_guidance)
             emotions_loss = F.mse_loss(out_emotions, emotion_guidance)
             loss += emotions_loss
 

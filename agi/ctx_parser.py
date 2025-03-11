@@ -5,13 +5,13 @@ import torch
 import torchvision.transforms as transforms
 import zmq
 from PIL import Image
-from loguru import logger
+
+# from loguru import logger
 
 from src.utilities.mj.geoms import compute_net_force_on_geom
 
 
 def ctx_parser(runtime_engine):
-    logger.info("starting ctx parser")
     cfg = runtime_engine.get_metadata("config")
     robot_sub_cfg = cfg["robot"]["sub"]
     zmq_ctx = zmq.Context()

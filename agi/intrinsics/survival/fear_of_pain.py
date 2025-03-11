@@ -19,12 +19,13 @@ class FearOfPain(Intrinsic):
     def impl(
         self,
         information: Dict[str, torch.Tensor],
-        brain_shm,
         physics=None,
     ):
         forces = information["force_on_geoms"] > self.acceptable_forceN
         painful = torch.any(forces).item()
-        self.add_guidance("emotion", "fearful" if painful else "neutral")
+        self.brain_shm["emotion"].put(
+            self.pad_vector("fearful" if painful else "neutral")
+        )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())

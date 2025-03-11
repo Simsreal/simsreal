@@ -13,7 +13,6 @@ class Impression(Intrinsic):
     def impl(
         self,
         information: Dict[str, torch.Tensor],
-        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -38,8 +37,8 @@ class Impression(Intrinsic):
             return
 
         emotions = torch.mean(emotions_tensor, dim=0).unsqueeze(0)
-        self.add_guidance(
-            "emotion", emotions * self.activeness_fn(information["governance"])
+        self.brain_shm["emotion"].put(
+            emotions * self.activeness_fn(information["governance"])
         )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:

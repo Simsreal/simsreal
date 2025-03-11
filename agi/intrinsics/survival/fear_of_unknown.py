@@ -14,7 +14,6 @@ class FearOfUnknown(Intrinsic):
     def impl(
         self,
         information: Dict[str, torch.Tensor],
-        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -32,12 +31,14 @@ class FearOfUnknown(Intrinsic):
         familarity = torch.mean(familiarities)
 
         if torch.isnan(familarity):
-            # could occur if there is lack of memory
             return
 
-        self.add_guidance(
-            "emotion",
-            "fearful" if familarity.item() < self.min_familiarity_wanted else "neutral",
+        self.brain_shm["emotion"].put(
+            self.pad_vector(
+                "fearful"
+                if familarity.item() < self.min_familiarity_wanted
+                else "neutral",
+            )
         )
 
     def generate_motion_trajectory(self) -> MotionTrajectory:

@@ -44,6 +44,7 @@ def motivator(runtime_engine):
             id=intrinsic_indices[intrinsic],
             live_memory_store=live_memory_store,
             episodic_memory_store=episodic_memory_store,
+            brain_shm=brain_shm,
         )
 
     while True:
@@ -79,6 +80,5 @@ def motivator(runtime_engine):
         for intrinsic in intrinsics:
             motivators[intrinsic].guide(
                 information=information,
-                brain_shm=brain_shm,
                 physics=physics,
             )

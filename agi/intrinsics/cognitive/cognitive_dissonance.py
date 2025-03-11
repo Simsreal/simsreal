@@ -16,7 +16,6 @@ class CognitiveDissonance(Intrinsic):
     def impl(
         self,
         information: Dict[str, torch.Tensor],
-        brain_shm,
         physics=None,
     ):
         if not self.memory_is_available:
@@ -50,7 +49,7 @@ class CognitiveDissonance(Intrinsic):
             self.alpha * information["latent"].cpu() + (1 - self.alpha) * norm_memory
         )
 
-        brain_shm["latent"].put(dissonance)
+        self.brain_shm["latent"].put(dissonance)
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())
