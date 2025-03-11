@@ -17,4 +17,4 @@ def get_wsl_ip():
         sys.exit(1)
 
 
-logger.info(f"{get_wsl_ip()}")
+print(f"{get_wsl_ip()}")

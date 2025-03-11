@@ -1,23 +1,35 @@
-# import torch
 import torch.nn as nn
 
-# from titans_pytorch import NeuralMemory
+from titans_pytorch import NeuralMemory
+
+from agi.learning.efforts import Torques
+from agi.learning.emotions import PAD
 
 
 class Titans(nn.Module):
-    def __init__(self, ctx_len, latent_size, chunk_size, **kwargs):
+    def __init__(
+        self,
+        latent_size,
+        chunk_size,
+        device,
+        n_actuators,
+    ):
         super().__init__()
+        self.mem = NeuralMemory(
+            dim=latent_size,
+            chunk_size=chunk_size,
+        ).to(device)
 
-    """
-        mem = NeuralMemory(
-        dim=16,
-        chunk_size=64,  # set to smaller chunk size for better perf on smaller sequence lengths (but more memory usage)
-    ).cuda()
+        self.torques = Torques(latent_size, n_actuators).to(device)
+        self.pad = PAD(latent_size).to(device)
 
-    print(mem)
-    print(type(mem))
-    for i in range(10):
-        seq = torch.randn(2, 1024, 16).cuda()
-        retrieved, mem_state = mem(seq)
-        print(retrieved[:, -1, :])
-    """
+    def forward(self, ctx):
+        retrieved, _ = self.mem(ctx)
+        retrieved = retrieved[:, -1, :]
+
+        torques = self.torques(retrieved)
+        emotions = self.pad(retrieved)
+        return {
+            "torques": torques,
+            "emotions": emotions,
+        }

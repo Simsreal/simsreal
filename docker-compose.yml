@@ -14,11 +14,6 @@ services:
       - .:/app
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    deploy:
-      resources:
-        limits:
-          cpus: '12'
-          memory: 4G
 
   qdrant:
     image: qdrant/qdrant

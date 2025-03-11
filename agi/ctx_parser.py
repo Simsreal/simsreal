@@ -30,7 +30,6 @@ def ctx_parser(runtime_engine):
 
         # vision
         egocentric_view = bytes(frame["egocentric_view"])
-        logger.info(f"egocentric_view: {egocentric_view}")
         egocentric_view = Image.open(io.BytesIO(egocentric_view))
         transform = transforms.ToTensor()
         egocentric_view = transform(egocentric_view)

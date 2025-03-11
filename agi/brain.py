@@ -5,7 +5,8 @@ import torch.nn.functional as F
 
 from loguru import logger
 
-from agi.learning.conscious import LSTM, xLSTM
+from agi.learning.conscious.titans import Titans
+from agi.learning.conscious.lstm import LSTM
 from src.utilities.queues.queue_util import try_get
 
 
@@ -22,23 +23,19 @@ def brain(runtime_engine):
     actuator_shm = runtime_engine.get_shared_memory("actuator")
 
     brain_cfg = cfg["brain"]
+    module = brain_cfg["module"]
+    ctx_len = brain_cfg["ctx_len"]
     nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
 
-    if brain_cfg["module"] == "xlstm" and device == "cuda":
-        lstm = xLSTM(
-            ctx_len=brain_cfg["lstm"]["ctx_len"],
-            latent_size=latent_dim,
-            n_blocks=brain_cfg["lstm"]["n_xlstm_blocks"],
-            device=device,
-            n_actuators=nu,
-            n_lstm_heads=brain_cfg["lstm"]["n_lstm_heads"],
-            convid_kernel_size=brain_cfg["lstm"]["convid_kernel_size"],
-            qkv_proj_blocksize=brain_cfg["lstm"]["qkv_proj_blocksize"],
-            proj_factor=brain_cfg["lstm"]["proj_factor"],
+    if module == "titans":
+        brain = Titans(
+            latent_dim,
+            brain_cfg["titans"]["chunk_size"],
+            device,
+            nu,
         ).to(device)
-
     else:
-        lstm = LSTM(
+        brain = LSTM(
             latent_dim,
             brain_cfg["lstm"]["hidden_dim"],
             brain_cfg["lstm"]["n_layers"],
@@ -47,8 +44,7 @@ def brain(runtime_engine):
             nu,
         ).to(device)
 
-    brain_optimizer = torch.optim.Adam(lstm.parameters(), lr=0.001)
-    ctx_len = brain_cfg["lstm"]["ctx_len"]
+    brain_optimizer = torch.optim.Adam(brain.parameters(), lr=0.001)
 
     ctx = torch.zeros(
         (
@@ -65,12 +61,12 @@ def brain(runtime_engine):
         if latent is None:
             continue
         ctx = fifo(ctx, latent)
-        logger.info(ctx.shape)
 
         torque_guidance = try_get(brain_shm["torque"], device)
         emotion_guidance = try_get(brain_shm["emotion"], device)
 
-        out = lstm(ctx)
+        out = brain(ctx)
+        logger.info(out)
         out_torques = out["torques"]
         out_emotions = out["emotions"]
 

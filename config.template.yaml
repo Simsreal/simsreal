@@ -30,9 +30,11 @@ intrinsics:
   - MereExposure
 
 brain:
-  module: lstm
+  module: titans
+  ctx_len: 100
+  titans:
+    chunk_size: 64
   lstm:
-    ctx_len: 100
     hidden_dim: 32
     n_layers: 1
     n_xlstm_blocks: 4
