@@ -20,7 +20,6 @@ def ctx_parser(runtime_engine):
         f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"  # type: ignore
     )
     sub.setsockopt_string(zmq.SUBSCRIBE, "")
-    robot_props = runtime_engine.get_metadata("robot_props")
     perceiver_shm = runtime_engine.get_shared_memory("perceiver")
     motivator_shm = runtime_engine.get_shared_memory("motivator")
 
@@ -34,18 +33,10 @@ def ctx_parser(runtime_engine):
         transform = transforms.ToTensor()
         egocentric_view = transform(egocentric_view)
 
-        # force on geoms
-        force_on_geoms = torch.zeros(robot_props["n_geoms"], dtype=torch.float32)
-        humanoid_geom_mapping = robot_props["humanoid_geom_name2id"]
-
-        for name, id in humanoid_geom_mapping.items():
-            _, force_magnitude, _ = compute_net_force_on_geom(
-                len(robot_state["contact"]),
-                robot_state["contact"],
-                robot_state["efc_force"],
-                id,
-            )
-            force_on_geoms[id] = torch.tensor(force_magnitude)
-        perceiver_shm["vision"].put(egocentric_view)
-        motivator_shm["force_on_geoms"].put(force_on_geoms)
-        motivator_shm["robot_state"].put(robot_state)
+        perceiver_shm["vision"].put(frame["line_of_sight"])
+        motivator_shm["robot_state"].put({
+            "x": frame["x"],
+            "y": frame["y"],
+            "z": frame["z"],
+            "line_of_sight": frame["line_of_sight"],
+            "hit_point": frame["hit_point"],})

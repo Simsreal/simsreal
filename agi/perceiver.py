@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 
-from agi.learning.perceive import Retina
+# from agi.learning.perceive import Retina
+from agi.learning.perceive.mlp import MLP
 from src.utilities.queues.queue_util import try_get
 
 # from utilities.torch.gradients import check_gradients
@@ -14,12 +15,10 @@ vision_std = [0.229, 0.224, 0.225]
 def vision_preproc(x) -> torch.Tensor | None:
     if x is None:
         return None
-    return transforms.Compose(
-        [
-            transforms.Resize(128),
-            transforms.CenterCrop((128, 128)),
-        ]
-    )(x)
+    
+    # x is list_of_dicts: [{"distance": float, "image": bytes}, ...]
+    arr = [[item["distance"], item["image"]] for item in x]
+    return torch.tensor(arr, dtype=torch.float32)
 
 
 def vae_loss_function(reconstructed, original, mu, logvar) -> torch.Tensor:
@@ -43,8 +42,11 @@ def perceiver(runtime_engine, name):
         loss.backward()
         optimizer.step()
 
+    # Maybe Retina is not needed, since the input is simplified,
+    # using a simpler perceiver might be more efficient. MLP?
     perceivers_lookup = {
-        "vision": Retina,
+        #"vision": Retina,
+        "vision": MLP,
     }
     preproc_lookup = {
         "vision": vision_preproc,
@@ -52,9 +54,14 @@ def perceiver(runtime_engine, name):
     cfg = runtime_engine.get_metadata("config")
     perceivers_cfg = cfg["perceivers"]
     device = runtime_engine.get_metadata("device")
-    perceptor = perceivers_lookup[name](emb_dim=perceivers_cfg[name]["emb_dim"]).to(
-        device
-    )
+    # perceptor = perceivers_lookup[name](emb_dim=perceivers_cfg[name]["emb_dim"]).to(
+    #     device
+    # )
+    perceptor = perceivers_lookup[name](
+        emb_dim=perceivers_cfg[name]["emb_dim"],
+        input_dim=2,
+        hidden_dim=64,
+    ).to(device)
 
     optimizer = torch.optim.Adam(perceptor.parameters(), lr=0.001)
 
@@ -71,7 +78,7 @@ def perceiver(runtime_engine, name):
                 x = preproc(ctx)
                 if x is None:
                     continue
-                x = x.to(device).unsqueeze(0)
+                x = x.to(device).unsqueeze(0) # [1, N, 2]
                 x0 = x.clone()
                 r, mu_normalized, logvar = forward(x)
                 if torch.any(torch.isnan(mu_normalized)):

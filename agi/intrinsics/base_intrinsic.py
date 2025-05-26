@@ -117,11 +117,10 @@ class Intrinsic(ABC):
         self,
         information: Dict[str, torch.Tensor],
         brain_shm,
-        physics=None,
     ):
         self.activeness = self.activeness_fn(information["governance"])
         self.importance = self.importance_fn()
-        self.impl(information, brain_shm, physics)
+        self.impl(information, brain_shm)
 
         try:
             emotion_guidance = self.priorities["emotion"].get_nowait()[1]
@@ -136,7 +135,6 @@ class Intrinsic(ABC):
         self,
         information: Dict[str, torch.Tensor],
         brain_shm,
-        physics=None,
     ):
         """
         :param information: Dict[str, torch.Tensor]

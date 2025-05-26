@@ -13,7 +13,6 @@ class Boredom(Intrinsic):
         self,
         information,
         brain_shm,
-        physics=None,
     ):
         if not self.memory_is_available:
             return

@@ -66,7 +66,9 @@ class Host:
         self.cfg = cfg
         intrinsics = cfg["intrinsics"]
         intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        robot_props = self.connect_robot()
+        # seems that it should set up some robot properties which is removed
+        # commenting out the robot connection init for now
+        # robot_props = self.connect_robot()
 
         # ----------metadata----------
         latent_offset = 0

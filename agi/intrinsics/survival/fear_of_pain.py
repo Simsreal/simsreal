@@ -20,7 +20,6 @@ class FearOfPain(Intrinsic):
         self,
         information: Dict[str, torch.Tensor],
         brain_shm,
-        physics=None,
     ):
         forces = information["force_on_geoms"] > self.acceptable_forceN
         painful = torch.any(forces).item()

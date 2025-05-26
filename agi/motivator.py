@@ -1,6 +1,5 @@
 from importlib import import_module
 
-from dm_control.mujoco import Physics
 import numpy as np
 
 from agi.memory.store import MemoryStore
@@ -14,7 +13,6 @@ def motivator(runtime_engine):
         name: getattr(intrinsics_module, name) for name in intrinsics_module.__all__
     }
     intrinsics = cfg["intrinsics"]
-    physics = Physics.from_xml_path(cfg["robot"]["mjcf_path"])
     intrinsic_indices = runtime_engine.get_metadata("intrinsic_indices")
     episodic_memory_cfg = cfg["memory_management"]["episodic_memory"]
     live_memory_cfg = cfg["memory_management"]["live_memory"]
@@ -50,7 +48,6 @@ def motivator(runtime_engine):
         latent = try_get(motivator_shm["latent"], device)
         robot_state: dict = try_get(motivator_shm["robot_state"])
         governance = try_get(motivator_shm["governance"], device)
-        force_on_geoms = try_get(motivator_shm["force_on_geoms"], device)
         emotion = try_get(motivator_shm["emotion"], device)
 
         if (
@@ -62,23 +59,24 @@ def motivator(runtime_engine):
         ):
             continue
 
-        qpos = robot_state["qpos"]
-        qvel = robot_state["qvel"]
-
-        with physics.reset_context():
-            physics.data.qpos[:] = np.array(qpos)  # type: ignore
-            physics.data.qvel[:] = np.array(qvel)  # type: ignore
+        # FIXME: unused variables/information, remove if not needed
+        # not sure if these are needed
+        # x, y, z, hit_point
+        # pass exact coordinates to motivators may impact generalization, ignore?
+        x = robot_state["x"]
+        y = robot_state["y"]
+        z = robot_state["z"]
+        line_of_sight = robot_state["line_of_sight"]
 
         information = {
             "latent": latent,
             "emotion": emotion,
             "governance": governance,
-            "force_on_geoms": force_on_geoms,
+            
         }
 
         for intrinsic in intrinsics:
             motivators[intrinsic].guide(
                 information=information,
                 brain_shm=brain_shm,
-                physics=physics,
             )
