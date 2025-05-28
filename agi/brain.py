@@ -1,5 +1,3 @@
-# import time
-
 import torch
 import torch.nn.functional as F
 
@@ -26,7 +24,7 @@ def brain(runtime_engine):
     module = brain_cfg["module"]
     ctx_len = brain_cfg["ctx_len"]
     # nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
-    nu = 3 # treat output as x, y, and orientation
+    nu = 3  # treat output as x, y, and orientation
 
     if module == "titans":
         brain = Titans(
