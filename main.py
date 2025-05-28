@@ -59,6 +59,8 @@ class Host:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
         cfg = yaml.safe_load(open(self.cfg_file))
+        logger.info(f"loaded config from {self.cfg_file}")
+        logger.info(f"config: {cfg}")
         if os.environ.get("RUNNING_ENV") == "docker":
             cfg["robot"]["sub"]["ip"] = "host.docker.internal"
             cfg["robot"]["pub"]["ip"] = "host.docker.internal"
@@ -284,7 +286,7 @@ if __name__ == "__main__":
             )
 
     parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="config.template.yaml")
+    parser.add_argument("--config", type=str, default="config.yaml")
     parser.add_argument("--exp_dir", type=str, default="experiments")
     parser.add_argument("-d", "--debug", action="store_true")
 

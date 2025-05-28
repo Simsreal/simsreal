@@ -1,6 +1,7 @@
 import json
 
 import zmq
+from loguru import logger
 
 from src.utilities.queues.queue_util import try_get
 
@@ -11,6 +12,9 @@ def actuator(runtime_engine):
     pub = zmq.Context().socket(zmq.PUB)
     pub.bind(
         f"{robot_pub_cfg['protocol']}://{robot_pub_cfg['ip']}:{robot_pub_cfg['port']}"  # type: ignore
+    )
+    logger.info(
+        f"Actuator is publishing to {robot_pub_cfg['protocol']}://{robot_pub_cfg['ip']}:{robot_pub_cfg['port']}"
     )
     device = runtime_engine.get_metadata("device")
     actuator_shm = runtime_engine.get_shared_memory("actuator")

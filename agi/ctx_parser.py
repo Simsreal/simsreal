@@ -16,16 +16,23 @@ def ctx_parser(runtime_engine):
     robot_sub_cfg = cfg["robot"]["sub"]
     zmq_ctx = zmq.Context()
     sub = zmq_ctx.socket(zmq.SUB)
-    sub.connect(
-        f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"  # type: ignore
-    )
+    try:
+        sub.connect(
+            f"{robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"  # type: ignore
+        )
+    except Exception as e:
+        logger.error(f"Failed to connect to robot subscriber: {e}")
+        rais
     sub.setsockopt_string(zmq.SUBSCRIBE, "")
+    logger.info(
+        f"Ctx parser is subscribed to {robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
+    )
     perceiver_shm = runtime_engine.get_shared_memory("perceiver")
     motivator_shm = runtime_engine.get_shared_memory("motivator")
 
     while True:
         frame: dict = sub.recv_json()  # type: ignore
-        robot_state = json.loads(frame["robot_state"])
+        logger.info(f"received frame: {frame}")
 
         # vision
         egocentric_view = bytes(frame["egocentric_view"])

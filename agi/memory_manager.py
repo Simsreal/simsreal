@@ -73,7 +73,6 @@ def memory_manager(runtime_engine, mem_type):
                     emerged_emotion = try_get(memory_manager_shm["emotion"], device)
                     emerged_command = try_get(memory_manager_shm["command"], device)
 
-                    # TODO: change the vision to new format
                     if vision_latent is not None:
                         latent[latent_slices["vision"]] = vision_latent
 

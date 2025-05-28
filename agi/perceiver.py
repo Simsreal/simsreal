@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from loguru import logger
 from torchvision import transforms
 
 # from agi.learning.perceive import Retina
