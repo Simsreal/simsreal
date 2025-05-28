@@ -1,13 +1,7 @@
-import io
 import json
 
-import torch
-import torchvision.transforms as transforms
 import zmq
-from PIL import Image
 from loguru import logger
-
-from src.utilities.mj.geoms import compute_net_force_on_geom
 
 
 def ctx_parser(runtime_engine):
@@ -22,7 +16,7 @@ def ctx_parser(runtime_engine):
         )
     except Exception as e:
         logger.error(f"Failed to connect to robot subscriber: {e}")
-        rais
+        raise
     sub.setsockopt_string(zmq.SUBSCRIBE, "")
     logger.info(
         f"Ctx parser is subscribed to {robot_sub_cfg['protocol']}://{robot_sub_cfg['ip']}:{robot_sub_cfg['port']}"
@@ -31,19 +25,19 @@ def ctx_parser(runtime_engine):
     motivator_shm = runtime_engine.get_shared_memory("motivator")
 
     while True:
-        frame: dict = sub.recv_json()  # type: ignore
-        logger.info(f"received frame: {frame}")
+        msg = sub.recv_string()
+        # logger.info(f"received message: {msg}")
+        frame = json.loads(msg)
+        # frame: dict = sub.recv_json()  # type: ignore
 
         # vision
-        egocentric_view = bytes(frame["egocentric_view"])
-        egocentric_view = Image.open(io.BytesIO(egocentric_view))
-        transform = transforms.ToTensor()
-        egocentric_view = transform(egocentric_view)
-
         perceiver_shm["vision"].put(frame["line_of_sight"])
-        motivator_shm["robot_state"].put({
-            "x": frame["x"],
-            "y": frame["y"],
-            "z": frame["z"],
-            "line_of_sight": frame["line_of_sight"],
-            "hit_point": frame["hit_point"],})
+        motivator_shm["robot_state"].put(
+            {
+                "x": frame["x"],
+                "y": frame["y"],
+                "z": frame["z"],
+                "line_of_sight": frame["line_of_sight"],
+                "hit_point": frame["hit_point"],
+            }
+        )
