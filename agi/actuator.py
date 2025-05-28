@@ -16,11 +16,17 @@ def actuator(runtime_engine):
     actuator_shm = runtime_engine.get_shared_memory("actuator")
 
     while True:
-        torque = try_get(actuator_shm["torque"], device)
-        if torque is None:
+        command = try_get(actuator_shm["command"], device)
+        if command is None:
             continue
 
+        command_list = command.squeeze(0).tolist()
+        x = command_list[0]
+        y = command_list[1]
+        orientation = command_list[2]
         actuation = {
-            "torques": torque.squeeze(0).tolist(),
+            "x": x,
+            "y": y,
+            "orientation": orientation,
         }
         pub.send_string(json.dumps(actuation))

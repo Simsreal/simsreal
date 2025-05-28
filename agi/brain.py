@@ -25,7 +25,8 @@ def brain(runtime_engine):
     brain_cfg = cfg["brain"]
     module = brain_cfg["module"]
     ctx_len = brain_cfg["ctx_len"]
-    nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
+    # nu = runtime_engine.get_metadata("robot_props")["n_actuators"]
+    nu = 3 # treat output as x, y, and orientation
 
     if module == "titans":
         brain = Titans(
@@ -62,33 +63,35 @@ def brain(runtime_engine):
             continue
         ctx = fifo(ctx, latent)
 
-        torque_guidance = try_get(brain_shm["torque"], device)
+        command_guidance = try_get(brain_shm["command"], device)
         emotion_guidance = try_get(brain_shm["emotion"], device)
 
         out = brain(ctx)
         logger.info(out)
-        out_torques = out["torques"]
+        out_command = out["command"]
         out_emotions = out["emotions"]
 
         loss: int | torch.Tensor = 0
 
-        if torque_guidance is not None:
-            torque_loss = F.mse_loss(out_torques, torque_guidance)
-            loss += torque_loss
+        if command_guidance is not None:
+            command_loss = F.mse_loss(out_command, command_guidance)
+            loss += command_loss
 
         if emotion_guidance is not None:
             emotions_loss = F.mse_loss(out_emotions, emotion_guidance)
             loss += emotions_loss
 
-        if not (torque_guidance is None) or not (emotion_guidance is None):
+        if not (command_guidance is None) or not (emotion_guidance is None):
             brain_optimizer.zero_grad()
             if isinstance(loss, torch.Tensor):
                 loss.backward()
             brain_optimizer.step()
 
-        out_torques.detach_()
+        out_command.detach_()
         out_emotions.detach_()
 
-        memory_manager_shm["torque"].put(out_torques)
+        logger.info("Brain output command: %s", out_command)
+        logger.info("Brain output emotions: %s", out_emotions)
+        memory_manager_shm["command"].put(out_command)
         memory_manager_shm["emotion"].put(out_emotions)
-        actuator_shm["torque"].put(out_torques)
+        actuator_shm["command"].put(out_command)

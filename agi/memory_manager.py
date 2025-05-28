@@ -12,7 +12,7 @@ def memory_manager(runtime_engine, mem_type):
     latent_dim = runtime_engine.get_metadata("latent_size")
     mem_manage_cfg = cfg["memory_management"]
     memory_cfg = mem_manage_cfg[mem_type]
-    robot_props = runtime_engine.get_metadata("robot_props")
+    # robot_props = runtime_engine.get_metadata("robot_props")
     device = runtime_engine.get_metadata("device")
     latent_slices = runtime_engine.get_metadata("latent_slices")
     memory_manager_shm = runtime_engine.get_shared_memory("memory_manager")
@@ -57,7 +57,8 @@ def memory_manager(runtime_engine, mem_type):
     torque = torch.zeros(
         (
             1,
-            robot_props["n_actuators"],
+            # robot_props["n_actuators"],
+            3,  # treat output as x, y, and orientation
         ),
         dtype=torch.float32,
     )
@@ -70,7 +71,7 @@ def memory_manager(runtime_engine, mem_type):
                     id = int(time.time() * 10e6)
                     vision_latent = try_get(memory_manager_shm["vision_latent"], device)
                     emerged_emotion = try_get(memory_manager_shm["emotion"], device)
-                    emerged_torque = try_get(memory_manager_shm["torque"], device)
+                    emerged_command = try_get(memory_manager_shm["command"], device)
 
                     # TODO: change the vision to new format
                     if vision_latent is not None:
@@ -79,14 +80,14 @@ def memory_manager(runtime_engine, mem_type):
                     if emerged_emotion is not None:
                         emotion = emerged_emotion.clone()
 
-                    if emerged_torque is not None:
-                        torque = emerged_torque.clone()
+                    if emerged_command is not None:
+                        command = emerged_command.clone()
 
                     memory.memorize(
                         id=id,
                         latent=latent.squeeze(0).cpu().numpy().tolist(),
                         emotion=emotion.squeeze(0).cpu().numpy().tolist(),
-                        efforts=torque.squeeze(0).cpu().numpy().tolist(),
+                        efforts=command.squeeze(0).cpu().numpy().tolist(), # not sure, the command is not a physical matrix
                     )
                     brain_shm["latent"].put(latent)
                     motivator_shm["latent"].put(latent)

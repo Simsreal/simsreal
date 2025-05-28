@@ -30,6 +30,6 @@ class Titans(nn.Module):
         torques = self.torques(retrieved)
         emotions = self.pad(retrieved)
         return {
-            "torques": torques,
+            "command": torques,
             "emotions": emotions,
         }

@@ -60,6 +60,6 @@ class LSTM(nn.Module):
         torques = self.torques(out)
         emotions = self.pad(out)
         return {
-            "torques": torques,
+            "command": torques,
             "emotions": emotions,
         }

@@ -80,7 +80,7 @@ class Host:
             latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
             latent_offset += emb_dim
 
-        runtime_engine.add_metadata("robot_props", robot_props)
+        # runtime_engine.add_metadata("robot_props", robot_props)
         runtime_engine.add_metadata("config", cfg)
         runtime_engine.add_metadata("device", device)
         runtime_engine.add_metadata("intrinsics", intrinsics)
@@ -95,7 +95,7 @@ class Host:
         memory_manager_shm = {
             "vision_latent": mp.Queue(),
             "emotion": mp.Queue(),
-            "torque": mp.Queue(),
+            "command": mp.Queue(),
         }
         motivator_shm = {
             "emotion": mp.Queue(),
@@ -110,10 +110,10 @@ class Host:
         brain_shm = {
             "latent": mp.Queue(),
             "emotion": mp.Queue(),
-            "torque": mp.Queue(),
+            "command": mp.Queue(),
         }
         actuator_shm = {
-            "torque": mp.Queue(),
+            "command": mp.Queue(),
         }
 
         runtime_engine.add_shared_memory("perceiver", perceiver_shm)
