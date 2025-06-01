@@ -54,13 +54,28 @@ def memory_manager(runtime_engine, mem_type):
         dtype=torch.float32,
     )
 
-    torque = torch.zeros(
-        (
-            1,
-            robot_props["n_actuators"],
-        ),
-        dtype=torch.float32,
-    )
+    # Handle different robot types
+    if robot_props.get("data_type") == "simple_agent":
+        # For simple agent, use movement commands instead of torques
+        # [movement_x, movement_y, orientation]
+        movement_commands = torch.zeros(
+            (
+                1,
+                3,  # movement_x, movement_y, orientation
+            ),
+            dtype=torch.float32,
+        )
+        logger.info("Using simple agent mode - movement commands (x, y, orientation)")
+    else:
+        # For MuJoCo robots with actuators
+        movement_commands = torch.zeros(
+            (
+                1,
+                robot_props.get("n_actuators", 1),  # Default to 1 if not found
+            ),
+            dtype=torch.float32,
+        )
+        logger.info(f"Using robot mode - {robot_props.get('n_actuators', 1)} actuators")
 
     while True:
         if time.time() - last_memory > 1 / memory_cfg["hz"]:
@@ -70,7 +85,9 @@ def memory_manager(runtime_engine, mem_type):
                     id = int(time.time() * 10e6)
                     vision_latent = try_get(memory_manager_shm["vision_latent"], device)
                     emerged_emotion = try_get(memory_manager_shm["emotion"], device)
-                    emerged_torque = try_get(memory_manager_shm["torque"], device)
+                    emerged_movement = try_get(
+                        memory_manager_shm["torque"], device
+                    )  # Still using "torque" queue name for compatibility
 
                     if vision_latent is not None:
                         latent[latent_slices["vision"]] = vision_latent
@@ -78,14 +95,49 @@ def memory_manager(runtime_engine, mem_type):
                     if emerged_emotion is not None:
                         emotion = emerged_emotion.clone()
 
-                    if emerged_torque is not None:
-                        torque = emerged_torque.clone()
+                    if emerged_movement is not None:
+                        # Handle movement commands for simple agent
+                        if robot_props.get("data_type") == "simple_agent":
+                            # Expect movement commands: [movement_x, movement_y, orientation]
+                            if emerged_movement.shape[-1] >= 3:
+                                movement_commands = emerged_movement[:, :3].clone()
+                            elif emerged_movement.shape[-1] == 2:
+                                # If only 2D movement, pad with zero orientation
+                                movement_commands = torch.cat(
+                                    [
+                                        emerged_movement,
+                                        torch.zeros(
+                                            emerged_movement.shape[0],
+                                            1,
+                                            device=emerged_movement.device,
+                                        ),
+                                    ],
+                                    dim=-1,
+                                )
+                            else:
+                                # If single value, assume it's movement_x
+                                movement_commands = torch.cat(
+                                    [
+                                        emerged_movement,
+                                        torch.zeros(
+                                            emerged_movement.shape[0],
+                                            2,
+                                            device=emerged_movement.device,
+                                        ),
+                                    ],
+                                    dim=-1,
+                                )
+                        else:
+                            movement_commands = emerged_movement.clone()
 
                     memory.memorize(
                         id=id,
                         latent=latent.squeeze(0).cpu().numpy().tolist(),
                         emotion=emotion.squeeze(0).cpu().numpy().tolist(),
-                        efforts=torque.squeeze(0).cpu().numpy().tolist(),
+                        efforts=movement_commands.squeeze(0)
+                        .cpu()
+                        .numpy()
+                        .tolist(),  # Store movement commands as "efforts"
                     )
                     brain_shm["latent"].put(latent)
                     motivator_shm["latent"].put(latent)
@@ -106,6 +158,5 @@ def memory_manager(runtime_engine, mem_type):
                 memory.decay_on_retain_time()
             elif mem_type == "episodic_memory":
                 memory.decay_on_capacity("emotion_intensity")
-
             else:
                 logger.warning("Unable to decay memory")

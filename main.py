@@ -17,7 +17,6 @@ from agi import (
     brain,
     actuator,
 )
-from src.utilities.mj.mjcf import get_humanoid_geoms
 from src.utilities.tools.retry import retry
 
 
@@ -159,9 +158,6 @@ class Host:
     def connect_robot(self) -> Dict[str, Any]:
         import zmq
         from dotenv import load_dotenv
-        from PIL import Image
-        import io
-        import torchvision.transforms as transforms
 
         load_dotenv()
 
@@ -172,64 +168,33 @@ class Host:
         robot_sub_cfg = robot_cfg["sub"]
         ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
         logger.info("robot_sub_cfg: ", ip)
-        url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
+        url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"
         logger.info(url)
         sub.connect(url)
         sub.setsockopt_string(zmq.SUBSCRIBE, "")
         frame: dict = sub.recv_json()  # type: ignore
         sub.close()
         zmq_tmp_ctx.term()
+
+        print(frame)
         logger.info("robot connected.")
         logger.info(frame.keys())
 
-        humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
-        robot_state = json.loads(frame["robot_state"])
-        robot_mapping = json.loads(frame["robot_mapping"])
-        robot_state["egocentric_view"] = bytes(frame["egocentric_view"])
-        geom_mapping = robot_mapping["geom_name_id_mapping"]
-        humanoid_geom_mapping = {
-            k: v
-            for k, v in geom_mapping.items()
-            if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
-        }
-        humanoid_geom_mapping_rev = {v: k for k, v in humanoid_geom_mapping.items()}
-        humanoid_indices = [
-            v
-            for k, v in geom_mapping.items()
-            if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
-        ]
-        joint_mapping = robot_mapping["joint_name_id_mapping"]
-        geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
-        joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
+        # Parse simple agent data
+        agent_status = json.loads(frame["robot_state"])
+        logger.info("Using simple agent data format")
 
-        actuator_mapping = robot_mapping["actuator_name_id_mapping"]
-        actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
-
-        img_data = bytes(robot_state["egocentric_view"])
-        img = Image.open(io.BytesIO(img_data))
-        transform = transforms.ToTensor()
-        img = transform(img)
-        if torch.any(torch.isnan(img)):
-            raise ValueError("egocentric_view is None")
+        # Use the new raycast_data structure instead of line_of_sight
+        raycast_data = agent_status.get("raycast_data", {})
 
         robot_props = {
-            "geom_id2name": geom_mapping_rev,
-            "geom_name2id": geom_mapping,
-            "humanoid_geom_name2id": humanoid_geom_mapping,
-            "humanoid_geom_id2name": humanoid_geom_mapping_rev,
-            "n_geoms": len(geom_mapping),
-            "n_body_geoms": len(geom_mapping),
-            "n_humanoid_geoms": len(humanoid_geom_mapping),
-            "n_actuators": len(actuator_mapping),
-            "humanoid_geom_indices": humanoid_indices,
-            "joint_id2name": joint_mapping_rev,
-            "joint_name2id": joint_mapping,
-            "actuator_id2name": actuator_mapping_rev,
-            "actuator_name2id": actuator_mapping,
-            "egocentric_view_width": img.shape[2],
-            "egocentric_view_height": img.shape[1],
-            "n_qpos": len(robot_state["qpos"]),
-            "n_qvel": len(robot_state["qvel"]),
+            "data_type": "simple_agent",
+            "agent_position": [agent_status["x"], agent_status["y"], agent_status["z"]],
+            "agent_hp": agent_status["hit_point"],
+            "agent_raycast_count": raycast_data.get("total_rays", 0),
+            "agent_obstacle_count": raycast_data.get("obstacle_count", 0),
+            "agent_enemy_count": raycast_data.get("enemy_count", 0),
+            "agent_empty_count": raycast_data.get("empty_count", 0),
         }
 
         return robot_props
