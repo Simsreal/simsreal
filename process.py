@@ -258,7 +258,7 @@ class SequentialProcessor:
             print("[DEBUG] vision preprocessing returned None")
             return None
 
-        x = x.to(self.device).unsqueeze(0)
+        x = x.to(self.device)
         x0 = x.clone()
 
         print("[DEBUG] About to compute forward pass")
