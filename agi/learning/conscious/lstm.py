@@ -25,8 +25,12 @@ class LSTM(nn.Module):
             batch_first=batch_first,
         ).to(device)
 
-        self.h = torch.zeros((n_layers, batch_size, hidden_dim), dtype=torch.float32).to(device)
-        self.c = torch.zeros((n_layers, batch_size, hidden_dim), dtype=torch.float32).to(device)
+        self.h = torch.zeros(
+            (n_layers, batch_size, hidden_dim), dtype=torch.float32
+        ).to(device)
+        self.c = torch.zeros(
+            (n_layers, batch_size, hidden_dim), dtype=torch.float32
+        ).to(device)
 
         self.n_layers = n_layers
         self.hidden_dim = hidden_dim
@@ -34,7 +38,7 @@ class LSTM(nn.Module):
 
         self.movement_actions = SymbolicActions(hidden_dim, n_movement_actions)
         self.emotions = PAD(hidden_dim)
-        
+
         if n_intrinsics:
             self.governance = GovernancePolicy(hidden_dim, n_intrinsics)
         else:
@@ -48,17 +52,17 @@ class LSTM(nn.Module):
         self.h = h
         self.c = c
         out = out[:, -1, :]
-        
+
         movement_logits = self.movement_actions(out)
         emotions = self.emotions(out)
-        
+
         outputs = {
             "movement_logits": movement_logits,
             "emotions": emotions,
         }
-        
+
         if self.governance:
             governance = self.governance(out)
             outputs["governance"] = governance
-            
+
         return outputs

@@ -13,24 +13,24 @@ def process_line_of_sight(line_of_sight: List[Dict[str, Any]]) -> Dict[str, Any]
     enemy_angles = []
     empty_distances = []
     empty_angles = []
-    
+
     distances = []
     angles = []
     types = []
-    
+
     total_rays = len(line_of_sight)
-    
+
     for i, ray in enumerate(line_of_sight):
         distance = ray.get("Distance", -1.0)
         ray_type = ray.get("Type", 0)
-        
+
         # Calculate angle based on ray index (assuming evenly distributed rays)
         angle = (i * 360.0 / total_rays) if total_rays > 0 else 0.0
-        
+
         distances.append(distance)
         angles.append(angle)
         types.append(ray_type)
-        
+
         if ray_type == 1 and distance > 0:  # Obstacle
             obstacle_distances.append(distance)
             obstacle_angles.append(angle)
@@ -40,11 +40,11 @@ def process_line_of_sight(line_of_sight: List[Dict[str, Any]]) -> Dict[str, Any]
         elif distance == -1.0:  # Empty/no hit
             empty_distances.append(100.0)  # Max range for visualization
             empty_angles.append(angle)
-    
+
     obstacle_count = len(obstacle_distances)
     enemy_count = len(enemy_distances)
     empty_count = len(empty_distances)
-    
+
     return {
         "total_rays": total_rays,
         "obstacle_count": obstacle_count,
@@ -95,7 +95,9 @@ def create_raycast_matrices(raycast_data: Dict[str, Any]) -> Dict[str, Any]:
     return matrices
 
 
-def create_distance_angle_matrix(distances: List[float], angles: List[float], types: List[int] = None) -> torch.Tensor:
+def create_distance_angle_matrix(
+    distances: List[float], angles: List[float], types: List[int] = None
+) -> torch.Tensor:
     """
     Create a matrix from distances and angles
     Returns: torch.Tensor of shape [N, 2] or [N, 3] if types included
@@ -110,4 +112,4 @@ def create_distance_angle_matrix(distances: List[float], angles: List[float], ty
         types = torch.tensor(types, dtype=torch.float32)
         return torch.stack([distances, angles, types], dim=1)
     else:
-        return torch.stack([distances, angles], dim=1) 
+        return torch.stack([distances, angles], dim=1)

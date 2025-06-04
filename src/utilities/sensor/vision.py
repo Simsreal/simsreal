@@ -34,7 +34,9 @@ def create_lidar_vision_tensor(raycast_matrices: Dict[str, Any]) -> torch.Tensor
     return vision_tensor
 
 
-def lidar_to_2d_grid(distance_angle_matrix: torch.Tensor, height: int, width: int) -> torch.Tensor:
+def lidar_to_2d_grid(
+    distance_angle_matrix: torch.Tensor, height: int, width: int
+) -> torch.Tensor:
     """
     Convert distance-angle pairs to a 2D grid representation
     """
@@ -66,4 +68,4 @@ def lidar_to_2d_grid(distance_angle_matrix: torch.Tensor, height: int, width: in
         if 0 <= grid_x < width and 0 <= grid_y < height:
             grid[grid_y, grid_x] = distance / max_distance  # Normalize distance
 
-    return grid 
+    return grid

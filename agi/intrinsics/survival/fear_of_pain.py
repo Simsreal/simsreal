@@ -20,16 +20,16 @@ class FearOfPain(Intrinsic):
     ):
         # Check if agent_state is available and indicates pain (state = 1)
         agent_state = information.get("agent_state", 0)
-        
+
         # Convert to scalar if it's a tensor
         if torch.is_tensor(agent_state):
             state_value = agent_state.item()
         else:
             state_value = agent_state
-            
+
         # State = 1 indicates pain/damage
-        painful = (state_value == 1)
-        
+        painful = state_value == 1
+
         self.add_guidance("emotion", "fearful" if painful else "neutral")
 
     def generate_motion_trajectory(self) -> MotionTrajectory:

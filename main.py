@@ -34,18 +34,18 @@ class RuntimeEngine:
 def initialize_runtime_engine():
     """Initialize the runtime engine with config and device"""
     runtime_engine = RuntimeEngine()
-    
+
     # Load configuration
     with open("config.yaml", "r") as f:
         config = yaml.safe_load(f)
-    
+
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
+
     # Add metadata
     runtime_engine.add_metadata("config", config)
     runtime_engine.add_metadata("device", device)
-    
+
     logger.info(f"Runtime engine initialized with device: {device}")
     return runtime_engine
 
@@ -55,11 +55,11 @@ def main():
     try:
         # Initialize runtime engine
         runtime_engine = initialize_runtime_engine()
-        
+
         # Create and run sequential processor
         processor = SequentialProcessor(runtime_engine)
         processor.run()
-        
+
     except Exception as e:
         logger.error(f"Error in main: {e}")
         raise

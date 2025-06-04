@@ -56,7 +56,9 @@ class VectorStore:
                 )
             except ValueError as e:
                 if "CUDAExecutionProvider is not available" in str(e):
-                    logger.warning("CUDA not available for ONNX runtime, falling back to CPU")
+                    logger.warning(
+                        "CUDA not available for ONNX runtime, falling back to CPU"
+                    )
                     self.client.set_model(
                         self.client.DEFAULT_EMBEDDING_MODEL,
                         providers=["CPUExecutionProvider"],
