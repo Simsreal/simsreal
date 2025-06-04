@@ -187,10 +187,10 @@ class SequentialProcessor:
         try:
             # Movement symbols
             self.movement_symbols = [
-                "moveup",
-                "movedown",
-                "moveleft",
-                "moveright",
+                "moveforward",
+                "movebackward",
+                "lookleft",
+                "lookright",
                 "idle",
                 "standup",
             ]
