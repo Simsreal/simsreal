@@ -2,6 +2,9 @@
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class VectorStore:
@@ -42,14 +45,24 @@ class VectorStore:
         )
 
         if gpu:
-            # working gpu
-            self.client.set_model(
-                self.client.DEFAULT_EMBEDDING_MODEL,
-                providers=[
-                    "CUDAExecutionProvider",
-                    "CPUExecutionProvider",
-                ],
-            )
+            # Try CUDA first, fallback to CPU if not available
+            try:
+                self.client.set_model(
+                    self.client.DEFAULT_EMBEDDING_MODEL,
+                    providers=[
+                        "CUDAExecutionProvider",
+                        "CPUExecutionProvider",
+                    ],
+                )
+            except ValueError as e:
+                if "CUDAExecutionProvider is not available" in str(e):
+                    logger.warning("CUDA not available for ONNX runtime, falling back to CPU")
+                    self.client.set_model(
+                        self.client.DEFAULT_EMBEDDING_MODEL,
+                        providers=["CPUExecutionProvider"],
+                    )
+                else:
+                    raise e
 
         if reset and self.client.collection_exists(self.collection_name):
             self.client.delete_collection(self.collection_name)

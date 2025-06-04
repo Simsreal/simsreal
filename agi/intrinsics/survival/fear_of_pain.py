@@ -8,13 +8,9 @@ from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 class FearOfPain(Intrinsic):
     """
-    TODO:
-    instead of a hardcoded acceptable force
-    acceptable forces to be defined thoroughly depending robot states.
-    just make sure they are measured in Newtons with reliable contact sensors.
+    Fear of pain intrinsic that responds to agent damage state.
+    When agent state = 1, it indicates the agent is experiencing pain/damage.
     """
-
-    acceptable_forceN = 100
 
     def impl(
         self,
@@ -22,8 +18,18 @@ class FearOfPain(Intrinsic):
         brain_shm,
         physics=None,
     ):
-        forces = information["force_on_geoms"] > self.acceptable_forceN
-        painful = torch.any(forces).item()
+        # Check if agent_state is available and indicates pain (state = 1)
+        agent_state = information.get("agent_state", 0)
+        
+        # Convert to scalar if it's a tensor
+        if torch.is_tensor(agent_state):
+            state_value = agent_state.item()
+        else:
+            state_value = agent_state
+            
+        # State = 1 indicates pain/damage
+        painful = (state_value == 1)
+        
         self.add_guidance("emotion", "fearful" if painful else "neutral")
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
