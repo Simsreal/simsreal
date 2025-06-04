@@ -17,7 +17,8 @@ from agi.learning.perceive import Retina
 from agi.memory.store import MemoryStore
 from agi.learning.conscious.titans import Titans
 from agi.learning.emotions import TitansAlphaSR
-from pprint import pprint
+
+from loguru import logger
 
 # Vision preprocessing constants
 vision_mean = [0.485, 0.456, 0.406]
@@ -113,8 +114,14 @@ class SequentialProcessor:
 
         # Publisher for sending processed data
         self.publisher = self.context.socket(zmq.PUB)
-        self.publisher.connect(
+        self.publisher.bind(
             f"tcp://{self.cfg['robot']['pub']['ip']}:{self.cfg['robot']['pub']['port']}"
+        )
+
+        logger.info(
+            "ZMQ connections initialized: "
+            f"Subscriber at {self.cfg['robot']['sub']['ip']}:{self.cfg['robot']['sub']['port']}, "
+            f"Publisher at {self.cfg['robot']['pub']['ip']}:{self.cfg['robot']['pub']['port']}"
         )
 
     def _init_perceiver(self):
@@ -353,7 +360,7 @@ class SequentialProcessor:
                         # Try to get emotion guidance from the priority queue
                         guidance = intrinsic.priorities["emotion"].get_nowait()[1]
                         emotion_guidances.append(guidance)
-                    except:
+                    except Exception:
                         continue  # No guidance available from this intrinsic
 
             # Average emotion guidance if any exists
@@ -430,7 +437,11 @@ class SequentialProcessor:
 
             return parsed_context
 
-        except Exception:
+        except Exception as e:
+            # Log the error with traceback
+            logger.error(f"Failed to parse context from raw data: {e}")
+            logger.exception("Context parsing error")
+            logger.debug(f"Raw data received: {raw_data}")
             return {}
 
     def _categorize_detections(self, raycast_info: Dict[str, Any]) -> Dict[str, Any]:
