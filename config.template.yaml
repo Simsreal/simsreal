@@ -23,11 +23,11 @@ perceivers:
 
 intrinsics:
   - FearOfPain
-  - Impression
-  - FearOfUnknown
-  - CognitiveDissonance
-  - Boredom
-  - MereExposure
+  # - Impression
+  # - FearOfUnknown
+  # - CognitiveDissonance
+  # - Boredom
+  # - MereExposure
 
 brain:
   module: titans
