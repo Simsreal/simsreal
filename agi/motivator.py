@@ -5,11 +5,18 @@ from importlib import import_module
 
 class Motivator:
     """Motivator system for handling intrinsics and emotion guidance"""
-    
-    def __init__(self, cfg: Dict[str, Any], device: torch.device, emb_dim: int, live_memory=None, episodic_memory=None):
+
+    def __init__(
+        self,
+        cfg: Dict[str, Any],
+        device: torch.device,
+        emb_dim: int,
+        live_memory=None,
+        episodic_memory=None,
+    ):
         """
         Initialize motivator system
-        
+
         Args:
             cfg: Configuration dictionary containing intrinsics settings
             device: PyTorch device for tensor operations
@@ -22,10 +29,10 @@ class Motivator:
         self.emb_dim = emb_dim
         self.live_memory = live_memory
         self.episodic_memory = episodic_memory
-        
+
         # Initialize motivator components
         self._init_intrinsics()
-    
+
     def _init_intrinsics(self):
         """Initialize intrinsics system"""
         try:
@@ -62,7 +69,7 @@ class Motivator:
             self.motivators = {}
             self.intrinsic_indices = {}
             self.current_emotion_guidance = None
-    
+
     def process_step(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Generate emotion guidance from intrinsics"""
         try:

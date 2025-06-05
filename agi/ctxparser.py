@@ -24,8 +24,16 @@ class MindMap:
     2D occupancy map that tracks environment features based on agent's raycast data.
     Updates continuously and resets when agent state equals 3.
     """
-    
-    def __init__(self, map_size: int = 512, resolution: float = 0.5, decay_factor: float = 0.99, enable_visualization: bool = True, save_frames: bool = False, output_dir: str = "mindmap_frames"):
+
+    def __init__(
+        self,
+        map_size: int = 512,
+        resolution: float = 0.5,
+        decay_factor: float = 0.99,
+        enable_visualization: bool = True,
+        save_frames: bool = False,
+        output_dir: str = "mindmap_frames",
+    ):
         """Initialize the MindMap with reference frame system."""
         self.map_size = map_size
         self.resolution = resolution
@@ -33,43 +41,45 @@ class MindMap:
         self.enable_visualization = enable_visualization
         self.save_frames = save_frames
         self.base_output_dir = Path(output_dir)
-        
+
         # Episode management
         self.episode_counter = 0
         self.current_episode_dir = None
         self._setup_episode_directory()
-        
+
         # Map channels: [obstacle, enemy, trap, goal, people, food, explored]
         self.num_channels = 7
-        self.map_data = np.zeros((self.num_channels, map_size, map_size), dtype=np.float32)
-        
+        self.map_data = np.zeros(
+            (self.num_channels, map_size, map_size), dtype=np.float32
+        )
+
         # Type mapping from raycast to channels
         self.type_to_channel = {
             0: -1,  # nil - no update
-            1: 0,   # obstacle
-            2: 1,   # enemy
-            3: 2,   # trap
-            4: 3,   # goal
-            5: 4,   # people
-            6: 5,   # food
+            1: 0,  # obstacle
+            2: 1,  # enemy
+            3: 2,  # trap
+            4: 3,  # goal
+            5: 4,  # people
+            6: 5,  # food
         }
-        
+
         # Colors for visualization
         self.colors = {
-            0: [0.5, 0.5, 0.5],    # obstacle - gray
-            1: [1.0, 0.0, 0.0],    # enemy - red
-            2: [1.0, 0.6, 0.0],    # trap - orange
-            3: [0.0, 1.0, 0.0],    # goal - green
-            4: [1.0, 0.0, 1.0],    # people - magenta
-            5: [0.0, 1.0, 1.0],    # food - cyan
-            6: [0.25, 0.25, 0.25], # explored - dark gray
+            0: [0.5, 0.5, 0.5],  # obstacle - gray
+            1: [1.0, 0.0, 0.0],  # enemy - red
+            2: [1.0, 0.6, 0.0],  # trap - orange
+            3: [0.0, 1.0, 0.0],  # goal - green
+            4: [1.0, 0.0, 1.0],  # people - magenta
+            5: [0.0, 1.0, 1.0],  # food - cyan
+            6: [0.25, 0.25, 0.25],  # explored - dark gray
         }
-        
+
         # Reference frame system
         self.reference_pos = None  # Will be set on first update or reset
         self.agent_pos = {"x": 0.0, "y": 0.0, "z": 0.0}
         self.map_center = map_size // 2
-        
+
         # Visualization variables
         self.frame_counter = 0
         self.fig = None
@@ -80,22 +90,27 @@ class MindMap:
         self.viz_running = False
         self.update_flag = False
         self.viz_lock = threading.Lock()
-        
+
         if self.enable_visualization:
             self._init_matplotlib_visualization()
-        
-        logger.info(f"MindMap initialized: {map_size}x{map_size}, resolution={resolution}m/px, reference frame system enabled")
-    
+
+        logger.info(
+            f"MindMap initialized: {map_size}x{map_size}, resolution={resolution}m/px, reference frame system enabled"
+        )
+
     def _setup_episode_directory(self):
         """Setup directory for current episode."""
         if self.save_frames:
             # Create base directory if it doesn't exist
             self.base_output_dir.mkdir(exist_ok=True)
-            
+
             # Find the next episode number
-            existing_episodes = [d for d in self.base_output_dir.iterdir() 
-                               if d.is_dir() and d.name.startswith("episode_")]
-            
+            existing_episodes = [
+                d
+                for d in self.base_output_dir.iterdir()
+                if d.is_dir() and d.name.startswith("episode_")
+            ]
+
             if existing_episodes:
                 episode_numbers = []
                 for ep_dir in existing_episodes:
@@ -104,117 +119,147 @@ class MindMap:
                         episode_numbers.append(ep_num)
                     except (IndexError, ValueError):
                         continue
-                self.episode_counter = max(episode_numbers) + 1 if episode_numbers else 0
+                self.episode_counter = (
+                    max(episode_numbers) + 1 if episode_numbers else 0
+                )
             else:
                 self.episode_counter = 0
-            
+
             # Create current episode directory
-            self.current_episode_dir = self.base_output_dir / f"episode_{self.episode_counter:04d}"
+            self.current_episode_dir = (
+                self.base_output_dir / f"episode_{self.episode_counter:04d}"
+            )
             self.current_episode_dir.mkdir(exist_ok=True)
-            
+
             # Reset frame counter for new episode
             self.frame_counter = 0
-            
-            logger.info(f"Episode {self.episode_counter}: Saving frames to {self.current_episode_dir}")
+
+            logger.info(
+                f"Episode {self.episode_counter}: Saving frames to {self.current_episode_dir}"
+            )
 
     def _init_matplotlib_visualization(self):
         """Initialize matplotlib visualization in a separate thread."""
         try:
             self.viz_running = True
-            self.viz_thread = threading.Thread(target=self._visualization_loop, daemon=True)
+            self.viz_thread = threading.Thread(
+                target=self._visualization_loop, daemon=True
+            )
             self.viz_thread.start()
             logger.info("Matplotlib visualization thread started")
         except Exception as e:
             logger.error(f"Failed to start visualization thread: {e}")
             self.enable_visualization = False
-    
+
     def _visualization_loop(self):
         """Main visualization loop - now saves PNG files instead of displaying."""
         try:
             # Use Agg backend for PNG generation (no GUI required)
             import matplotlib
-            matplotlib.use('Agg')
+
+            matplotlib.use("Agg")
             import matplotlib.pyplot as plt
-            
+
             # Create figure and axis
             self.fig, self.ax = plt.subplots(figsize=(12, 10), dpi=100)
             self.ax.set_title("MindMap Live View")
             self.ax.set_xlabel("Map X (pixels)")
             self.ax.set_ylabel("Map Y (pixels)")
-            
+
             # Create initial empty image
             initial_img = np.zeros((self.map_size, self.map_size, 3))
-            self.im = self.ax.imshow(initial_img, origin='lower', extent=[0, self.map_size, 0, self.map_size])
-            
+            self.im = self.ax.imshow(
+                initial_img, origin="lower", extent=[0, self.map_size, 0, self.map_size]
+            )
+
             # Add colorbar legend
             self._add_legend()
-            
+
             # Initial agent marker
-            self.agent_marker, = self.ax.plot([], [], 'wo', markersize=8, markeredgecolor='black', markeredgewidth=2)
-            
+            (self.agent_marker,) = self.ax.plot(
+                [], [], "wo", markersize=8, markeredgecolor="black", markeredgewidth=2
+            )
+
             plt.tight_layout()
-            
+
             # Main loop - no GUI display, just PNG saving
             while self.viz_running:
                 try:
                     with self.viz_lock:
                         if self.update_flag:
                             self._update_plot()
-                            
+
                             # Save frame as PNG instead of displaying
                             if self.save_frames:
                                 self._save_frame()
-                            
+
                             self.update_flag = False
-                    
+
                     # Simple sleep instead of plt.pause()
                     time.sleep(0.1)  # Adjust as needed
-                    
+
                 except Exception as e:
                     logger.error(f"Visualization update error: {e}")
                     break
-                    
+
         except Exception as e:
             logger.error(f"Visualization loop error: {e}")
         finally:
             if self.fig:
                 plt.close(self.fig)
             logger.info("Visualization thread ended")
-    
+
     def _add_legend(self):
         """Add a legend to the plot."""
         legend_elements = []
-        legend_labels = ["Obstacle", "Enemy", "Trap", "Goal", "People", "Food", "Explored", "Agent"]
-        legend_colors = [self.colors[i] for i in range(7)] + [[1.0, 1.0, 1.0]]  # White for agent
-        
+        legend_labels = [
+            "Obstacle",
+            "Enemy",
+            "Trap",
+            "Goal",
+            "People",
+            "Food",
+            "Explored",
+            "Agent",
+        ]
+        legend_colors = [self.colors[i] for i in range(7)] + [
+            [1.0, 1.0, 1.0]
+        ]  # White for agent
+
         for label, color in zip(legend_labels, legend_colors):
-            legend_elements.append(plt.Rectangle((0, 0), 1, 1, facecolor=color, label=label))
-        
-        self.ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.02, 1))
-    
+            legend_elements.append(
+                plt.Rectangle((0, 0), 1, 1, facecolor=color, label=label)
+            )
+
+        self.ax.legend(
+            handles=legend_elements, loc="upper left", bbox_to_anchor=(1.02, 1)
+        )
+
     def _update_plot(self):
         """Update the matplotlib plot with current map data."""
         try:
             # Create RGB image from map data
             viz_img = np.zeros((self.map_size, self.map_size, 3))
-            
+
             # Render each channel with its color (priority order: objects > explored)
             for channel_idx in [6, 0, 1, 2, 3, 4, 5]:  # explored first, then objects
                 channel_data = self.map_data[channel_idx]
                 mask = channel_data > 0.1
-                
+
                 if np.any(mask):
                     color = self.colors[channel_idx]
                     viz_img[mask] = color
-            
+
             # Update image
             self.im.set_data(viz_img)
-            
+
             # Update agent position
-            agent_map_x, agent_map_y = self.world_to_map(self.agent_pos["x"], self.agent_pos["y"])
+            agent_map_x, agent_map_y = self.world_to_map(
+                self.agent_pos["x"], self.agent_pos["y"]
+            )
             if self.is_valid_coordinate(agent_map_x, agent_map_y):
                 self.agent_marker.set_data([agent_map_x], [agent_map_y])
-            
+
             # Update title with episode info and coordinates
             timestamp = time.strftime("%H:%M:%S")
             if self.reference_pos:
@@ -223,12 +268,12 @@ class MindMap:
                 title = f"Episode {self.episode_counter} - Frame: {self.frame_counter} | Agent: World({self.agent_pos['x']:.1f}, {self.agent_pos['y']:.1f}) Rel({rel_x:.1f}, {rel_y:.1f}) | {timestamp}"
             else:
                 title = f"Episode {self.episode_counter} - Frame: {self.frame_counter} | Agent: ({self.agent_pos['x']:.1f}, {self.agent_pos['y']:.1f}) | {timestamp}"
-            
+
             self.ax.set_title(title)
-            
+
         except Exception as e:
             logger.error(f"Error updating plot: {e}")
-    
+
     def world_to_map(self, world_x: float, world_y: float) -> Tuple[int, int]:
         """Convert world coordinates to map indices using reference frame."""
         if self.reference_pos is None:
@@ -239,26 +284,26 @@ class MindMap:
             # Calculate relative position from reference
             rel_x = world_x - self.reference_pos["x"]
             rel_y = world_y - self.reference_pos["y"]
-            
+
             # Convert to map coordinates (reference pos is at map center)
             map_x = int(self.map_center + rel_x / self.resolution)
             map_y = int(self.map_center + rel_y / self.resolution)
-        
+
         return map_x, map_y
-    
+
     def map_to_world(self, map_x: int, map_y: int) -> Tuple[float, float]:
         """Convert map indices to world coordinates using reference frame."""
         if self.reference_pos is None:
             return 0.0, 0.0
-        
+
         # Calculate relative position from map center
         rel_x = (map_x - self.map_center) * self.resolution
         rel_y = (map_y - self.map_center) * self.resolution
-        
+
         # Add to reference position to get world coordinates
         world_x = self.reference_pos["x"] + rel_x
         world_y = self.reference_pos["y"] + rel_y
-        
+
         return world_x, world_y
 
     def set_reference_frame(self, agent_position: Dict[str, float]):
@@ -266,100 +311,116 @@ class MindMap:
         self.reference_pos = {
             "x": agent_position["x"],
             "y": agent_position["y"],
-            "z": agent_position["z"]
+            "z": agent_position["z"],
         }
-        logger.info(f"Reference frame set to: ({self.reference_pos['x']:.2f}, {self.reference_pos['y']:.2f})")
+        logger.info(
+            f"Reference frame set to: ({self.reference_pos['x']:.2f}, {self.reference_pos['y']:.2f})"
+        )
 
     def reset_map(self):
         """Reset the entire map, reference frame, and create new episode directory."""
         self.map_data.fill(0.0)
         self.reference_pos = None  # Will be reset on next update
-        
+
         # Setup new episode directory
         self._setup_episode_directory()
-        
-        logger.info(f"MindMap reset - Episode {self.episode_counter} started, reference frame will be set on next update")
+
+        logger.info(
+            f"MindMap reset - Episode {self.episode_counter} started, reference frame will be set on next update"
+        )
         if self.enable_visualization:
             self._trigger_update()
 
-    def update_from_raycast(self, agent_position: Dict[str, float], raycast_info: Dict[str, Any]):
+    def update_from_raycast(
+        self, agent_position: Dict[str, float], raycast_info: Dict[str, Any]
+    ):
         """Update the map based on agent position and raycast data."""
         try:
             # Update agent position
             self.agent_pos = agent_position.copy()
-            
+
             # Set reference frame if not set (first frame or after reset)
             if self.reference_pos is None:
                 self.set_reference_frame(agent_position)
-            
+
             # Get agent position in map coordinates (relative to reference)
-            agent_map_x, agent_map_y = self.world_to_map(agent_position["x"], agent_position["y"])
-            
+            agent_map_x, agent_map_y = self.world_to_map(
+                agent_position["x"], agent_position["y"]
+            )
+
             # Check if agent is within map bounds
             if not self.is_valid_coordinate(agent_map_x, agent_map_y):
-                logger.warning(f"Agent position out of map bounds: {agent_position} -> map coords: ({agent_map_x}, {agent_map_y})")
-                
+                logger.warning(
+                    f"Agent position out of map bounds: {agent_position} -> map coords: ({agent_map_x}, {agent_map_y})"
+                )
+
                 # Still update frame counter and visualization
                 self.frame_counter += 1
                 if self.enable_visualization:
                     self._trigger_update()
                 return
-            
+
             # Apply decay to all channels except explored
             self.map_data[:6] *= self.decay_factor
-            
+
             # Mark agent's current position as explored
             self.map_data[6, agent_map_y, agent_map_x] = 1.0
-            
+
             # Process raycast data
             distances = raycast_info.get("distances", [])
             angles = raycast_info.get("angles", [])
             types = raycast_info.get("types", [])
-            
+
             for distance, angle, obj_type in zip(distances, angles, types):
                 if obj_type == 0:  # Skip nil types
                     continue
-                    
+
                 # Convert angle to radians and calculate hit point
                 angle_rad = np.deg2rad(angle)
                 hit_x = agent_position["x"] + distance * np.cos(angle_rad)
                 hit_y = agent_position["y"] + distance * np.sin(angle_rad)
-                
+
                 # Convert to map coordinates (relative to reference)
                 hit_map_x, hit_map_y = self.world_to_map(hit_x, hit_y)
-                
+
                 if not self.is_valid_coordinate(hit_map_x, hit_map_y):
                     continue
-                
+
                 # Update the appropriate channel
                 channel = self.type_to_channel.get(obj_type, -1)
                 if channel >= 0:
                     self.map_data[channel, hit_map_y, hit_map_x] = 1.0
-                
+
                 # Mark the ray path as explored
-                self._mark_ray_path_explored(agent_map_x, agent_map_y, hit_map_x, hit_map_y)
-            
+                self._mark_ray_path_explored(
+                    agent_map_x, agent_map_y, hit_map_x, hit_map_y
+                )
+
             # Update visualization every frame
             self.frame_counter += 1
             if self.enable_visualization:
                 self._trigger_update()
-                
+
         except Exception as e:
             logger.error(f"Error updating map from raycast: {e}")
-    
+
     def _trigger_update(self):
         """Trigger a visualization update in a thread-safe way."""
         with self.viz_lock:
             self.update_flag = True
-    
+
     def _mark_ray_path_explored(self, x0: int, y0: int, x1: int, y1: int):
         """Mark the path of a ray as explored using Bresenham's line algorithm."""
         points = self._bresenham_line(x0, y0, x1, y1)
         for x, y in points:
             if self.is_valid_coordinate(x, y):
-                self.map_data[6, y, x] = max(self.map_data[6, y, x], 0.5)  # Explored but not occupied
-    
-    def _bresenham_line(self, x0: int, y0: int, x1: int, y1: int) -> List[Tuple[int, int]]:
+                self.map_data[6, y, x] = max(
+                    self.map_data[6, y, x], 0.5
+                )  # Explored but not occupied
+
+    def _bresenham_line(
+        self, x0: int, y0: int, x1: int, y1: int
+    ) -> List[Tuple[int, int]]:
         """Bresenham's line algorithm for marking explored paths."""
         points = []
         dx = abs(x1 - x0)
@@ -383,67 +444,79 @@ class MindMap:
                 y += y_inc
 
         return points
-    
+
     def get_local_map(self, radius: int = 64) -> np.ndarray:
         """Get a local map centered on the agent's position."""
-        agent_map_x, agent_map_y = self.world_to_map(self.agent_pos["x"], self.agent_pos["y"])
-        
+        agent_map_x, agent_map_y = self.world_to_map(
+            self.agent_pos["x"], self.agent_pos["y"]
+        )
+
         # Calculate bounds
         x_start = max(0, agent_map_x - radius)
         x_end = min(self.map_size, agent_map_x + radius)
         y_start = max(0, agent_map_y - radius)
         y_end = min(self.map_size, agent_map_y + radius)
-        
+
         # Extract local map
         local_map = self.map_data[:, y_start:y_end, x_start:x_end]
-        
+
         # Pad if necessary to maintain consistent size
         target_size = 2 * radius
         if local_map.shape[1] != target_size or local_map.shape[2] != target_size:
-            padded_map = np.zeros((self.num_channels, target_size, target_size), dtype=np.float32)
-            
+            padded_map = np.zeros(
+                (self.num_channels, target_size, target_size), dtype=np.float32
+            )
+
             # Calculate padding offsets
             y_offset = (target_size - local_map.shape[1]) // 2
             x_offset = (target_size - local_map.shape[2]) // 2
-            
+
             # Fix: Ensure we don't exceed bounds when copying
             y_end_copy = min(y_offset + local_map.shape[1], target_size)
             x_end_copy = min(x_offset + local_map.shape[2], target_size)
-            
+
             # Only copy the part that fits
             copy_height = y_end_copy - y_offset
             copy_width = x_end_copy - x_offset
-            
-            padded_map[:, 
-                      y_offset:y_end_copy, 
-                      x_offset:x_end_copy] = local_map[:, :copy_height, :copy_width]
+
+            padded_map[:, y_offset:y_end_copy, x_offset:x_end_copy] = local_map[
+                :, :copy_height, :copy_width
+            ]
             return padded_map
-        
+
         return local_map
-    
+
     def get_map_tensor(self, device: torch.device = None) -> torch.Tensor:
         """Get the full map as a PyTorch tensor."""
         tensor = torch.from_numpy(self.map_data.copy())
         if device is not None:
             tensor = tensor.to(device)
         return tensor
-    
+
     def get_map_summary(self) -> Dict[str, Any]:
         """Get summary statistics of the map."""
-        channel_names = ["obstacle", "enemy", "trap", "goal", "people", "food", "explored"]
+        channel_names = [
+            "obstacle",
+            "enemy",
+            "trap",
+            "goal",
+            "people",
+            "food",
+            "explored",
+        ]
         summary = {}
-        
+
         for i, name in enumerate(channel_names):
             channel_data = self.map_data[i]
             summary[name] = {
                 "max_value": float(np.max(channel_data)),
                 "total_coverage": float(np.sum(channel_data > 0.1)),
-                "density": float(np.mean(channel_data))
+                "density": float(np.mean(channel_data)),
             }
-        
+
         summary["agent_position"] = self.agent_pos.copy()
         return summary
-    
+
     def close_visualization(self):
         """Close the matplotlib visualization."""
         if self.enable_visualization and self.viz_running:
@@ -453,97 +526,110 @@ class MindMap:
             if self.fig:
                 plt.close(self.fig)
             logger.info("Visualization closed")
-    
+
     def _save_frame(self):
         """Save current frame as PNG in current episode directory."""
         try:
             if not self.current_episode_dir:
                 logger.warning("No episode directory set - cannot save frame")
                 return
-                
+
             filename = f"mindmap_frame_{self.frame_counter:06d}.png"
             filepath = self.current_episode_dir / filename
-            
+
             # Save with high quality
             self.fig.savefig(
                 filepath,
                 dpi=100,
-                bbox_inches='tight',
-                facecolor='white',
-                edgecolor='none'
+                bbox_inches="tight",
+                facecolor="white",
+                edgecolor="none",
             )
-            
+
             # Log every frame for debugging (change back to % 50 later)
             logger.info(f"Episode {self.episode_counter}: Saved frame: {filename}")
-                
+
         except Exception as e:
-            logger.error(f"Error saving frame {self.frame_counter} in episode {self.episode_counter}: {e}")
-    
+            logger.error(
+                f"Error saving frame {self.frame_counter} in episode {self.episode_counter}: {e}"
+            )
+
     def get_frame_count(self) -> int:
         """Get total number of saved frames in current episode."""
-        if not self.save_frames or not self.current_episode_dir or not self.current_episode_dir.exists():
+        if (
+            not self.save_frames
+            or not self.current_episode_dir
+            or not self.current_episode_dir.exists()
+        ):
             return 0
         return len(list(self.current_episode_dir.glob("mindmap_frame_*.png")))
-    
-    def create_gif_from_frames(self, gif_path: str = None, fps: int = 10, max_frames: int = None):
+
+    def create_gif_from_frames(
+        self, gif_path: str = None, fps: int = 10, max_frames: int = None
+    ):
         """Create a GIF animation from saved PNG frames in current episode."""
         try:
             from PIL import Image
-            
+
             if not self.current_episode_dir or not self.current_episode_dir.exists():
                 logger.warning("No current episode directory found")
                 return
-            
+
             # Default GIF name includes episode number
             if gif_path is None:
                 gif_path = f"episode_{self.episode_counter:04d}_animation.gif"
-            
+
             # Get all frame files from current episode
             frame_files = sorted(self.current_episode_dir.glob("mindmap_frame_*.png"))
-            
+
             if max_frames:
                 frame_files = frame_files[-max_frames:]  # Take last N frames
-            
+
             if not frame_files:
-                logger.warning(f"No frames found in episode {self.episode_counter} to create GIF")
+                logger.warning(
+                    f"No frames found in episode {self.episode_counter} to create GIF"
+                )
                 return
-            
+
             # Load images
             images = []
             for frame_file in frame_files:
                 img = Image.open(frame_file)
                 images.append(img)
-            
+
             # Save as GIF in episode directory
             gif_output = self.current_episode_dir / gif_path
             images[0].save(
                 gif_output,
                 save_all=True,
                 append_images=images[1:],
-                duration=1000//fps,  # milliseconds per frame
-                loop=0
+                duration=1000 // fps,  # milliseconds per frame
+                loop=0,
             )
-            
+
             logger.info(f"Created GIF: {gif_output} with {len(images)} frames")
-            
+
         except ImportError:
             logger.error("PIL/Pillow required for GIF creation: pip install Pillow")
         except Exception as e:
             logger.error(f"Error creating GIF for episode {self.episode_counter}: {e}")
-    
+
     def cleanup_old_episodes(self, keep_last_n: int = 10):
         """Keep only the last N episodes to prevent disk space issues."""
         if not self.save_frames or not self.base_output_dir.exists():
             return
-        
-        episode_dirs = [d for d in self.base_output_dir.iterdir() 
-                       if d.is_dir() and d.name.startswith("episode_")]
-        
+
+        episode_dirs = [
+            d
+            for d in self.base_output_dir.iterdir()
+            if d.is_dir() and d.name.startswith("episode_")
+        ]
+
         if len(episode_dirs) > keep_last_n:
             # Sort by episode number
             episode_dirs.sort(key=lambda x: int(x.name.split("_")[1]))
             dirs_to_delete = episode_dirs[:-keep_last_n]
-            
+
             for episode_dir in dirs_to_delete:
                 try:
                     # Delete all files in the episode directory
@@ -553,36 +639,43 @@ class MindMap:
                     episode_dir.rmdir()
                 except Exception as e:
                     logger.error(f"Error deleting episode directory {episode_dir}: {e}")
-            
-            logger.info(f"Cleaned up {len(dirs_to_delete)} old episodes, kept last {keep_last_n}")
+
+            logger.info(
+                f"Cleaned up {len(dirs_to_delete)} old episodes, kept last {keep_last_n}"
+            )
 
     def get_episode_summary(self) -> Dict[str, Any]:
         """Get summary of all episodes."""
         if not self.base_output_dir.exists():
             return {"total_episodes": 0, "episodes": []}
-        
-        episode_dirs = [d for d in self.base_output_dir.iterdir() 
-                       if d.is_dir() and d.name.startswith("episode_")]
-        
+
+        episode_dirs = [
+            d
+            for d in self.base_output_dir.iterdir()
+            if d.is_dir() and d.name.startswith("episode_")
+        ]
+
         episodes = []
         for ep_dir in episode_dirs:
             try:
                 ep_num = int(ep_dir.name.split("_")[1])
                 frame_count = len(list(ep_dir.glob("mindmap_frame_*.png")))
-                episodes.append({
-                    "episode": ep_num,
-                    "directory": str(ep_dir),
-                    "frame_count": frame_count
-                })
+                episodes.append(
+                    {
+                        "episode": ep_num,
+                        "directory": str(ep_dir),
+                        "frame_count": frame_count,
+                    }
+                )
             except (IndexError, ValueError):
                 continue
-        
+
         episodes.sort(key=lambda x: x["episode"])
-        
+
         return {
             "total_episodes": len(episodes),
             "current_episode": self.episode_counter,
-            "episodes": episodes
+            "episodes": episodes,
         }
 
     def is_valid_coordinate(self, map_x: int, map_y: int) -> bool:
@@ -591,18 +684,30 @@ class MindMap:
 
 
 class ContextParser:
-    
-    def __init__(self, device=None, map_size: int = 512, map_resolution: float = 0.5, enable_viz: bool = True, save_frames: bool = False, output_dir: str = "mindmap_frames"):
-        self.device = device or torch.device('cpu')
+    def __init__(
+        self,
+        device=None,
+        map_size: int = 512,
+        map_resolution: float = 0.5,
+        enable_viz: bool = True,
+        save_frames: bool = False,
+        output_dir: str = "mindmap_frames",
+    ):
+        self.device = device or torch.device("cpu")
         self.mind_map = MindMap(
-            map_size=map_size, 
-            resolution=map_resolution, 
+            map_size=map_size,
+            resolution=map_resolution,
             enable_visualization=enable_viz,
             save_frames=save_frames,
-            output_dir=output_dir
+            output_dir=output_dir,
         )
-    
-    def parse_context(self, raw_data: Dict[str, Any], perceive_vision_fn=None, construct_vision_fn=None) -> Dict[str, Any]:
+
+    def parse_context(
+        self,
+        raw_data: Dict[str, Any],
+        perceive_vision_fn=None,
+        construct_vision_fn=None,
+    ) -> Dict[str, Any]:
         try:
             line_of_sight = raw_data.get("line_of_sight", [])
 
@@ -655,23 +760,39 @@ class ContextParser:
             logger.error(f"Failed to parse context from raw data: {e}")
             logger.exception("Context parsing error")
             logger.debug(f"Raw data received: {raw_data}")
-            
+
             # Return a fallback context with required keys to prevent downstream errors
             fallback_context = {
                 "raycast_info": {"distances": [], "angles": [], "types": []},
-                "raycast_matrices": {"obstacle_matrix": torch.zeros((0, 2)), "enemy_matrix": torch.zeros((0, 2)), "empty_matrix": torch.zeros((0, 2))},
-                "mind_map": torch.zeros((self.mind_map.num_channels, self.mind_map.map_size, self.mind_map.map_size)),
+                "raycast_matrices": {
+                    "obstacle_matrix": torch.zeros((0, 2)),
+                    "enemy_matrix": torch.zeros((0, 2)),
+                    "empty_matrix": torch.zeros((0, 2)),
+                },
+                "mind_map": torch.zeros(
+                    (
+                        self.mind_map.num_channels,
+                        self.mind_map.map_size,
+                        self.mind_map.map_size,
+                    )
+                ),
                 "local_mind_map": torch.zeros((self.mind_map.num_channels, 128, 128)),
                 "mind_map_summary": {"agent_position": {"x": 0.0, "y": 0.0, "z": 0.0}},
                 "lidar_vision_tensor": torch.zeros((3, 64, 64)),
-                "agent_position": {"x": raw_data.get("x", 0.0), "y": raw_data.get("y", 0.0), "z": raw_data.get("z", 0.0)},
+                "agent_position": {
+                    "x": raw_data.get("x", 0.0),
+                    "y": raw_data.get("y", 0.0),
+                    "z": raw_data.get("z", 0.0),
+                },
                 "agent_state": raw_data.get("state", 0),
                 "hit_point": raw_data.get("hit_point", 100),
                 "hunger": raw_data.get("hunger", 0.0),
-                "detection_summary": {"nil": {"count": 0, "distances": [], "angles": []}},
+                "detection_summary": {
+                    "nil": {"count": 0, "distances": [], "angles": []}
+                },
                 "raw_perception": raw_data,
             }
-            
+
             return fallback_context
 
     def categorize_detections(self, raycast_info: Dict[str, Any]) -> Dict[str, Any]:
@@ -702,16 +823,17 @@ class ContextParser:
                 categorized[type_name]["angles"].append(angle)
 
         return categorized
-    
+
     def cleanup(self):
         """Clean up resources including visualization."""
         self.mind_map.close_visualization()
 
 
 class VisionConstructor:
-    
     @staticmethod
-    def construct_vision_from_raycast(line_of_sight: List[Dict[str, Any]]) -> np.ndarray:
+    def construct_vision_from_raycast(
+        line_of_sight: List[Dict[str, Any]]
+    ) -> np.ndarray:
         max_distance = 100.0
         height = 64
         width = 64
@@ -770,7 +892,9 @@ class VisionConstructor:
         return vision_matrix
 
     @staticmethod
-    def construct_polar_vision_from_raycast(line_of_sight: List[Dict[str, Any]]) -> np.ndarray:
+    def construct_polar_vision_from_raycast(
+        line_of_sight: List[Dict[str, Any]]
+    ) -> np.ndarray:
         height = 64
         width = 64
         max_distance = 100.0

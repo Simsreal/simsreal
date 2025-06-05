@@ -17,7 +17,6 @@ from loguru import logger
 
 
 class SequentialProcessor:
-
     def __init__(self, runtime_engine):
         self.runtime_engine = runtime_engine
         self.cfg = runtime_engine.get_metadata("config")
@@ -64,32 +63,23 @@ class SequentialProcessor:
 
     def _init_memory_manager(self):
         self.memory_manager = MemoryManager(self.cfg, self.emb_dim)
-        
+
         self.live_memory = self.memory_manager.live_memory
         self.episodic_memory = self.memory_manager.episodic_memory
 
     def _init_motivator(self):
         self.motivator = Motivator(
-            self.cfg, 
-            self.device, 
-            self.emb_dim, 
-            self.live_memory, 
-            self.episodic_memory
+            self.cfg, self.device, self.emb_dim, self.live_memory, self.episodic_memory
         )
-        
+
         self.intrinsics = self.motivator.intrinsics
         self.motivators = self.motivator.motivators
         self.intrinsic_indices = self.motivator.intrinsic_indices
         self.current_emotion_guidance = self.motivator.current_emotion_guidance
 
     def _init_governor(self):
-        self.governor = Governor(
-            self.cfg,
-            self.device,
-            self.emb_dim,
-            self.intrinsics
-        )
-        
+        self.governor = Governor(self.cfg, self.device, self.emb_dim, self.intrinsics)
+
         self.movement_symbols = self.governor.movement_symbols
         self.titans_model = self.governor.titans_model
         self.titans_alphasr = self.governor.titans_alphasr
@@ -101,12 +91,12 @@ class SequentialProcessor:
         enable_viz = self.cfg.get("enable_mindmap_viz", True)
         save_frames = self.cfg.get("save_mindmap_frames", True)
         output_dir = self.cfg.get("mindmap_output_dir", "mindmap_frames")
-        
+
         self.context_parser = ContextParser(
-            device=self.device, 
+            device=self.device,
             enable_viz=enable_viz,
             save_frames=save_frames,
-            output_dir=output_dir
+            output_dir=output_dir,
         )
         self.vision_constructor = VisionConstructor()
 
@@ -116,7 +106,7 @@ class SequentialProcessor:
     def ctx_parser(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         return self.context_parser.parse_context(
             raw_data,
-            construct_vision_fn=self.vision_constructor.construct_vision_from_raycast
+            construct_vision_fn=self.vision_constructor.construct_vision_from_raycast,
         )
 
     def memory_manager_step(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -236,6 +226,7 @@ class SequentialProcessor:
 
         except Exception as e:
             logger.error(f"Process step error: {e}")
+
     def run(self):
         logger.info("Starting processing loop...")
         try:

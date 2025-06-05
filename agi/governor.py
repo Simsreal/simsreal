@@ -7,11 +7,17 @@ from agi.learning.emotions import TitansAlphaSR
 
 class Governor:
     """Governor system for decision making and movement control"""
-    
-    def __init__(self, cfg: Dict[str, Any], device: torch.device, emb_dim: int, intrinsics: List[str]):
+
+    def __init__(
+        self,
+        cfg: Dict[str, Any],
+        device: torch.device,
+        emb_dim: int,
+        intrinsics: List[str],
+    ):
         """
         Initialize governor system
-        
+
         Args:
             cfg: Configuration dictionary containing brain settings
             device: PyTorch device for tensor operations
@@ -22,10 +28,10 @@ class Governor:
         self.device = device
         self.emb_dim = emb_dim
         self.intrinsics = intrinsics
-        
+
         # Initialize governor components
         self._init_governor()
-    
+
     def _init_governor(self):
         """Initialize the governor (decision making system)"""
         try:
@@ -74,12 +80,12 @@ class Governor:
             self.titans_model = None
             self.titans_alphasr = None
             self.movement_symbols = ["idle"]  # Fallback
-    
+
     def fifo_context_update(self, ctx, x):
         """FIFO context update for maintaining temporal context"""
         x = x.to(self.device)
         return torch.cat((ctx[:, 1:, :], x.unsqueeze(1)), dim=1)
-    
+
     def process_step(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Generate movement decisions using the governor"""
         try:
