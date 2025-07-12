@@ -3,9 +3,14 @@ import numpy as np
 from typing import List, Dict, Any
 
 
-def process_line_of_sight(line_of_sight: List[Dict[str, Any]]) -> Dict[str, Any]:
+def process_line_of_sight(line_of_sight: List[Dict[str, Any]], agent_orientation: float = 0.0) -> Dict[str, Any]:
     """
     Process line_of_sight data to extract raycast information
+    FOV is 120 degrees (-60 to +60 degrees) relative to agent's facing direction
+    
+    Args:
+        line_of_sight: List of raycast hit data
+        agent_orientation: Agent's current orientation in degrees (from Unity)
     """
     obstacle_distances = []
     obstacle_angles = []
@@ -24,22 +29,27 @@ def process_line_of_sight(line_of_sight: List[Dict[str, Any]]) -> Dict[str, Any]
         distance = ray.get("Distance", -1.0)
         ray_type = ray.get("Type", 0)
 
-        # Calculate angle based on ray index (assuming evenly distributed rays)
-        angle = (i * 360.0 / total_rays) if total_rays > 0 else 0.0
-
+        # Calculate relative angle for 120° FOV (-60° to +60°)
+        if total_rays > 0:
+            # Map ray index to relative angle within 120° FOV
+            relative_angle = -60.0 + (i * 120.0 / (total_rays - 1)) if total_rays > 1 else 0.0
+        else:
+            relative_angle = 0.0
+        
+        # Store the relative angle (will be combined with agent orientation in mindmap_builder)
         distances.append(distance)
-        angles.append(angle)
+        angles.append(relative_angle)
         types.append(ray_type)
 
         if ray_type == 1 and distance > 0:  # Obstacle
             obstacle_distances.append(distance)
-            obstacle_angles.append(angle)
+            obstacle_angles.append(relative_angle)
         elif ray_type == 2:  # Enemy
             enemy_distances.append(distance)
-            enemy_angles.append(angle)
+            enemy_angles.append(relative_angle)
         elif distance == -1.0:  # Empty/no hit
             empty_distances.append(100.0)  # Max range for visualization
-            empty_angles.append(angle)
+            empty_angles.append(relative_angle)
 
     obstacle_count = len(obstacle_distances)
     enemy_count = len(enemy_distances)
@@ -59,6 +69,7 @@ def process_line_of_sight(line_of_sight: List[Dict[str, Any]]) -> Dict[str, Any]
         "distances": distances,
         "angles": angles,
         "types": types,
+        "agent_orientation": agent_orientation,  # Store for reference
     }
 
 

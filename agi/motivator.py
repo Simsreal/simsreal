@@ -76,58 +76,22 @@ class Motivator:
             if not self.motivators:
                 return {"emotion_guidance": None}
 
-            # Get vision latent as primary latent representation
-            latent = context.get("vision_latent")
+            # Get raw context data directly
+            raw_context = context.get("raw_context", {})
+            
+            # Extract agent state from raw context
+            agent_state = raw_context.get("state", 0)
 
-            # If no vision latent, create a simple representation from raycast data
-            if latent is None:
-                # Create a simple latent from raycast distances (fallback)
-                distances = context.get("raycast_info", {}).get("distances", [])
-                if distances:
-                    # Pad or truncate to fixed size and normalize
-                    padded_distances = (distances + [100.0] * self.emb_dim)[
-                        : self.emb_dim
-                    ]
-                    latent = (
-                        torch.tensor(padded_distances, dtype=torch.float32).to(
-                            self.device
-                        )
-                        / 100.0
-                    )
-                    latent = latent.unsqueeze(0)  # Add batch dimension
-                else:
-                    return {"emotion_guidance": None}
-
-            # Create dummy emotion (neutral state)
-            dummy_emotion = torch.zeros(3, dtype=torch.float32).to(
-                self.device
-            )  # PAD format [P, A, D]
-
-            # Create dummy governance (equal weights for all intrinsics)
+            # Create dummy governance for backward compatibility (equal weights for all intrinsics)
             dummy_governance = torch.ones(
                 len(self.intrinsics), dtype=torch.float32
             ) / len(self.intrinsics)
             dummy_governance = dummy_governance.to(self.device)
 
-            # Extract agent state and other important info
-            agent_state = context.get("agent_state", 0)
-            hit_point = context.get("hit_point", 100)
-            hunger = context.get("hunger", 0.0)
-            detection_summary = context.get("detection_summary", {})
-
-            # Create information dictionary for intrinsics
-            information = {
-                "latent": latent.flatten(),
-                "emotion": dummy_emotion,
-                "governance": dummy_governance,
-                "agent_state": agent_state,
-                "hit_point": hit_point,
-                "hunger": hunger,
-                "detection_summary": detection_summary,
-                "robot_state": context.get("raw_perception", {}),
-                "force_on_geoms": torch.zeros(1, dtype=torch.float32).to(
-                    self.device
-                ),  # Backward compatibility
+            # Add governance to context for intrinsics that need it
+            context_with_governance = {
+                **raw_context,
+                "governance": dummy_governance
             }
 
             # Collect emotion guidance from all intrinsics
@@ -137,9 +101,9 @@ class Motivator:
                     intrinsic = self.motivators[intrinsic_name]
 
                     try:
-                        # Run the intrinsic logic
+                        # Run the intrinsic logic with raw context
                         intrinsic.impl(
-                            information, {}, None
+                            context_with_governance, {}, None
                         )  # No brain_shm, no physics
 
                         # Try to get emotion guidance from the priority queue
@@ -160,10 +124,6 @@ class Motivator:
                 "active_intrinsics": len(emotion_guidances),
                 "total_intrinsics": len(self.motivators),
                 "agent_state": agent_state,
-                "threats_detected": detection_summary.get("trap", {}).get("count", 0)
-                + detection_summary.get("enemy", {}).get("count", 0),
-                "goals_detected": detection_summary.get("goal", {}).get("count", 0)
-                + detection_summary.get("food", {}).get("count", 0),
             }
 
         except Exception:

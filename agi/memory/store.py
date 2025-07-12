@@ -13,12 +13,11 @@ from qdrant_client.models import (
     UpdateResult,
 )
 from loguru import logger
-from src.utilities.emotion.pad import get_emotion_magnitude
 from src.utilities.vectordb.vec_store import VectorStore
 
 
 class MemoryStore:
-    strong_emotion_intensity = -1
+    strong_emotion_intensity = 0.5  # Threshold for strong emotions (scalar)
 
     def __init__(
         self,
@@ -73,8 +72,8 @@ class MemoryStore:
         self,
         id,
         latent,
-        emotion,
-        efforts,
+        emotion_reward: float,  # Simplified to scalar
+        reward: float,         # Agent's reward
     ) -> None:
         self.memory_store.client.upsert(
             collection_name=self.collection_name,
@@ -83,10 +82,10 @@ class MemoryStore:
                     id=id,
                     vector=latent,
                     payload={
-                        "emotion": emotion,
-                        "emotion_intensity": get_emotion_magnitude(emotion),
+                        "emotion_reward": emotion_reward,
+                        "reward": reward,
+                        "emotion_intensity": abs(emotion_reward),  # Use absolute value as intensity
                         "timestamp": time.time(),
-                        "efforts": efforts,
                     },
                 )
             ],
@@ -126,9 +125,32 @@ class MemoryStore:
 
         return recalled
 
+    def recall_by_reward(
+        self,
+        latent,
+        k,
+        min_reward: float = 0.0,
+    ) -> List[ScoredPoint]:
+        """Recall memories with minimum reward threshold"""
+        recalled = self.memory_store.client.search(
+            collection_name=self.collection_name,
+            query_vector=latent,
+            query_filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="reward",
+                        range=Range(gte=min_reward),
+                    )
+                ]
+            ),
+            limit=k,
+        )
+
+        return recalled
+
     def recall_all(
         self,
-        payloads=["emotion"],
+        payloads=["emotion_reward", "reward"],
     ) -> List[Record]:
         memory = self.memory_store.client.scroll(
             collection_name=self.collection_name,
@@ -141,6 +163,7 @@ class MemoryStore:
     def consolidate(self, attr) -> Tuple[Sequence[PointStruct | Record], Any]:
         thresh_lookup = {
             "emotion_intensity": self.strong_emotion_intensity,
+            "reward": 0.5,  # Threshold for good experiences
         }
 
         try:
@@ -150,7 +173,7 @@ class MemoryStore:
                     must=[
                         FieldCondition(
                             key=attr,
-                            range=Range(gt=thresh_lookup[attr]),
+                            range=Range(gt=thresh_lookup.get(attr, 0.0)),
                         )
                     ]
                 ),
@@ -215,17 +238,40 @@ class MemoryStore:
             ),
         )
 
+    def get_reward_statistics(self) -> dict:
+        """Get statistics about stored rewards"""
+        if self.size == 0:
+            return {"count": 0, "avg_reward": 0.0, "max_reward": 0.0, "min_reward": 0.0}
+        
+        rewards = self.memory_attr("reward")
+        return {
+            "count": len(rewards),
+            "avg_reward": np.mean(rewards),
+            "max_reward": np.max(rewards),
+            "min_reward": np.min(rewards),
+        }
+
 
 if __name__ == "__main__":
     cfg = {
         "host": "localhost",
         "port": 6333,
-        "collection": "test4",
+        "collection": "test_simplified",
         "gpu": False,
-        "capacity": 2,
-        "retain_time": 5,
+        "capacity": 100,
+        "retain_time": 3600,  # 1 hour
     }
 
-    memory = MemoryStore(vector_size=16, cfg=cfg)
-    vector = np.random.rand(16)
-    memory.memorize(0, vector, [0.3, 1, 1], [0.3, 1, 1])
+    memory = MemoryStore(vector_size=47, cfg=cfg)  # Updated to match our simplified state tensor
+    vector = np.random.rand(47)
+    
+    # Test with simplified scalar values
+    memory.memorize(
+        id=0, 
+        latent=vector, 
+        emotion_reward=0.8,  # Positive emotion
+        reward=0.5           # Moderate reward
+    )
+    
+    print("Memory stored successfully!")
+    print(f"Memory statistics: {memory.get_reward_statistics()}")

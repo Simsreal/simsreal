@@ -7,7 +7,7 @@ import numpy as np
 from typing import Dict, Any
 from torchvision import transforms
 
-from agi.ctxparser import ContextParser, VisionConstructor
+from agi.mindmap_builder import MindmapBuilder
 from agi.memory_manager import MemoryManager
 from agi.motivator import Motivator
 from agi.governor import Governor
@@ -78,7 +78,7 @@ class SequentialProcessor:
         self.current_emotion_guidance = self.motivator.current_emotion_guidance
 
     def _init_governor(self):
-        self.governor = Governor(self.cfg, self.device, self.emb_dim, self.intrinsics)
+        self.governor = Governor(self.cfg, self.device, self.emb_dim, self.intrinsics, self.motivator)
 
         self.movement_symbols = self.governor.movement_symbols
         self.titans_model = self.governor.titans_model
@@ -92,22 +92,18 @@ class SequentialProcessor:
         save_frames = self.cfg.get("save_mindmap_frames", True)
         output_dir = self.cfg.get("mindmap_output_dir", "mindmap_frames")
 
-        self.context_parser = ContextParser(
+        self.mindmap_builder = MindmapBuilder(
             device=self.device,
             enable_viz=enable_viz,
             save_frames=save_frames,
             output_dir=output_dir,
         )
-        self.vision_constructor = VisionConstructor()
 
     def motivator_step(self, context: Dict[str, Any]) -> Dict[str, Any]:
         return self.motivator.process_step(context)
 
-    def ctx_parser(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
-        return self.context_parser.parse_context(
-            raw_data,
-            construct_vision_fn=self.vision_constructor.construct_vision_from_raycast,
-        )
+    def mindmap_parser(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
+        return self.mindmap_builder.parse_context(raw_data)
 
     def memory_manager_step(self, context: Dict[str, Any]) -> Dict[str, Any]:
         return self.memory_manager.process_step(context)
@@ -115,8 +111,8 @@ class SequentialProcessor:
     def fifo_context_update(self, ctx, x):
         return self.governor.fifo_context_update(ctx, x)
 
-    def governor_step(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        return self.governor.process_step(context)
+    def governor_step(self, context: Dict[str, Any], skip_heavy_processing: bool = False) -> Dict[str, Any]:
+        return self.governor.process_step(context, skip_heavy_processing)
 
     def _tensor_to_serializable(self, obj):
         if isinstance(obj, torch.Tensor):
@@ -139,7 +135,6 @@ class SequentialProcessor:
                 if self.subscriber.poll(timeout=50):  # 50ms timeout
                     raw_message = self.subscriber.recv_string(zmq.NOBLOCK)
                     raw_data = json.loads(raw_message)
-                    pprint(raw_data)
                     self.last_message_time = current_time
 
                     # Optional: Clear additional messages if queue is building up
@@ -151,8 +146,7 @@ class SequentialProcessor:
                         except zmq.Again:
                             break
 
-                    if messages_cleared > 0:
-                        logger.debug(f"Cleared {messages_cleared} additional messages")
+                    # Removed debug logging to reduce log noise
 
                 else:
                     # No message available, but check if we haven't received anything for too long
@@ -179,9 +173,8 @@ class SequentialProcessor:
             # Skip heavy processing if we're falling behind
             self.skip_heavy_processing = processing_interval > target_interval * 1.5
 
-            # 3. Parse context (lightweight)
-            context = self.ctx_parser(raw_data)
-            agent_state = context["agent_state"]
+            # 3. Parse context using mindmap builder (lightweight)
+            context = self.mindmap_parser(raw_data)
             if not context:
                 return
 
@@ -189,19 +182,12 @@ class SequentialProcessor:
             if not self.skip_heavy_processing:
                 # Full processing when we have time
                 memory_info = self.memory_manager_step(context)
-                motivator_info = self.motivator_step(context)
             else:
                 # Lightweight processing when behind
                 memory_info = {}
-                motivator_info = {"emotion_guidance": None}
 
-            # 5. Always do governor step (critical for control)
-            governor_info = self.governor_step(
-                {
-                    **context,
-                    "emotion_guidance": motivator_info.get("emotion_guidance"),
-                }
-            )
+            # 5. Governor step now includes motivator processing
+            governor_info = self.governor_step(context, skip_heavy_processing=self.skip_heavy_processing)
 
             # 6. Send command immediately
             command_output = {
@@ -211,7 +197,7 @@ class SequentialProcessor:
                     "confidence": governor_info.get("decision_confidence", 0.0),
                 },
             }
-            # pprint(command_output)
+            pprint(command_output)
 
             self.publisher.send_string(json.dumps(command_output))
             self.last_process_time = current_time

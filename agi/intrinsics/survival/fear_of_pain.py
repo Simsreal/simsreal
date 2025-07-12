@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Dict
+from typing import Dict, Any
 
 import torch
 
@@ -8,29 +8,49 @@ from agi.intrinsics.base_intrinsic import Intrinsic, MotionTrajectory
 
 class FearOfPain(Intrinsic):
     """
-    Fear of pain intrinsic that responds to agent damage state.
-    When agent state = 1, it indicates the agent is experiencing pain/damage.
+    Fear of pain intrinsic that responds to agent damage/status state.
+    Reward system:
+    - Status 0 (normal): +0.1 (slight positive for being healthy)
+    - Status 1 (fell down): -0.5 (moderate negative, recoverable)
+    - Status 2 (won): +1.0 (maximum positive reward)
+    - Status 3 (dead): -1.0 (maximum negative reward)
     """
 
     def impl(
         self,
-        information: Dict[str, torch.Tensor],
+        context: Dict[str, Any],
         brain_shm,
         physics=None,
     ):
-        # Check if agent_state is available and indicates pain (state = 1)
-        agent_state = information.get("agent_state", 0)
+        # Get agent state from raw context or parsed context
+        raw_context = context.get("raw_context", context)
+        agent_state = raw_context.get("state", 0)
 
         # Convert to scalar if it's a tensor
         if torch.is_tensor(agent_state):
             state_value = agent_state.item()
         else:
-            state_value = agent_state
+            state_value = int(agent_state)
 
-        # State = 1 indicates pain/damage
-        painful = state_value == 1
+        # Calculate reward based on status
+        if state_value == 0:  # Normal
+            self.reward = 0.1
+            emotion = "neutral"
+        elif state_value == 1:  # Fell down (recoverable)
+            self.reward = -0.5
+            emotion = "fearful"
+        elif state_value == 2:  # Won
+            self.reward = 1.0
+            emotion = "joyful"
+        elif state_value == 3:  # Dead (unrecoverable)
+            self.reward = -1.0
+            emotion = "fearful"
+        else:  # Unknown state
+            self.reward = 0.0
+            emotion = "neutral"
 
-        self.add_guidance("emotion", "fearful" if painful else "neutral")
+        # Add emotional guidance
+        self.add_guidance("emotion", emotion)
 
     def generate_motion_trajectory(self) -> MotionTrajectory:
         return MotionTrajectory(trajectory=deque())

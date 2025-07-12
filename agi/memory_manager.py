@@ -50,7 +50,7 @@ class MemoryManager:
         Handle memory operations for one processing step
 
         Args:
-            context: Context dictionary containing vision_latent and other data
+            context: Context dictionary containing state tensor and reward info
 
         Returns:
             Dictionary containing memory information and statistics
@@ -58,27 +58,59 @@ class MemoryManager:
         try:
             current_time = time.time()
 
-            # Store vision latent in memory if available
-            if context.get("vision_latent") is not None:
-                vision_latent = context["vision_latent"].cpu().numpy().flatten()
+            # Get state tensor (our simplified 47-dimensional state)
+            state_tensor = context.get("state_tensor")
+            
+            # Get reward information from governor or motivator
+            reward = 0.0
+            emotion_reward = 0.0
+            
+            # Try to get reward from different sources
+            if "governor_info" in context:
+                reward = context["governor_info"].get("reward", 0.0)
+                emotion_reward = context["governor_info"].get("simulated_reward", 0.0)
+            elif "motivator_info" in context:
+                # Get emotion guidance magnitude as emotion reward
+                emotion_guidance = context["motivator_info"].get("emotion_guidance")
+                if emotion_guidance is not None:
+                    if isinstance(emotion_guidance, torch.Tensor):
+                        emotion_reward = torch.norm(emotion_guidance).item()
+                    else:
+                        emotion_reward = float(emotion_guidance)
 
-                # Store in live memory
-                self.live_memory.memorize(
-                    id=int(current_time * 1000),  # Use timestamp as ID
-                    latent=vision_latent.tolist(),
-                    emotion=[0.0, 0.0, 0.0],  # Placeholder emotion
-                    efforts=0.0,
-                )
+            # Store in live memory if we have a state tensor
+            if state_tensor is not None:
+                if isinstance(state_tensor, torch.Tensor):
+                    state_vector = state_tensor.cpu().numpy().flatten()
+                else:
+                    state_vector = state_tensor
+                
+                # Ensure vector is the right size
+                if len(state_vector) == self.emb_dim:
+                    self.live_memory.memorize(
+                        id=int(current_time * 1000),  # Use timestamp as ID
+                        latent=state_vector.tolist(),
+                        emotion_reward=emotion_reward,
+                        reward=reward,
+                    )
+
+            # Periodic memory maintenance
+            if int(current_time) % 60 == 0:  # Every minute
+                self.live_memory.decay_on_retain_time()
+                self.live_memory.decay_on_capacity("reward")
 
             memory_info = {
                 "live_memory_size": self.live_memory.size,
                 "episodic_memory_size": self.episodic_memory.size,
+                "live_memory_stats": self.live_memory.get_reward_statistics(),
+                "episodic_memory_stats": self.episodic_memory.get_reward_statistics(),
                 "last_update": current_time,
             }
 
             return memory_info
 
-        except Exception:
+        except Exception as e:
+            print(f"Memory manager error: {e}")
             return {}
 
     def store_experience(self, experience: Dict[str, Any]) -> bool:
@@ -100,17 +132,19 @@ class MemoryManager:
             self.episodic_memory.memorize(
                 id=experience.get("id", int(current_time * 1000)),
                 latent=experience["latent"],
-                emotion=experience.get("emotion", [0.0, 0.0, 0.0]),
-                efforts=experience.get("efforts", 0.0),
+                emotion_reward=experience.get("emotion_reward", 0.0),
+                reward=experience.get("reward", 0.0),
             )
 
             return True
 
-        except Exception:
+        except Exception as e:
+            print(f"Store experience error: {e}")
             return False
 
     def retrieve_similar_memories(
-        self, query_latent: torch.Tensor, k: int = 5, memory_type: str = "live"
+        self, query_latent: torch.Tensor, k: int = 5, memory_type: str = "live",
+        min_reward: float = 0.0
     ) -> List[Dict[str, Any]]:
         """
         Retrieve similar memories based on latent similarity
@@ -119,6 +153,7 @@ class MemoryManager:
             query_latent: Query latent vector
             k: Number of similar memories to retrieve
             memory_type: Type of memory to search ("live" or "episodic")
+            min_reward: Minimum reward threshold for retrieved memories
 
         Returns:
             List of similar memory entries
@@ -133,17 +168,35 @@ class MemoryManager:
 
             # Convert query to numpy if it's a tensor
             if isinstance(query_latent, torch.Tensor):
-                query_vector = query_latent.cpu().numpy().flatten()
+                query_vector = query_latent.cpu().numpy().flatten().tolist()
             else:
                 query_vector = query_latent
 
-            # Use memory store's search functionality if available
-            # This is a placeholder - actual implementation depends on MemoryStore API
-            similar_memories = []
+            # Use reward-based recall if min_reward is specified
+            if min_reward > 0:
+                similar_memories = memory_store.recall_by_reward(
+                    query_vector, k, min_reward
+                )
+            else:
+                similar_memories = memory_store.recall(query_vector, k)
 
-            return similar_memories
+            # Convert to list of dictionaries
+            memory_list = []
+            for memory in similar_memories:
+                memory_dict = {
+                    "id": memory.id,
+                    "score": memory.score,
+                    "latent": memory.vector,
+                    "emotion_reward": memory.payload.get("emotion_reward", 0.0),
+                    "reward": memory.payload.get("reward", 0.0),
+                    "timestamp": memory.payload.get("timestamp", 0.0),
+                }
+                memory_list.append(memory_dict)
 
-        except Exception:
+            return memory_list
+
+        except Exception as e:
+            print(f"Retrieve memories error: {e}")
             return []
 
     def get_memory_stats(self) -> Dict[str, Any]:
@@ -158,10 +211,12 @@ class MemoryManager:
                 "live_memory": {
                     "size": self.live_memory.size if self.live_memory else 0,
                     "capacity": getattr(self.live_memory, "capacity", "unknown"),
+                    "reward_stats": self.live_memory.get_reward_statistics() if self.live_memory else {},
                 },
                 "episodic_memory": {
                     "size": self.episodic_memory.size if self.episodic_memory else 0,
                     "capacity": getattr(self.episodic_memory, "capacity", "unknown"),
+                    "reward_stats": self.episodic_memory.get_reward_statistics() if self.episodic_memory else {},
                 },
                 "total_memories": (self.live_memory.size if self.live_memory else 0)
                 + (self.episodic_memory.size if self.episodic_memory else 0),
@@ -169,50 +224,43 @@ class MemoryManager:
 
             return stats
 
-        except Exception:
+        except Exception as e:
+            print(f"Memory stats error: {e}")
             return {
-                "live_memory": {"size": 0, "capacity": "unknown"},
-                "episodic_memory": {"size": 0, "capacity": "unknown"},
+                "live_memory": {"size": 0, "capacity": "unknown", "reward_stats": {}},
+                "episodic_memory": {"size": 0, "capacity": "unknown", "reward_stats": {}},
                 "total_memories": 0,
             }
 
-    def clear_memories(self, memory_type: str = "both") -> bool:
+    def consolidate_memories(self, min_reward: float = 0.5) -> bool:
         """
-        Clear memories from specified memory stores
+        Consolidate high-reward memories from live to episodic memory
 
         Args:
-            memory_type: Type of memory to clear ("live", "episodic", or "both")
-
-        Returns:
-            True if successfully cleared, False otherwise
-        """
-        try:
-            if memory_type in ["live", "both"] and self.live_memory:
-                # Reset live memory - implementation depends on MemoryStore API
-                pass
-
-            if memory_type in ["episodic", "both"] and self.episodic_memory:
-                # Reset episodic memory - implementation depends on MemoryStore API
-                pass
-
-            return True
-
-        except Exception:
-            return False
-
-    def consolidate_memories(self) -> bool:
-        """
-        Consolidate memories from live to episodic memory based on criteria
+            min_reward: Minimum reward threshold for consolidation
 
         Returns:
             True if consolidation was successful, False otherwise
         """
         try:
-            # This is a placeholder for memory consolidation logic
-            # Implementation would depend on specific consolidation criteria
-            # such as importance, recency, or emotional significance
+            if not self.live_memory or self.live_memory.size == 0:
+                return True
+
+            # Get high-reward memories from live memory
+            consolidated_memories, _ = self.live_memory.consolidate("reward")
+            
+            if consolidated_memories:
+                # Store them in episodic memory
+                episodic_points = []
+                for memory in consolidated_memories:
+                    if hasattr(memory, 'payload') and memory.payload.get("reward", 0) >= min_reward:
+                        episodic_points.append(memory)
+                
+                if episodic_points:
+                    self.episodic_memory.memorize_points(episodic_points)
 
             return True
 
-        except Exception:
+        except Exception as e:
+            print(f"Memory consolidation error: {e}")
             return False

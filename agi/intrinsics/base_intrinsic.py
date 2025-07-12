@@ -2,12 +2,11 @@ from abc import ABC, abstractmethod
 import random
 from dataclasses import dataclass
 from queue import Empty, PriorityQueue
-from typing import Deque, Dict, Tuple
+from typing import Deque, Dict, Tuple, Any, List
 
 import numpy as np
 from loguru import logger
 import torch
-from dm_control.utils.inverse_kinematics import IKResult, qpos_from_site_pose
 
 from agi.memory.store import MemoryStore
 from src.utilities.emotion.pad import emotion_look_up
@@ -16,7 +15,7 @@ from src.utilities.tools.retry import retry
 
 @dataclass
 class MotionCheckpoint:
-    reward_emotion: torch.Tensor
+    reward_emotion: float  # Simplified to single float
     pos: torch.Tensor | np.ndarray
     eta: float
 
@@ -24,6 +23,15 @@ class MotionCheckpoint:
 @dataclass
 class MotionTrajectory:
     trajectory: Deque[MotionCheckpoint]
+
+
+@dataclass
+class SimulationState:
+    """State tracking for MCTS simulation"""
+    step: int
+    accumulated_reward: float
+    context: Dict[str, Any]
+    action_sequence: List[str]
 
 
 class Intrinsic(ABC):
@@ -43,6 +51,12 @@ class Intrinsic(ABC):
 
         self.activeness = 0.0
         self.importance = 0.0
+        self.reward = 0.0  # Current step reward
+        
+        # Enhanced simulation tracking
+        self.simulation_history: List[SimulationState] = []
+        self.accumulated_simulation_reward = 0.0
+        self.simulation_active = False
 
     @property
     def memory_is_available(self) -> bool:
@@ -79,20 +93,6 @@ class Intrinsic(ABC):
             return emotion_look_up[emotion].unsqueeze(0)
         return emotion_look_up[emotion]
 
-    def solve_ik(
-        self,
-        physics,
-        site_name,
-        target_pos,
-        joint_names,
-    ) -> IKResult:
-        return qpos_from_site_pose(
-            physics=physics,
-            site_name=site_name,
-            target_pos=target_pos,
-            joint_names=joint_names,
-        )
-
     @retry
     def add_guidance(
         self,
@@ -113,15 +113,83 @@ class Intrinsic(ABC):
         else:
             logger.warning(f"Invalid guidance type: {guidance_type}")
 
+    def start_simulation(self, initial_context: Dict[str, Any]):
+        """Start a new MCTS simulation sequence"""
+        self.simulation_active = True
+        self.simulation_history = []
+        self.accumulated_simulation_reward = 0.0
+        
+        # Store initial state
+        initial_state = SimulationState(
+            step=0,
+            accumulated_reward=0.0,
+            context=initial_context.copy(),
+            action_sequence=[]
+        )
+        self.simulation_history.append(initial_state)
+
+    def simulate_step(self, context: Dict[str, Any], action: str, step: int) -> float:
+        """Simulate one step in MCTS and return step reward"""
+        if not self.simulation_active:
+            self.start_simulation(context)
+        
+        # Evaluate intrinsic for this simulation step
+        old_reward = self.reward
+        self.impl(context, {}, None)
+        step_reward = self.get_reward()
+        
+        # Accumulate reward
+        self.accumulated_simulation_reward += step_reward
+        
+        # Store simulation state
+        sim_state = SimulationState(
+            step=step,
+            accumulated_reward=self.accumulated_simulation_reward,
+            context=context.copy(),
+            action_sequence=self.simulation_history[-1].action_sequence + [action]
+        )
+        self.simulation_history.append(sim_state)
+        
+        # Restore original reward (don't affect real state)
+        self.reward = old_reward
+        
+        return step_reward
+
+    def get_simulation_reward(self) -> float:
+        """Get accumulated reward from current simulation"""
+        return self.accumulated_simulation_reward if self.simulation_active else 0.0
+
+    def end_simulation(self) -> float:
+        """End simulation and return total accumulated reward"""
+        if not self.simulation_active:
+            return 0.0
+        
+        total_reward = self.accumulated_simulation_reward
+        self.simulation_active = False
+        self.simulation_history = []
+        self.accumulated_simulation_reward = 0.0
+        
+        return total_reward
+
+    def get_simulation_trajectory(self) -> List[SimulationState]:
+        """Get the current simulation trajectory"""
+        return self.simulation_history.copy()
+
     def guide(
         self,
-        information: Dict[str, torch.Tensor],
+        context: Dict[str, Any],
         brain_shm,
         physics=None,
     ):
-        self.activeness = self.activeness_fn(information["governance"])
+        # For backward compatibility, if governance is available, use it for activeness
+        governance = context.get("governance")
+        if governance is not None:
+            self.activeness = self.activeness_fn(governance)
+        else:
+            self.activeness = 1.0  # Default activeness
+            
         self.importance = self.importance_fn()
-        self.impl(information, brain_shm, physics)
+        self.impl(context, brain_shm, physics)
 
         try:
             emotion_guidance = self.priorities["emotion"].get_nowait()[1]
@@ -134,12 +202,12 @@ class Intrinsic(ABC):
     @abstractmethod
     def impl(
         self,
-        information: Dict[str, torch.Tensor],
+        context: Dict[str, Any],
         brain_shm,
         physics=None,
     ):
         """
-        :param information: Dict[str, torch.Tensor]
+        :param context: Dict[str, Any] - Raw context data from the environment
         :param physics: dm_control.physics.Physics
         """
         raise NotImplementedError
@@ -147,3 +215,9 @@ class Intrinsic(ABC):
     @abstractmethod
     def generate_motion_trajectory(self) -> MotionTrajectory:
         raise NotImplementedError
+
+    def get_reward(self) -> float:
+        """
+        Return simplified reward as single float in range [-1, +1]
+        """
+        return max(-1.0, min(1.0, self.reward))
