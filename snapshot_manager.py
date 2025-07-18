@@ -318,11 +318,11 @@ class SnapshotManager:
         """Add exploration-specific information overlay to the image"""
         # Create a larger image to accommodate exploration info
         img_width, img_height = image.size
-        info_width = 250
+        info_width = 280  # Increased width for better readability
         new_width = img_width + info_width
         
         # Create new image with dark background
-        combined = Image.new('RGB', (new_width, img_height), (20, 20, 20))
+        combined = Image.new('RGB', (new_width, img_height), (15, 15, 15))
         combined.paste(image, (0, 0))
         
         # Draw exploration info
@@ -333,47 +333,43 @@ class SnapshotManager:
         except:
             font = None
         
-        # Exploration info items
+        # Compact exploration info with better formatting
         info_items = [
-            ("EXPLORATION DATA", (255, 255, 0)),
-            ("", (0, 0, 0)),  # Spacer
-            (f"Step: {step_info.get('step', 'N/A')}", (255, 255, 255)),
-            (f"Action: {step_info.get('action', 'N/A')}", (255, 255, 255)),
-            (f"Reward: {step_info.get('reward', 0):.3f}", (0, 255, 0) if step_info.get('reward', 0) >= 0 else (255, 100, 100)),
+            ("EXPLORATION DATA", (255, 255, 100)),
+            (f"Step {step_info.get('step', 'N/A')} | {step_info.get('action', 'N/A')}", (255, 255, 255)),
+            (f"Reward: {step_info.get('reward', 0):+.3f}", (0, 255, 0) if step_info.get('reward', 0) >= 0 else (255, 100, 100)),
             (f"Terminal: {'Yes' if step_info.get('is_terminal', False) else 'No'}", 
-             (255, 100, 100) if step_info.get('is_terminal', False) else (200, 200, 200)),
+             (255, 100, 100) if step_info.get('is_terminal', False) else (180, 180, 180)),
             ("", (0, 0, 0)),  # Spacer
-            ("AGENT STATE", (255, 255, 0)),
-            ("", (0, 0, 0)),  # Spacer
-            (f"Pos: ({state['location']['x']}, {state['location']['z']})", (200, 200, 200)),
+            ("AGENT STATE", (255, 255, 100)),
+            (f"Pos: ({state['location']['x']:.1f}, {state['location']['z']:.1f})", (200, 200, 200)),
             (f"Status: {['Normal', 'Fell', 'Won', 'Dead'][state['state']]}", (200, 200, 200)),
-            (f"Hunger: {state['hunger']:.1f}", (200, 200, 200)),
-            (f"HP: {state['hitpoint']}", (200, 200, 200)),
+            (f"Hunger: {state['hunger']:.1f} | HP: {state['hitpoint']}", (200, 200, 200)),
             ("", (0, 0, 0)),  # Spacer
-            ("SNAPSHOT INFO", (255, 255, 0)),
-            ("", (0, 0, 0)),  # Spacer
+            ("SNAPSHOT INFO", (255, 255, 100)),
             (f"Size: {state.get('snapshot', {}).get('width', 0)}x{state.get('snapshot', {}).get('height', 0)}", (200, 200, 200)),
             (f"Res: {state.get('snapshot', {}).get('resolution', 0):.1f}m/px", (200, 200, 200)),
             (f"Rays: {len(state.get('line_of_sight', []))}", (200, 200, 200)),
         ]
         
-        # Add additional info if provided
+        # Add intrinsic rewards in compact format
         if 'intrinsic_rewards' in step_info:
             info_items.extend([
                 ("", (0, 0, 0)),  # Spacer
-                ("INTRINSIC REWARDS", (255, 255, 0)),
-                ("", (0, 0, 0)),  # Spacer
+                ("INTRINSIC REWARDS", (255, 255, 100)),
             ])
             for reward_type, value in step_info['intrinsic_rewards'].items():
                 color = (0, 255, 0) if value >= 0 else (255, 100, 100)
-                info_items.append((f"{reward_type}: {value:.3f}", color))
+                # Truncate long reward names for better display
+                short_name = reward_type[:12] + "..." if len(reward_type) > 15 else reward_type
+                info_items.append((f"{short_name}: {value:+.3f}", color))
         
-        # Draw all info items
-        y_offset = 20
+        # Draw all info items with improved spacing
+        y_offset = 15
         for text, color in info_items:
             if text:  # Skip empty spacer lines
-                draw.text((img_width + 10, y_offset), text, fill=color, font=font)
-            y_offset += 16
+                draw.text((img_width + 8, y_offset), text, fill=color, font=font)
+            y_offset += 14  # Reduced line spacing for more compact display
         
         return combined
     
@@ -530,9 +526,7 @@ class SnapshotManager:
     
     def _raycast_to_image(self, line_of_sight: List[LineOfSight], max_distance: float = 100.0) -> np.ndarray:
         """
-        Convert ray-cast data to visible image with clear object representation and explorable area
-        Forward movement (increasing Z) goes upward in the image
-        Left/right matches Unity coordinate system (left = -X, right = +X)
+        Convert ray-cast data to visible image with optimized rendering
         """
         img_size = 400
         image = np.zeros((img_size, img_size, 3), dtype=np.uint8)
@@ -549,19 +543,18 @@ class SnapshotManager:
         
         # Define distinct colors for each object type
         type_colors = {
-            0: (128, 128, 128),  # unknown - gray
-            1: (255, 0, 0),      # obstacle - red
-            2: (0, 255, 0),      # checkpoint - green  
+            0: (100, 100, 100),  # unknown - dark gray
+            1: (255, 80, 80),    # obstacle - bright red
+            2: (80, 255, 80),    # checkpoint - bright green  
             3: (255, 165, 0),    # trap - orange
-            4: (0, 0, 255),      # goal - blue
-            5: (255, 255, 0),    # people - yellow
-            6: (255, 0, 255),    # food - magenta
-            7: (0, 140, 0)       # explorable_area - dark green
+            4: (80, 80, 255),    # goal - bright blue
+            5: (255, 255, 80),   # people - bright yellow
+            6: (255, 80, 255),   # food - bright magenta
+            7: (60, 120, 60)     # explorable_area - darker green
         }
         
-        # Calculate explorable area - ALL rays define the boundary
+        # Calculate explorable area with optimized rendering
         ray_endpoints = []
-        
         max_ray_length = min(center_y - 20, img_size - center_x - 20, center_x - 20)
         
         for i, ray in enumerate(line_of_sight):
@@ -587,10 +580,10 @@ class SnapshotManager:
             
             ray_endpoints.append((end_x, end_y, angle, distance, ray.get('type', 0)))
         
-        # Draw explorable area FIRST (so it appears behind everything else)
+        # Draw explorable area with reduced opacity
         self._draw_explorable_area_solid(image, center_x, center_y, ray_endpoints)
         
-        # Draw objects on top (no individual ray lines)
+        # Draw objects with smaller, more visible points
         for i, ray in enumerate(line_of_sight):
             angle = (i / num_rays) * 2 * np.pi - np.pi / 2
             
@@ -609,32 +602,33 @@ class SnapshotManager:
             
             object_type = ray.get('type', 0)
             
-            # Only draw circles for actual detected objects
+            # Draw smaller, more visible objects
             if object_type > 0:
-                color = type_colors.get(object_type, (128, 128, 128))
-                circle_radius = max(4, int(10 - normalized_distance * 5))  # Slightly larger objects
+                color = type_colors.get(object_type, (100, 100, 100))
+                # Smaller radius with distance-based scaling (2-4 pixels max)
+                circle_radius = max(2, min(4, int(4 - normalized_distance * 2)))
                 self._draw_circle(image, end_x, end_y, circle_radius, color)
         
-        # Draw center point (agent position) - larger and white
-        self._draw_circle(image, center_x, center_y, 8, (255, 255, 255))
+        # Draw smaller agent position
+        self._draw_circle(image, center_x, center_y, 5, (255, 255, 255))  # Reduced from 8 to 5
         
-        # Draw direction indicator (small arrow pointing forward/up)
-        arrow_length = 18
+        # Draw compact direction indicator
+        arrow_length = 12  # Reduced from 18
         arrow_tip_x = center_x
         arrow_tip_y = center_y - arrow_length
         arrow_base_x = center_x
-        arrow_base_y = center_y - 10
+        arrow_base_y = center_y - 6  # Reduced from 10
         
         # Draw arrow shaft
         self._draw_line(image, arrow_base_x, arrow_base_y, arrow_tip_x, arrow_tip_y, (255, 255, 255))
-        # Draw arrow head
-        self._draw_line(image, arrow_tip_x, arrow_tip_y, arrow_tip_x - 4, arrow_tip_y + 4, (255, 255, 255))
-        self._draw_line(image, arrow_tip_x, arrow_tip_y, arrow_tip_x + 4, arrow_tip_y + 4, (255, 255, 255))
+        # Draw arrow head (smaller)
+        self._draw_line(image, arrow_tip_x, arrow_tip_y, arrow_tip_x - 3, arrow_tip_y + 3, (255, 255, 255))
+        self._draw_line(image, arrow_tip_x, arrow_tip_y, arrow_tip_x + 3, arrow_tip_y + 3, (255, 255, 255))
         
         return image
     
     def _draw_explorable_area_solid(self, image: np.ndarray, center_x: int, center_y: int, ray_endpoints: List[tuple]):
-        """Draw the explorable area as a solid filled region"""
+        """Draw the explorable area as a subtle filled region"""
         if len(ray_endpoints) < 3:
             return
         
@@ -648,16 +642,16 @@ class SnapshotManager:
         for endpoint in ray_endpoints:
             polygon_points.append((endpoint[0], endpoint[1]))
         
-        # Fill the entire explorable area with solid green
+        # Fill with reduced opacity for less visual interference
         if len(polygon_points) >= 3:
-            self._draw_filled_polygon(image, polygon_points, (0, 140, 0), alpha=0.5)
+            self._draw_filled_polygon(image, polygon_points, (40, 100, 40), alpha=0.25)  # Reduced from 0.5
             
-            # Draw a subtle border around the explorable area
-            for i in range(len(polygon_points)):
-                curr_point = polygon_points[i]
-                next_point = polygon_points[(i + 1) % len(polygon_points)]
-                self._draw_line(image, curr_point[0], curr_point[1], 
-                               next_point[0], next_point[1], (0, 200, 0))
+            # Draw subtle border (optional, can be removed if too cluttered)
+            # for i in range(len(polygon_points)):
+            #     curr_point = polygon_points[i]
+            #     next_point = polygon_points[(i + 1) % len(polygon_points)]
+            #     self._draw_line(image, curr_point[0], curr_point[1], 
+            #                    next_point[0], next_point[1], (60, 120, 60))
     
     def _draw_filled_polygon(self, image: np.ndarray, points: List[tuple], color: tuple, alpha: float = 1.0):
         """Draw a completely filled polygon using improved scan line algorithm"""
@@ -747,7 +741,7 @@ class SnapshotManager:
                     image[y, x] = color
 
     def save_snapshot(self, state: State) -> None:
-        """Save current state as snapshot image with legend"""
+        """Save current state as snapshot image with optimized legend"""
         try:
             # Check if we need to start a new episode
             current_state = state['state']
@@ -802,14 +796,14 @@ class SnapshotManager:
             logger.error(f"Error saving snapshot: {e}")
     
     def _add_legend_and_info(self, image: Image.Image, state: State) -> Image.Image:
-        """Add legend and state information to the image"""
+        """Add optimized legend and state information to the image"""
         # Create a larger image to accommodate legend
         img_width, img_height = image.size
-        legend_width = 220
+        legend_width = 260  # Increased width for better readability
         new_width = img_width + legend_width
         
-        # Create new image with black background
-        combined = Image.new('RGB', (new_width, img_height), (0, 0, 0))
+        # Create new image with dark background
+        combined = Image.new('RGB', (new_width, img_height), (10, 10, 10))
         combined.paste(image, (0, 0))
         
         # Draw legend
@@ -821,43 +815,43 @@ class SnapshotManager:
         except:
             font = None
         
-        # Legend items
+        # Optimized legend items with compact formatting
         legend_items = [
-            ("Map View:", (255, 255, 255)),
-            ("↑ Forward (+Z)", (200, 200, 200)),
-            ("← Left (-X) | Right (+X) →", (200, 200, 200)),
+            ("MAP VIEW", (255, 255, 100)),
+            ("↑ Forward (+Z)", (180, 180, 180)),
+            ("← Left (-X) | Right (+X) →", (180, 180, 180)),
             ("Agent: ●→", (255, 255, 255)),
             ("", (0, 0, 0)),  # Spacer
-            ("Explorable Area:", (255, 255, 255)),
-            ("█ Sensor coverage", (0, 140, 0)),
-            ("— Area boundary", (0, 200, 0)),
+            ("EXPLORABLE AREA", (255, 255, 100)),
+            ("█ Sensor coverage", (40, 100, 40)),
             ("", (0, 0, 0)),  # Spacer
-            ("Objects:", (255, 255, 255)),
-            ("○ Unknown", (128, 128, 128)),
-            ("○ Obstacle", (255, 0, 0)),
-            ("○ Checkpoint", (0, 255, 0)),
-            ("○ Trap", (255, 165, 0)),
-            ("○ Goal", (0, 0, 255)),
-            ("○ People", (255, 255, 0)),
-            ("○ Food", (255, 0, 255)),
+            ("OBJECTS", (255, 255, 100)),
+            ("● Unknown", (100, 100, 100)),
+            ("● Obstacle", (255, 80, 80)),
+            ("● Checkpoint", (80, 255, 80)),
+            ("● Trap", (255, 165, 0)),
+            ("● Goal", (80, 80, 255)),
+            ("● People", (255, 255, 80)),
+            ("● Food", (255, 80, 255)),
             ("", (0, 0, 0)),  # Spacer
-            ("Agent Info:", (255, 255, 255)),
+            ("AGENT INFO", (255, 255, 100)),
             (f"Pos: ({state['location']['x']:.1f}, {state['location']['z']:.1f})", (200, 200, 200)),
-            (f"HP: {state['hitpoint']}", (200, 200, 200)),
-            (f"Hunger: {state['hunger']:.1f}", (200, 200, 200)),
-            (f"State: {state['state']}", (200, 200, 200)),
+            (f"HP: {state['hitpoint']} | Hunger: {state['hunger']:.1f}", (200, 200, 200)),
+            (f"State: {['Normal', 'Fell', 'Won', 'Dead'][state['state']]}", (200, 200, 200)),
             (f"Frame: {self.frame_count}", (200, 200, 200)),
             ("", (0, 0, 0)),  # Spacer
-            ("Snapshot:", (255, 255, 255)),
+            ("SNAPSHOT", (255, 255, 100)),
             (f"Size: {state.get('snapshot', {}).get('width', 0)}x{state.get('snapshot', {}).get('height', 0)}", (200, 200, 200)),
             (f"Res: {state.get('snapshot', {}).get('resolution', 0):.1f}m/px", (200, 200, 200)),
+            (f"Rays: {len(state.get('line_of_sight', []))}", (200, 200, 200)),
         ]
         
-        y_offset = 20
+        # Draw all info items with improved spacing
+        y_offset = 15
         for text, color in legend_items:
             if text:  # Skip empty spacer lines
-                draw.text((img_width + 10, y_offset), text, fill=color, font=font)
-            y_offset += 18
+                draw.text((img_width + 8, y_offset), text, fill=color, font=font)
+            y_offset += 15  # Reduced line spacing for more compact display
         
         return combined
 

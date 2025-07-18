@@ -1,300 +1,300 @@
 {
-  "x": -23.3699989,
-  "y": 1.0,
-  "z": -347.0,
+  "x": 2.630001,
+  "y": 1.76076,
+  "z": -386.0,
   "line_of_sight": [
     {
-      "Distance": 28.4170589,
+      "Distance": 13.26203,
       "Type": 1
     },
     {
-      "Distance": 13.9115906,
+      "Distance": 13.3126879,
       "Type": 1
     },
     {
-      "Distance": 6.982377,
+      "Distance": 13.4666185,
       "Type": 1
     },
     {
-      "Distance": 4.68465328,
+      "Distance": 13.7298632,
       "Type": 1
     },
     {
-      "Distance": 3.54504824,
+      "Distance": 14.1131573,
       "Type": 1
     },
     {
-      "Distance": 2.86896729,
+      "Distance": 14.63303,
       "Type": 1
     },
     {
-      "Distance": 2.424956,
+      "Distance": 15.313673,
       "Type": 1
     },
     {
-      "Distance": 2.11389136,
+      "Distance": 16.189949,
       "Type": 1
     },
     {
-      "Distance": 1.88628137,
+      "Distance": 17.3123512,
       "Type": 1
     },
     {
-      "Distance": 1.71470344,
+      "Distance": 18.7553425,
       "Type": 1
     },
     {
-      "Distance": 1.58277822,
+      "Distance": 20.6320534,
       "Type": 1
     },
     {
-      "Distance": 1.480163,
+      "Distance": 23.1216373,
       "Type": 1
     },
     {
-      "Distance": 1.40004957,
+      "Distance": 26.5240536,
       "Type": 1
     },
     {
-      "Distance": 1.33782208,
+      "Distance": 30.0256424,
       "Type": 1
     },
     {
-      "Distance": 1.29029262,
+      "Distance": 28.9589081,
       "Type": 1
     },
     {
-      "Distance": 1.25525022,
+      "Distance": 28.1724262,
       "Type": 1
     },
     {
-      "Distance": 1.231183,
+      "Distance": 27.63227,
       "Type": 1
     },
     {
-      "Distance": 1.21711,
+      "Distance": 27.3164215,
       "Type": 1
     },
     {
-      "Distance": 1.21247864,
+      "Distance": 27.2124748,
       "Type": 1
     },
     {
-      "Distance": 1.21711016,
+      "Distance": 27.3164234,
       "Type": 1
     },
     {
-      "Distance": 1.231183,
+      "Distance": 27.63227,
       "Type": 1
     },
     {
-      "Distance": 1.25525033,
+      "Distance": 28.17243,
       "Type": 1
     },
     {
-      "Distance": 1.29029274,
+      "Distance": 28.9589119,
       "Type": 1
     },
     {
-      "Distance": 1.3378222,
+      "Distance": 24.8923588,
       "Type": 1
     },
     {
-      "Distance": 1.40004981,
+      "Distance": 21.0399284,
       "Type": 1
     },
     {
-      "Distance": 1.48016322,
+      "Distance": 18.3409958,
       "Type": 1
     },
     {
-      "Distance": 1.58277845,
+      "Distance": 16.36616,
       "Type": 1
     },
     {
-      "Distance": 1.7147038,
+      "Distance": 14.8774776,
       "Type": 1
     },
     {
-      "Distance": 1.88628232,
+      "Distance": 13.7328367,
       "Type": 1
     },
     {
-      "Distance": 2.11389256,
+      "Distance": 12.8425045,
       "Type": 1
     },
     {
-      "Distance": 2.42495775,
+      "Distance": 12.1474085,
       "Type": 1
     },
     {
-      "Distance": 2.86896944,
+      "Distance": 11.6074963,
       "Type": 1
     },
     {
-      "Distance": 3.54505181,
+      "Distance": 11.1951122,
       "Type": 1
     },
     {
-      "Distance": 4.68465948,
+      "Distance": 10.8910685,
       "Type": 1
     },
     {
-      "Distance": 6.982391,
+      "Distance": 10.6822519,
       "Type": 1
     },
     {
-      "Distance": 11.411931,
-      "Type": 1
-    },
-    {
-      "Distance": 11.3685055,
-      "Type": 1
-    },
-    {
-      "Distance": 11.411931,
-      "Type": 1
-    },
-    {
-      "Distance": 11.5438833,
-      "Type": 1
-    },
-    {
-      "Distance": 11.7695427,
-      "Type": 1
-    },
-    {
-      "Distance": 12.0981112,
-      "Type": 1
-    },
-    {
-      "Distance": 12.5437584,
+      "Distance": 10.5601482,
       "Type": 2
     },
     {
-      "Distance": 13.1272192,
+      "Distance": 10.5199642,
       "Type": 2
     },
     {
-      "Distance": 13.8783827,
+      "Distance": 10.5601482,
       "Type": 2
     },
     {
-      "Distance": 14.8405285,
+      "Distance": 10.6822519,
       "Type": 2
     },
     {
-      "Distance": 16.0774956,
+      "Distance": 10.8910685,
       "Type": 2
     },
     {
-      "Distance": 17.6862564,
+      "Distance": 11.1951122,
       "Type": 2
     },
     {
-      "Distance": 19.8203812,
+      "Distance": 11.6074963,
+      "Type": 2
+    },
+    {
+      "Distance": 12.1474085,
+      "Type": 2
+    },
+    {
+      "Distance": 12.8425045,
+      "Type": 2
+    },
+    {
+      "Distance": 13.7328367,
+      "Type": 2
+    },
+    {
+      "Distance": 14.8774776,
       "Type": 1
     },
     {
-      "Distance": 22.737011,
+      "Distance": 16.36616,
       "Type": 1
     },
     {
-      "Distance": 26.9001789,
+      "Distance": 18.3409958,
       "Type": 1
     },
     {
-      "Distance": 5.254718,
-      "Type": 3
-    },
-    {
-      "Distance": 5.11200762,
-      "Type": 3
-    },
-    {
-      "Distance": 5.01399374,
-      "Type": 3
-    },
-    {
-      "Distance": 4.95668173,
-      "Type": 3
-    },
-    {
-      "Distance": 48.0745354,
+      "Distance": 21.0399284,
       "Type": 1
     },
     {
-      "Distance": 48.2581749,
+      "Distance": 24.3565636,
       "Type": 1
     },
     {
-      "Distance": 38.72512,
-      "Type": 6
-    },
-    {
-      "Distance": 35.03807,
+      "Distance": 23.4912376,
       "Type": 1
     },
     {
-      "Distance": 26.51457,
+      "Distance": 22.85325,
       "Type": 1
     },
     {
-      "Distance": 21.4579353,
+      "Distance": 22.415081,
       "Type": 1
     },
     {
-      "Distance": 18.1370316,
+      "Distance": 22.1588688,
       "Type": 1
     },
     {
-      "Distance": 15.8104744,
+      "Distance": 22.0745468,
       "Type": 1
     },
     {
-      "Distance": 14.1081076,
+      "Distance": 22.1588669,
       "Type": 1
     },
     {
-      "Distance": 12.8248205,
+      "Distance": 22.415081,
       "Type": 1
     },
     {
-      "Distance": 37.0958366,
+      "Distance": 22.8532543,
       "Type": 1
     },
     {
-      "Distance": 34.6908226,
+      "Distance": 23.4912415,
       "Type": 1
     },
     {
-      "Distance": 4.316326,
-      "Type": 3
+      "Distance": 24.35657,
+      "Type": 1
     },
     {
-      "Distance": 4.12448,
-      "Type": 3
+      "Distance": 25.4894924,
+      "Type": 1
     },
     {
-      "Distance": 3.97794771,
-      "Type": 3
+      "Distance": 23.1216373,
+      "Type": 1
     },
     {
-      "Distance": 3.86991215,
-      "Type": 3
+      "Distance": 20.6320534,
+      "Type": 1
     },
     {
-      "Distance": 3.79571366,
-      "Type": 3
+      "Distance": 18.7553425,
+      "Type": 1
     },
     {
-      "Distance": 5.36734724,
-      "Type": 3
+      "Distance": 17.3123512,
+      "Type": 1
+    },
+    {
+      "Distance": 16.189949,
+      "Type": 1
+    },
+    {
+      "Distance": 15.313673,
+      "Type": 1
+    },
+    {
+      "Distance": 14.63303,
+      "Type": 1
+    },
+    {
+      "Distance": 14.1131573,
+      "Type": 1
+    },
+    {
+      "Distance": 13.7298632,
+      "Type": 1
+    },
+    {
+      "Distance": 13.4666185,
+      "Type": 1
+    },
+    {
+      "Distance": 13.3126879,
+      "Type": 1
     }
   ],
   "hit_point": 100,
   "state": 0,
-  "hunger": 49.59489,
+  "hunger": 99.996,
   "orientation": 0.0,
-  "timestamp": 1752787164885
+  "timestamp": 1752840251420
 }
