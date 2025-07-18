@@ -1,0 +1,300 @@
+{
+  "x": -23.3699989,
+  "y": 1.0,
+  "z": -347.0,
+  "line_of_sight": [
+    {
+      "Distance": 28.4170589,
+      "Type": 1
+    },
+    {
+      "Distance": 13.9115906,
+      "Type": 1
+    },
+    {
+      "Distance": 6.982377,
+      "Type": 1
+    },
+    {
+      "Distance": 4.68465328,
+      "Type": 1
+    },
+    {
+      "Distance": 3.54504824,
+      "Type": 1
+    },
+    {
+      "Distance": 2.86896729,
+      "Type": 1
+    },
+    {
+      "Distance": 2.424956,
+      "Type": 1
+    },
+    {
+      "Distance": 2.11389136,
+      "Type": 1
+    },
+    {
+      "Distance": 1.88628137,
+      "Type": 1
+    },
+    {
+      "Distance": 1.71470344,
+      "Type": 1
+    },
+    {
+      "Distance": 1.58277822,
+      "Type": 1
+    },
+    {
+      "Distance": 1.480163,
+      "Type": 1
+    },
+    {
+      "Distance": 1.40004957,
+      "Type": 1
+    },
+    {
+      "Distance": 1.33782208,
+      "Type": 1
+    },
+    {
+      "Distance": 1.29029262,
+      "Type": 1
+    },
+    {
+      "Distance": 1.25525022,
+      "Type": 1
+    },
+    {
+      "Distance": 1.231183,
+      "Type": 1
+    },
+    {
+      "Distance": 1.21711,
+      "Type": 1
+    },
+    {
+      "Distance": 1.21247864,
+      "Type": 1
+    },
+    {
+      "Distance": 1.21711016,
+      "Type": 1
+    },
+    {
+      "Distance": 1.231183,
+      "Type": 1
+    },
+    {
+      "Distance": 1.25525033,
+      "Type": 1
+    },
+    {
+      "Distance": 1.29029274,
+      "Type": 1
+    },
+    {
+      "Distance": 1.3378222,
+      "Type": 1
+    },
+    {
+      "Distance": 1.40004981,
+      "Type": 1
+    },
+    {
+      "Distance": 1.48016322,
+      "Type": 1
+    },
+    {
+      "Distance": 1.58277845,
+      "Type": 1
+    },
+    {
+      "Distance": 1.7147038,
+      "Type": 1
+    },
+    {
+      "Distance": 1.88628232,
+      "Type": 1
+    },
+    {
+      "Distance": 2.11389256,
+      "Type": 1
+    },
+    {
+      "Distance": 2.42495775,
+      "Type": 1
+    },
+    {
+      "Distance": 2.86896944,
+      "Type": 1
+    },
+    {
+      "Distance": 3.54505181,
+      "Type": 1
+    },
+    {
+      "Distance": 4.68465948,
+      "Type": 1
+    },
+    {
+      "Distance": 6.982391,
+      "Type": 1
+    },
+    {
+      "Distance": 11.411931,
+      "Type": 1
+    },
+    {
+      "Distance": 11.3685055,
+      "Type": 1
+    },
+    {
+      "Distance": 11.411931,
+      "Type": 1
+    },
+    {
+      "Distance": 11.5438833,
+      "Type": 1
+    },
+    {
+      "Distance": 11.7695427,
+      "Type": 1
+    },
+    {
+      "Distance": 12.0981112,
+      "Type": 1
+    },
+    {
+      "Distance": 12.5437584,
+      "Type": 2
+    },
+    {
+      "Distance": 13.1272192,
+      "Type": 2
+    },
+    {
+      "Distance": 13.8783827,
+      "Type": 2
+    },
+    {
+      "Distance": 14.8405285,
+      "Type": 2
+    },
+    {
+      "Distance": 16.0774956,
+      "Type": 2
+    },
+    {
+      "Distance": 17.6862564,
+      "Type": 2
+    },
+    {
+      "Distance": 19.8203812,
+      "Type": 1
+    },
+    {
+      "Distance": 22.737011,
+      "Type": 1
+    },
+    {
+      "Distance": 26.9001789,
+      "Type": 1
+    },
+    {
+      "Distance": 5.254718,
+      "Type": 3
+    },
+    {
+      "Distance": 5.11200762,
+      "Type": 3
+    },
+    {
+      "Distance": 5.01399374,
+      "Type": 3
+    },
+    {
+      "Distance": 4.95668173,
+      "Type": 3
+    },
+    {
+      "Distance": 48.0745354,
+      "Type": 1
+    },
+    {
+      "Distance": 48.2581749,
+      "Type": 1
+    },
+    {
+      "Distance": 38.72512,
+      "Type": 6
+    },
+    {
+      "Distance": 35.03807,
+      "Type": 1
+    },
+    {
+      "Distance": 26.51457,
+      "Type": 1
+    },
+    {
+      "Distance": 21.4579353,
+      "Type": 1
+    },
+    {
+      "Distance": 18.1370316,
+      "Type": 1
+    },
+    {
+      "Distance": 15.8104744,
+      "Type": 1
+    },
+    {
+      "Distance": 14.1081076,
+      "Type": 1
+    },
+    {
+      "Distance": 12.8248205,
+      "Type": 1
+    },
+    {
+      "Distance": 37.0958366,
+      "Type": 1
+    },
+    {
+      "Distance": 34.6908226,
+      "Type": 1
+    },
+    {
+      "Distance": 4.316326,
+      "Type": 3
+    },
+    {
+      "Distance": 4.12448,
+      "Type": 3
+    },
+    {
+      "Distance": 3.97794771,
+      "Type": 3
+    },
+    {
+      "Distance": 3.86991215,
+      "Type": 3
+    },
+    {
+      "Distance": 3.79571366,
+      "Type": 3
+    },
+    {
+      "Distance": 5.36734724,
+      "Type": 3
+    }
+  ],
+  "hit_point": 100,
+  "state": 0,
+  "hunger": 49.59489,
+  "orientation": 0.0,
+  "timestamp": 1752787164885
+}

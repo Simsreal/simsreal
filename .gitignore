@@ -1,4 +1,5 @@
 experiments/
+media/
 *.mp4
 *.png
 prometheus*
@@ -14,12 +15,14 @@ turtlebot3/
 MUJOCO_LOG.TXT
 MJDATA.TXT
 MJMODEL.TXT
-snapshot*
+snapshots/
 mujoco/
 .vscode/
 IsaacLab/
 qdrant_storage/
 *.code-workspace
+test_explorable_area.p
+test_snapshots/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
