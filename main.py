@@ -1,298 +1,176 @@
 import gc
 import json
 import os
+import argparse
 from typing import Any, Dict
 
 import yaml
 from loguru import logger
 import torch
-from torch import multiprocessing as mp
 
-from agi import (
-    ctx_parser,
-    perceiver,
-    memory_manager,
-    governor,
-    motivator,
-    brain,
-    actuator,
-)
-from src.utilities.mj.mjcf import get_humanoid_geoms
+from run import ZMQRunner
 from src.utilities.tools.retry import retry
 
 
 class RuntimeEngine:
     def __init__(self):
-        self.shared_memory: Dict[str, Dict[str, mp.Queue]] = {}
+        self.shared_data: Dict[str, Any] = {}
         self.metadata: Dict[str, Any] = {}
 
-    def add_shared_memory(self, name: str, shared_memory: Dict[str, mp.Queue]):
-        """
-        stores shared memory for agi
-        """
-        self.shared_memory[name] = shared_memory
+    def add_shared_data(self, name: str, data: Any):
+        self.shared_data[name] = data
 
-    def get_shared_memory(self, name: str) -> Dict[str, mp.Queue]:
-        return self.shared_memory[name]
+    def get_shared_data(self, name: str) -> Any:
+        return self.shared_data.get(name, {})
 
-    def add_metadata(self, name: str, metadata: Any):
-        """
-        stores agi metadata
-        """
-        self.metadata[name] = metadata
+    def add_metadata(self, name: str, data: Any):
+        self.metadata[name] = data
 
     def get_metadata(self, name: str) -> Any:
-        return self.metadata[name]
+        return self.metadata.get(name)
 
 
-class Host:
-    def __init__(
-        self,
-        cfg_file,
-        exp_dir,
-    ):
-        # ----------configuration----------
-        runtime_engine = RuntimeEngine()
-        self.cfg_file = cfg_file
-        self.exp_dir = exp_dir
-        os.makedirs(self.exp_dir, exist_ok=True)
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+def initialize_runtime_engine():
+    runtime_engine = RuntimeEngine()
 
-        cfg = yaml.safe_load(open(self.cfg_file))
-        if os.environ.get("RUNNING_ENV") == "docker":
-            cfg["robot"]["sub"]["ip"] = "host.docker.internal"
-            cfg["robot"]["pub"]["ip"] = "host.docker.internal"
-            cfg["robot"]["mjcf_path"] = "/app/simulator/Assets/MJCF/humanoid.xml"
-        self.cfg = cfg
-        intrinsics = cfg["intrinsics"]
-        intrinsic_indices = {intrinsics[i]: i for i in range(len(intrinsics))}
-        robot_props = self.connect_robot()
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)
 
-        # ----------metadata----------
-        latent_offset = 0
-        latent_slices = {}
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        for name, params in cfg["perceivers"].items():
-            assert params["emb_dim"] > 0, f"emb_dim must be greater than 0 in {name}"
-            emb_dim = params["emb_dim"]
-            latent_slices[name] = slice(latent_offset, latent_offset + emb_dim)
-            latent_offset += emb_dim
+    runtime_engine.add_metadata("config", config)
+    runtime_engine.add_metadata("device", device)
 
-        runtime_engine.add_metadata("robot_props", robot_props)
-        runtime_engine.add_metadata("config", cfg)
-        runtime_engine.add_metadata("device", device)
-        runtime_engine.add_metadata("intrinsics", intrinsics)
-        runtime_engine.add_metadata("intrinsic_indices", intrinsic_indices)
-        runtime_engine.add_metadata("latent_slices", latent_slices)
-        runtime_engine.add_metadata("latent_size", latent_offset)
+    logger.info(f"Runtime engine initialized with device: {device}")
+    return runtime_engine
 
-        # ----------shared memory----------
-        perceiver_shm = {
-            "vision": mp.Queue(),
-        }
-        memory_manager_shm = {
-            "vision_latent": mp.Queue(),
-            "emotion": mp.Queue(),
-            "torque": mp.Queue(),
-        }
-        motivator_shm = {
-            "emotion": mp.Queue(),
-            "governance": mp.Queue(),
-            "latent": mp.Queue(),
-            "robot_state": mp.Queue(),
-            "force_on_geoms": mp.Queue(),
-        }
-        governor_shm = {
-            "emotion": mp.Queue(),
-        }
-        brain_shm = {
-            "latent": mp.Queue(),
-            "emotion": mp.Queue(),
-            "torque": mp.Queue(),
-        }
-        actuator_shm = {
-            "torque": mp.Queue(),
-        }
 
-        runtime_engine.add_shared_memory("perceiver", perceiver_shm)
-        runtime_engine.add_shared_memory("memory_manager", memory_manager_shm)
-        runtime_engine.add_shared_memory("brain", brain_shm)
-        runtime_engine.add_shared_memory("motivator", motivator_shm)
-        runtime_engine.add_shared_memory("governor", governor_shm)
-        runtime_engine.add_shared_memory("actuator", actuator_shm)
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='SimsReal Main Runtime Engine')
+    parser.add_argument('--debug-frames', action='store_true', 
+                       help='Enable debug frame saving (saves every frame)')
+    parser.add_argument('--config', default='config.yaml',
+                       help='Path to config file (default: config.yaml)')
+    parser.add_argument('--exploration-summary', type=int, metavar='RUN_NUMBER',
+                       help='Show exploration summary for specific run number (or latest if no number given)')
+    parser.add_argument('--list-runs', action='store_true',
+                       help='List all available runs')
+    parser.add_argument('--disable-images', action='store_true',
+                       help='Disable PNG image generation while keeping JSON metadata and exploration tracking')
+    return parser.parse_args()
 
-        # ---------process----------
-        ctx_parser_process = mp.Process(target=ctx_parser, args=(runtime_engine,))
-        perceiver_vision_process = mp.Process(
-            target=perceiver, args=(runtime_engine, "vision")
-        )
-        memory_manager_live_process = mp.Process(
-            target=memory_manager, args=(runtime_engine, "live_memory")
-        )
-        memory_manager_episodic_process = mp.Process(
-            target=memory_manager, args=(runtime_engine, "episodic_memory")
-        )
-        governor_process = mp.Process(target=governor, args=(runtime_engine,))
-        motivator_process = mp.Process(target=motivator, args=(runtime_engine,))
-        brain_process = mp.Process(target=brain, args=(runtime_engine,))
-        actuator_process = mp.Process(target=actuator, args=(runtime_engine,))
 
-        ctx_parser_process.start()
-        perceiver_vision_process.start()
-        memory_manager_live_process.start()
-        memory_manager_episodic_process.start()
-        governor_process.start()
-        motivator_process.start()
-        brain_process.start()
-        actuator_process.start()
+def show_exploration_summary(run_number: int = None):
+    """Show exploration summary for a specific run"""
+    from snapshot_manager import SnapshotManager
+    
+    # Create snapshot manager to access exploration data
+    snapshot_manager = SnapshotManager()
+    
+    # Get exploration summary
+    summary = snapshot_manager.get_exploration_summary(run_number)
+    
+    if "error" in summary:
+        logger.error(summary["error"])
+        return
+    
+    # Print formatted summary
+    print(f"\n{'='*60}")
+    print(f"EXPLORATION SUMMARY FOR RUN {summary['run_number']}")
+    print(f"{'='*60}")
+    print(f"Total Explorations: {summary['total_explorations']}")
+    print(f"Total Reward: {summary['total_reward']:.3f}")
+    print(f"Total Steps: {summary['total_steps']}")
+    print(f"Avg Reward/Exploration: {summary['avg_reward_per_exploration']:.3f}")
+    print(f"Avg Steps/Exploration: {summary['avg_steps_per_exploration']:.1f}")
+    
+    print(f"\nTermination Reasons:")
+    for reason, count in summary['termination_reasons'].items():
+        percentage = (count / summary['total_explorations']) * 100
+        print(f"  {reason}: {count} ({percentage:.1f}%)")
+    
+    print(f"\nTop 10 Best Explorations (by reward):")
+    top_explorations = sorted(summary['explorations'], 
+                            key=lambda x: x.get('total_reward', 0), 
+                            reverse=True)[:10]
+    
+    for i, exp in enumerate(top_explorations, 1):
+        print(f"  {i:2d}. ID:{exp['exploration_id']} "
+              f"Reward:{exp['total_reward']:7.3f} "
+              f"Steps:{exp['total_steps']:3d} "
+              f"Reason:{exp['termination_reason']}")
+    
+    print(f"{'='*60}\n")
 
-        ctx_parser_process.join()
-        perceiver_vision_process.join()
-        memory_manager_live_process.join()
-        memory_manager_episodic_process.join()
-        governor_process.join()
-        motivator_process.join()
-        brain_process.join()
-        actuator_process.join()
 
-    @retry
-    def connect_robot(self) -> Dict[str, Any]:
-        import zmq
-        from dotenv import load_dotenv
-        from PIL import Image
-        import io
-        import torchvision.transforms as transforms
+def list_available_runs():
+    """List all available runs"""
+    snapshots_dir = "snapshots"
+    if not os.path.exists(snapshots_dir):
+        logger.error("No snapshots directory found")
+        return
+    
+    run_dirs = []
+    for item in os.listdir(snapshots_dir):
+        if item.startswith("run") and os.path.isdir(os.path.join(snapshots_dir, item)):
+            try:
+                run_num = int(item[3:])
+                run_path = os.path.join(snapshots_dir, item)
+                
+                # Count frames and explorations
+                frame_count = len([f for f in os.listdir(run_path) 
+                                 if f.endswith('.png') and f.startswith('frame_')])
+                
+                explorations_path = os.path.join(run_path, 'explorations')
+                exploration_count = 0
+                if os.path.exists(explorations_path):
+                    exploration_count = len([d for d in os.listdir(explorations_path) 
+                                           if os.path.isdir(os.path.join(explorations_path, d))])
+                
+                run_dirs.append((run_num, frame_count, exploration_count))
+            except ValueError:
+                continue
+    
+    if not run_dirs:
+        logger.info("No runs found")
+        return
+    
+    print(f"\n{'='*50}")
+    print(f"AVAILABLE RUNS")
+    print(f"{'='*50}")
+    print(f"{'Run':>3} {'Frames':>7} {'Explorations':>12}")
+    print(f"{'-'*50}")
+    
+    for run_num, frame_count, exploration_count in sorted(run_dirs):
+        print(f"{run_num:3d} {frame_count:7d} {exploration_count:12d}")
+    
+    print(f"{'='*50}\n")
 
-        load_dotenv()
 
-        robot_cfg = self.cfg["robot"]
-        logger.info("connecting to robot.")
-        zmq_tmp_ctx = zmq.Context()
-        sub = zmq_tmp_ctx.socket(zmq.SUB)
-        robot_sub_cfg = robot_cfg["sub"]
-        ip = os.getenv("WINDOWS_IP", robot_sub_cfg["ip"])
-        logger.info("robot_sub_cfg: ", ip)
-        url = f"{robot_sub_cfg['protocol']}://{ip}:{robot_sub_cfg['port']}"  # type: ignore
-        logger.info(url)
-        sub.connect(url)
-        sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        frame: dict = sub.recv_json()  # type: ignore
-        sub.close()
-        zmq_tmp_ctx.term()
-        logger.info("robot connected.")
-        logger.info(frame.keys())
+def main():
+    try:
+        args = parse_arguments()
+        
+        # Handle special commands that don't require full runtime initialization
+        if args.list_runs:
+            list_available_runs()
+            return
+        
+        if args.exploration_summary is not None:
+            show_exploration_summary(args.exploration_summary)
+            return
+        
+        # Normal runtime initialization
+        runtime_engine = initialize_runtime_engine()
+        config = runtime_engine.get_metadata("config")
+        
+        runner = ZMQRunner(config, debug_frames=args.debug_frames, disable_images=getattr(args, 'disable_images', False))
+        runner.run()
 
-        humanoid_geoms = get_humanoid_geoms(robot_cfg["mjcf_path"])
-        robot_state = json.loads(frame["robot_state"])
-        robot_mapping = json.loads(frame["robot_mapping"])
-        robot_state["egocentric_view"] = bytes(frame["egocentric_view"])
-        geom_mapping = robot_mapping["geom_name_id_mapping"]
-        humanoid_geom_mapping = {
-            k: v
-            for k, v in geom_mapping.items()
-            if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
-        }
-        humanoid_geom_mapping_rev = {v: k for k, v in humanoid_geom_mapping.items()}
-        humanoid_indices = [
-            v
-            for k, v in geom_mapping.items()
-            if any(k.startswith(humanoid_geom) for humanoid_geom in humanoid_geoms)
-        ]
-        joint_mapping = robot_mapping["joint_name_id_mapping"]
-        geom_mapping_rev = {v: k for k, v in geom_mapping.items()}
-        joint_mapping_rev = {v: k for k, v in joint_mapping.items()}
-
-        actuator_mapping = robot_mapping["actuator_name_id_mapping"]
-        actuator_mapping_rev = {v: k for k, v in actuator_mapping.items()}
-
-        img_data = bytes(robot_state["egocentric_view"])
-        img = Image.open(io.BytesIO(img_data))
-        transform = transforms.ToTensor()
-        img = transform(img)
-        if torch.any(torch.isnan(img)):
-            raise ValueError("egocentric_view is None")
-
-        robot_props = {
-            "geom_id2name": geom_mapping_rev,
-            "geom_name2id": geom_mapping,
-            "humanoid_geom_name2id": humanoid_geom_mapping,
-            "humanoid_geom_id2name": humanoid_geom_mapping_rev,
-            "n_geoms": len(geom_mapping),
-            "n_body_geoms": len(geom_mapping),
-            "n_humanoid_geoms": len(humanoid_geom_mapping),
-            "n_actuators": len(actuator_mapping),
-            "humanoid_geom_indices": humanoid_indices,
-            "joint_id2name": joint_mapping_rev,
-            "joint_name2id": joint_mapping,
-            "actuator_id2name": actuator_mapping_rev,
-            "actuator_name2id": actuator_mapping,
-            "egocentric_view_width": img.shape[2],
-            "egocentric_view_height": img.shape[1],
-            "n_qpos": len(robot_state["qpos"]),
-            "n_qvel": len(robot_state["qvel"]),
-        }
-
-        return robot_props
+    except Exception as e:
+        logger.error(f"Error in main: {e}")
+        raise
 
 
 if __name__ == "__main__":
-    import platform
-    import subprocess
-    from argparse import ArgumentParser
-    from src.utilities.docker.container import running_containers
-
-    mp.set_start_method("spawn", force=True)
-    running_env = os.environ.get("RUNNING_ENV")
-    logger.info("available start methods:", mp.get_all_start_methods())
-    logger.info(f"available CPU cores: {mp.cpu_count()}")
-
-    if platform.system() == "Linux":
-        if running_env != "docker" and "qdrant" not in running_containers():
-            subprocess.run(
-                [
-                    "docker",
-                    "run",
-                    "--rm",
-                    "-d",
-                    "--name",
-                    "qdrant",
-                    "-p",
-                    "6333:6333",
-                    "-v",
-                    f"{os.getcwd()}/qdrant_storage:/qdrant/storage",
-                    "qdrant/qdrant",
-                ]
-            )
-    elif platform.system() == "Windows":
-        if running_env != "docker" and "qdrant" not in running_containers():
-            subprocess.run(
-                [
-                    "docker",
-                    "run",
-                    "--rm",
-                    "-d",
-                    "--name",
-                    "qdrant",
-                    "-p",
-                    "6333:6333",
-                    "-v",
-                    f"{os.getcwd()}\\qdrant_storage:/qdrant/storage",
-                    "qdrant/qdrant",
-                ]
-            )
-
-    parser = ArgumentParser()
-    parser.add_argument("--config", type=str, default="config.template.yaml")
-    parser.add_argument("--exp_dir", type=str, default="experiments")
-    parser.add_argument("-d", "--debug", action="store_true")
-
-    args = parser.parse_args()
-    os.environ["TORCH_CUDA_ARCH_LIST"] = "8.9"  # TODO: fix it.
-    os.environ["DEBUG"] = str(args.debug)
-
-    host = Host(
-        cfg_file=args.config,
-        exp_dir=args.exp_dir,
-    )
-    gc.collect()
-    torch.cuda.empty_cache()
+    main()
